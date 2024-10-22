@@ -86,7 +86,7 @@ export const mockData = [
         {`
           The Hyundai IONIQ 5 is a fully-electric midsize CUV with 800V battery technology for ultra-fast charging and offers a driving range of up to 354 miles.
         `}
-        <span className="block mt-3 font-bold text-xl">Available from £39,900.00</span>
+        <span className="block mt-3 font-bold text-xl">Available from £39,900</span>
       </>
     ),
   },

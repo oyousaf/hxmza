@@ -10,7 +10,7 @@ const NewsletterSignup = () => {
         Subscribe to Our Newsletter
       </h2>
       <p className="mb-4">Stay updated with our latest car offerings.</p>
-      <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
+      <form name="newsletter" onSubmit={handleSubmit} className="max-w-lg mx-auto">
         <input
           type="email"
           placeholder="Enter email"

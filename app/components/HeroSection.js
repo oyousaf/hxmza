@@ -1,6 +1,7 @@
 "use client";
 
 import { Link as ScrollLink } from "react-scroll";
+import { FaArrowDown } from "react-icons/fa";
 
 const HeroSection = () => {
   return (
@@ -19,16 +20,16 @@ const HeroSection = () => {
           thoroughly inspected to ensure top quality, reliability, and
           performance.
         </p>
-        <ScrollLink
-          to="about"
-          smooth={true}
-          duration={500}
-          className="text-xl mt-4 bg-rose-600 text-white py-2 px-4 rounded hover:bg-rose-700 transition duration-200 cursor-pointer"
-          aria-label="Scroll to Instagram section"
-        >
-          Explore
-        </ScrollLink>
       </div>
+      <ScrollLink
+        to="about"
+        smooth={true}
+        duration={500}
+        className="z-20 mt-4 flex items-center justify-center bg-rose-600 text-white p-4 rounded-full hover:bg-rose-700 transition duration-200 cursor-pointer"
+        aria-label="Scroll to About section"
+      >
+        <FaArrowDown className="animate-bounce text-3xl" />
+      </ScrollLink>
     </section>
   );
 };

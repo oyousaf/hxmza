@@ -15,8 +15,19 @@ const Navbar = () => {
     <nav className="bg-black text-white fixed top-0 left-0 right-0 p-4 z-50">
       <div className="flex container mx-auto justify-between items-center">
         {/* Logo wrapped with ScrollLink for smooth scroll to top */}
-        <ScrollLink to="hero" smooth={true} duration={500} className="cursor-pointer">
-          <Image src={logo} alt="logo" width={100} height={50} priority={true} />
+        <ScrollLink
+          to="hero"
+          smooth={true}
+          duration={500}
+          className="cursor-pointer"
+        >
+          <Image
+            src={logo}
+            alt="logo"
+            width={200}
+            height={100}
+            priority={true}
+          />
         </ScrollLink>
 
         <button
@@ -26,9 +37,9 @@ const Navbar = () => {
           aria-label="Toggle navigation menu"
         >
           {menuOpen ? (
-            <RiCloseLine className="w-6 h-6" />
+            <RiCloseLine className="text-4xl" />
           ) : (
-            <RiMenu3Line className="w-6 h-6" />
+            <RiMenu3Line className="text-4xl" />
           )}
         </button>
 
@@ -40,7 +51,7 @@ const Navbar = () => {
                 to={href}
                 smooth={true}
                 duration={500}
-                className="hover:text-rose-600 transition-colors cursor-pointer"
+                className="text-xl hover:text-rose-600 transition-colors cursor-pointer"
                 onClick={() => setMenuOpen(false)}
               >
                 {name}

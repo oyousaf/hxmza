@@ -6,7 +6,7 @@ const NewsletterSignup = () => {
 
   return (
     <section className="p-8 bg-rose-600 text-center rounded-lg" id="newsletter">
-      <h2 className="text-3xl font-bold text-center mb-4">
+      <h2 className="text-4xl font-bold text-center mb-4">
         Subscribe to Our Newsletter
       </h2>
       <p className="mb-4">Stay updated with our latest car offerings.</p>

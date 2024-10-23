@@ -1,8 +1,9 @@
 export const navLinks = [
   { id: 1, href: "hero", name: "Home" },
-  { id: 2, href: "instagram", name: "Cars" },
-  { id: 3, href: "reviews", name: "Reviews" },
-  { id: 4, href: "contact", name: "Contact" },
+  { id: 2, href: "about", name: "About" },
+  { id: 3, href: "instagram", name: "Cars" },
+  { id: 4, href: "reviews", name: "Reviews" },
+  { id: 5, href: "contact", name: "Contact" },
 ];
 
 import { FaInstagram, FaFacebook, FaYoutube } from "react-icons/fa";

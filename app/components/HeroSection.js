@@ -20,7 +20,7 @@ const HeroSection = () => {
           performance.
         </p>
         <ScrollLink
-          to="instagram"
+          to="about"
           smooth={true}
           duration={500}
           className="text-xl mt-4 bg-rose-600 text-white py-2 px-4 rounded hover:bg-rose-700 transition duration-200 cursor-pointer"

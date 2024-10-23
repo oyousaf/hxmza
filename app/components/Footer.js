@@ -3,7 +3,7 @@ import { socialLinks } from "../constants/index";
 const Footer = () => {
   return (
     <footer className="py-8" id="contact">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-center">
+      <div className="flex flex-col md:flex-row md:items-center justify-center">
         {/* Iframe Container */}
         <div className="flex-grow flex items-center justify-center">
           <iframe
@@ -18,12 +18,12 @@ const Footer = () => {
         </div>
 
         {/* Copyright and Social Icons */}
-        <div className="flex flex-col items-center md:ml-6 mt-4 md:mt-0">
+        <div className="flex flex-col items-center md:ml-6 mt-10 md:mt-0">
           <h4 className="text-lg font-semibold text-center">
             © {new Date().getFullYear()} Ace Motor Sales
           </h4>
           <p className="mt-2">4 Westgate, Heckmondwike, WF16 0EH</p>
-          <div className="flex space-x-6 mt-4">
+          <div className="flex space-x-6 mt-[50px]">
             {socialLinks.map(({ id, href, icon }) => (
               <a
                 key={id}

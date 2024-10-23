@@ -9,7 +9,7 @@ const About = () => {
   return (
     <section className="py-16" id="about">
       <h2 className="text-4xl font-bold text-center mb-12">About</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto text-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto text-center px-4 lg:px-8">
         {/* Tile 1 */}
         <div className="flex flex-col items-center bg-rose-600 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out">
           <FaHandshake className="text-rose-950 text-5xl mb-4" />

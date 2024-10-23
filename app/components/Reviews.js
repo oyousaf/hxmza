@@ -11,7 +11,7 @@ const Reviews = () => {
             className="bg-rose-800 p-4 shadow-md rounded-lg text-center hover:scale-105 transition-transform duration-300 ease-in-out"
           >
             <p className="text-lg">{`"${feedback}"`}</p>
-            <h4 className="mt-4 font-bold text-xl">{name}</h4>
+            <h4 className="mt-4 font-bold text-3xl">{name}</h4>
           </div>
         ))}
       </div>

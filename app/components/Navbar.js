@@ -24,9 +24,8 @@ const Navbar = () => {
           <Image
             src={logo}
             alt="logo"
-            width={200}
-            height={100}
             priority={true}
+            className="w-[150px] md:w-[200px]"
           />
         </ScrollLink>
 

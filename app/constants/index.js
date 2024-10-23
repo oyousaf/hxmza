@@ -67,7 +67,7 @@ export const reviews = [
 export const mockData = [
   {
     id: 1,
-    image_url: "../porsche-taycan.jpg",
+    image_url: "/porsche-taycan.jpg",
     title: "Porsche Taycan Turbo S",
     description: (
       <>
@@ -80,7 +80,7 @@ export const mockData = [
   },
   {
     id: 2,
-    image_url: "../hyundai-ioniq-5-pe.jpg",
+    image_url: "/hyundai-ioniq-5-pe.jpg",
     title: "Hyundai IONIQ 5 PE",
     description: (
       <>
@@ -93,7 +93,7 @@ export const mockData = [
   },
   {
     id: 3,
-    image_url: "../tesla y 2025.jpg",
+    image_url: "/tesla y 2025.jpg",
     title: "Tesla Model Y Juniper Update",
     description: (
       <>

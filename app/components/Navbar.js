@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RiMenu3Line, RiCloseLine } from "react-icons/ri";
 import { Link as ScrollLink } from "react-scroll";
 import { navLinks, socialLinks } from "../constants/index";
@@ -9,12 +9,24 @@ import logo from "@/public/logo.png";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+
   const toggleMenu = () => setMenuOpen((prev) => !prev);
+
+  // Effect to toggle scroll-lock
+  useEffect(() => {
+    const body = document.body;
+    menuOpen
+      ? body.classList.add("overflow-hidden")
+      : body.classList.remove("overflow-hidden");
+
+    return () => {
+      body.classList.remove("overflow-hidden");
+    };
+  }, [menuOpen]);
 
   return (
     <nav className="bg-black text-white fixed top-0 left-0 right-0 p-4 z-50">
       <div className="flex container mx-auto justify-between items-center">
-        {/* Logo wrapped with ScrollLink for smooth scroll to top */}
         <ScrollLink
           to="hero"
           smooth={true}
@@ -86,7 +98,7 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* Social Icons pinned to the bottom of the mobile menu */}
+        {/* Social Media Icons */}
         <div className="flex space-x-6 mb-4 justify-center">
           {socialLinks.map(({ id, href, icon }) => (
             <a key={id} href={href} target="_blank" rel="noopener noreferrer">

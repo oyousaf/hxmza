@@ -44,7 +44,7 @@ const About = () => {
         {about.map((tile, index) => (
           <div
             key={index}
-            className="flex flex-col items-center bg-rose-600 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out"
+            className="flex flex-col items-center bg-rose-600 p-6 rounded-lg shadow-lg"
           >
             <tile.icon className="text-rose-950 text-5xl mb-4" />
             <h3 className="text-xl font-semibold mb-2">{tile.title}</h3>

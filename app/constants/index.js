@@ -60,7 +60,7 @@ export const reviews = [
   {
     name: "VEYGO GROUPS",
     feedback:
-      "Brilliant customer service by Fez! Brilliant deals; lovely motors get your selves down!!!",
+      "Brilliant customer service by Fez! Brilliant deals; lovely motors so get your selves down!!!",
   },
   {
     name: "Eddie Kahoro",

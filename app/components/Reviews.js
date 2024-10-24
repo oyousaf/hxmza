@@ -1,4 +1,5 @@
 import { reviews } from "../constants/index";
+import { FaQuoteLeft } from "react-icons/fa";
 
 const Reviews = () => {
   return (
@@ -10,7 +11,10 @@ const Reviews = () => {
             key={index}
             className="bg-rose-800 p-4 shadow-md rounded-lg text-center hover:scale-105 transition-transform duration-300 ease-in-out"
           >
-            <p className="text-lg">{`"${feedback}"`}</p>
+            <div className="flex justify-center mb-2">
+              <FaQuoteLeft className="text-3xl text-white mt-2" />
+            </div>
+            <p className="text-lg">{feedback}</p>
             <h4 className="mt-4 font-bold text-3xl">{name}</h4>
           </div>
         ))}

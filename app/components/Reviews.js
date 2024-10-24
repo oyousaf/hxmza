@@ -15,7 +15,7 @@ const Reviews = () => {
               <FaQuoteLeft className="text-3xl text-white mt-2" />
             </div>
             <p className="text-lg">{feedback}</p>
-            <h4 className="mt-4 font-bold text-3xl">{name}</h4>
+            <h4 className="text-3xl font-bold mt-4">{name}</h4>
           </div>
         ))}
       </div>

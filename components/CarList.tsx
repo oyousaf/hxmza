@@ -38,7 +38,7 @@ export default function CarList({ cars, loading = false, onCardClick }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <CarCard car={car} onClick={onCardClick} />
+          <CarCard car={car} onClick={() => onCardClick?.(car)} />
         </motion.div>
       ))}
     </div>

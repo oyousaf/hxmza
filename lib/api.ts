@@ -30,7 +30,7 @@ export const mockCars: Car[] = [
     fuel: "electric",
     transmission: "Automatic",
     seats: 5,
-    isFeatured: true,
+    isFeatured: false,
     type: "electric",
     status: "available",
     engine: 750,

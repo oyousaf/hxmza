@@ -44,13 +44,14 @@ export default function HomePage() {
       featured: searchParams.get("featured") === "true",
       available: searchParams.get("available") === "true",
     };
+
     const sort =
       searchParams.get("sort") || localStorage.getItem("sortBy") || "year-desc";
 
     setFilters(initialFilters);
     setSortBy(sort);
     setCars(filterCars(initialFilters));
-  }, [searchParams.toString()]);
+  }, [searchParams]);
 
   useEffect(() => {
     const params = new URLSearchParams();

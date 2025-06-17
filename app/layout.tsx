@@ -11,7 +11,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Hxmza's Hub | Car Rentals UK",
+  title: "Hxmza's Hub | Car Rentals",
   description:
     "Modern, responsive car rental platform to rent supercars, EVs, and more.",
   metadataBase: new URL("https://hxmza.uk"),

@@ -6,9 +6,10 @@ import { motion } from "framer-motion";
 type Props = {
   cars: Car[];
   loading?: boolean;
+  onCardClick?: (car: Car) => void;
 };
 
-export default function CarList({ cars, loading = false }: Props) {
+export default function CarList({ cars, loading = false, onCardClick }: Props) {
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -37,7 +38,7 @@ export default function CarList({ cars, loading = false }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <CarCard car={car} />
+          <CarCard car={car} onClick={onCardClick} />
         </motion.div>
       ))}
     </div>

@@ -6,10 +6,14 @@ import SearchBar from "@/components/layout/ui/SearchBar";
 import CarList from "@/components/CarList";
 import { filterCars } from "@/lib/api";
 import { Car } from "@/types/car";
+import CarModal from "@/components/CarModal";
 
 export default function HomePage() {
   const [filteredCars, setFilteredCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const openCarModal = (car: Car) => setSelectedCar(car);
+  const closeCarModal = () => setSelectedCar(null);
 
   const handleSearch = (query: string, type: string) => {
     setLoading(true);
@@ -41,7 +45,12 @@ export default function HomePage() {
       </motion.h1>
 
       <SearchBar onSearch={handleSearch} loading={loading} />
-      <CarList cars={filteredCars} loading={loading} />
+      <CarList
+        cars={filteredCars}
+        loading={loading}
+        onCardClick={openCarModal}
+      />
+      <CarModal car={selectedCar} onClose={closeCarModal} />
     </main>
   );
 }

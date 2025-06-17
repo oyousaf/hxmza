@@ -3,7 +3,7 @@ export type Car = {
   make: string;
   model: string;
   year: number;
-  fuelType: string;
+  fuel: string;
   type: string;
   transmission: string;
   pricePerDay: number;

@@ -8,7 +8,7 @@ export const mockCars: Car[] = [
     year: 2025,
     image: "/cars/taycan.webp",
     pricePerDay: 240,
-    fuelType: "electric",
+    fuel: "electric",
     transmission: "Automatic",
     seats: 4,
     isFeatured: true,
@@ -21,7 +21,7 @@ export const mockCars: Car[] = [
     year: 2025,
     image: "/cars/eqs.webp",
     pricePerDay: 220,
-    fuelType: "electric",
+    fuel: "electric",
     transmission: "Automatic",
     seats: 5,
     isFeatured: true,
@@ -34,7 +34,7 @@ export const mockCars: Car[] = [
     year: 2025,
     image: "/cars/revuelto.jpg",
     pricePerDay: 350,
-    fuelType: "petrol",
+    fuel: "petrol",
     transmission: "Automatic",
     seats: 2,
     isFeatured: false,
@@ -47,7 +47,7 @@ export const mockCars: Car[] = [
     year: 2025,
     image: "/cars/sf90.jpg",
     pricePerDay: 400,
-    fuelType: "petrol",
+    fuel: "petrol",
     transmission: "Automatic",
     seats: 2,
     isFeatured: false,
@@ -66,7 +66,7 @@ export function filterCars(
       .toLowerCase()
       .includes(query.toLowerCase());
     const matchesType = type ? car.type === type : true;
-    const matchesFuel = fuel ? car.fuelType === fuel : true;
+    const matchesFuel = fuel ? car.fuel === fuel : true;
     const matchesYear = year ? car.year.toString() === year : true;
 
     return matchesQuery && matchesType && matchesFuel && matchesYear;

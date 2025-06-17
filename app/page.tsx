@@ -48,7 +48,7 @@ export default function HomePage() {
       available: false,
     };
     setFilters(cleared);
-    router.push("/"); UR
+    router.push("/");
   };
 
   // 🔄 Read filters from URL on initial load

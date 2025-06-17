@@ -8,7 +8,7 @@ export default function CarCard({ car }: { car: Car }) {
         src={car.image}
         alt={`${car.make} ${car.model}`}
         onError={(e) => {
-          e.currentTarget.src ="/placeholder.webp"
+          e.currentTarget.src = "/placeholder.webp";
         }}
         width={400}
         height={250}

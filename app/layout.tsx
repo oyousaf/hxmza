@@ -45,10 +45,6 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-  other: {
-    "google-font":
-      "https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap",
-  },
 };
 
 export default function RootLayout({
@@ -58,7 +54,45 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-gb" suppressHydrationWarning>
-      <head />
+      <head>
+        <link
+          rel="preload"
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
+          as="style"
+          onLoad="this.onload=null;this.rel='stylesheet'"
+        />
+        <noscript>
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
+          />
+        </noscript>
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "CarRental",
+              name: "Hxmza's Hub",
+              url: "https://hxmza.uk",
+              logo: "https://hxmza.uk/logoLight.png",
+              image: "https://hxmza.uk/og-image.png",
+              description:
+                "Find and rent premium cars across the UK including electric and luxury vehicles.",
+              address: {
+                "@type": "PostalAddress",
+                addressCountry: "GB",
+              },
+              sameAs: [
+                "https://facebook.com/hxmzashub",
+                "https://instagram.com/hxmzashub",
+                "https://tiktok.com/@hxmzashub",
+              ],
+            }),
+          }}
+        />
+      </head>
       <body className="pt-[60px] font-sans text-textPrimary bg-brand dark:bg-textPrimary dark:text-brand">
         <Navbar />
         <main>{children}</main>

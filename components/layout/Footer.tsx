@@ -13,7 +13,7 @@ export default function Footer() {
       <div className="text-lg flex justify-center items-center gap-1">
         Built with{" "}
         <motion.span
-          animate={{ rotate: 360 }}
+          animate={{ rotate: -360 }}
           transition={{
             repeat: Infinity,
             duration: 4,

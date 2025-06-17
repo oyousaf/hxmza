@@ -5,25 +5,20 @@ import { motion } from "framer-motion";
 import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa";
 import Image from "next/image";
+import { getInitialTheme, toggleTheme } from "@/lib/theme";
 
 export default function Navbar() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const prefersDark =
-      stored === "dark" ||
-      (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
-
-    setIsDark(prefersDark);
-    document.documentElement.classList.toggle("dark", prefersDark);
+    const initial = getInitialTheme();
+    setIsDark(initial === "dark");
+    document.documentElement.classList.toggle("dark", initial === "dark");
   }, []);
 
-  const toggleTheme = () => {
-    const newMode = !isDark;
-    setIsDark(newMode);
-    document.documentElement.classList.toggle("dark", newMode);
-    localStorage.setItem("theme", newMode ? "dark" : "light");
+  const handleToggle = () => {
+    const next = toggleTheme();
+    setIsDark(next === "dark");
   };
 
   return (
@@ -59,7 +54,7 @@ export default function Navbar() {
         {/* Center: Theme Toggle */}
         <div className="flex items-center">
           <button
-            onClick={toggleTheme}
+            onClick={handleToggle}
             className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
             aria-label="Toggle Dark Mode"
           >

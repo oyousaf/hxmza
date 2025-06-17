@@ -10,7 +10,7 @@ export default function SortDropdown({ value, onChange }: Props) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="border px-3 py-2 rounded-md text-sm dark:bg-gray-800 dark:text-white"
+      className="border px-3 py-2 rounded-md text-sm dark:bg-textPrimary dark:text-white"
     >
       <option value="pricePerDay-asc">Cheapest</option>
       <option value="pricePerDay-desc">Most Expensive</option>

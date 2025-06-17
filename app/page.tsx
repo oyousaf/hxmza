@@ -32,12 +32,10 @@ export default function HomePage() {
   };
 
   const [filters, setFilters] = useState(defaultFilters);
-
   const [sortBy, setSortBy] = useState(
     searchParams.get("sort") || localStorage.getItem("sortBy") || "year-desc"
   );
 
-  // 🔁 Load filters on mount
   useEffect(() => {
     const initialFilters = {
       query: searchParams.get("query") || "",
@@ -54,7 +52,6 @@ export default function HomePage() {
     setCars(results);
   }, []);
 
-  // 🔄 Sync filters & sort to URL + localStorage
   useEffect(() => {
     const params = new URLSearchParams();
 
@@ -83,7 +80,6 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, [filters, sortBy]);
 
-  // 🔧 Event Handlers
   const handleFilterChange = (updates: Partial<typeof filters>) => {
     setFilters((prev) => ({ ...prev, ...updates }));
   };
@@ -110,35 +106,37 @@ export default function HomePage() {
         Find your next ride
       </motion.h1>
 
-      <SearchBar
-        query={filters.query}
-        type={filters.type}
-        loading={loading}
-        onChange={handleFilterChange}
-      />
-
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-4">
-          <Filters
-            fuel={filters.fuel}
-            year={filters.year}
-            transmission={filters.transmission}
+      <div className="sticky top-[64px] z-20 bg-white dark:bg-textPrimary border border-gray-200 dark:border-gray-700 rounded-md shadow-sm px-4 py-5">
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+          <SearchBar
+            query={filters.query}
+            type={filters.type}
+            loading={loading}
             onChange={handleFilterChange}
           />
-          <Toggles
-            featured={filters.featured}
-            available={filters.available}
-            onChange={handleFilterChange}
-          />
+          <SortDropdown value={sortBy} onChange={handleSortChange} />
         </div>
 
-        <div className="flex gap-4 items-center">
-          <SortDropdown value={sortBy} onChange={handleSortChange} />
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mt-4">
+          <div className="flex flex-wrap gap-4">
+            <Filters
+              fuel={filters.fuel}
+              year={filters.year}
+              transmission={filters.transmission}
+              onChange={handleFilterChange}
+            />
+            <Toggles
+              featured={filters.featured}
+              available={filters.available}
+              onChange={handleFilterChange}
+            />
+          </div>
+
           <button
             onClick={clearFilters}
-            className="text-sm border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 transition"
+            className="text-sm border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 transition"
           >
-            Reset
+            Clear
           </button>
         </div>
       </div>

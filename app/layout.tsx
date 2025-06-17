@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { getInitialTheme } from "@/lib/theme";
 
 export const metadata: Metadata = {
   title: "Hxmza's Hub | Car Rentals UK",

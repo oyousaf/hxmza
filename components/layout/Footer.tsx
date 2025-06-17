@@ -6,9 +6,9 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="w-full text-center py-6 mt-12 border-t border-gray-200 dark:border-gray-700 bg-brand dark:bg-textPrimary text-textPrimary dark:text-brand">
+    <footer className="w-full text-center py-6 mt-12 border-t border-gray-200 dark:border-brand bg-brand dark:bg-textPrimary text-textPrimary dark:text-brand">
       <div className="text-xl mb-1">
-        © {year} Hxmza's Hub. All rights reserved.
+        © {year} Hxmza&apos;s Hub. All rights reserved.
       </div>
       <div className="text-lg flex justify-center items-center gap-1">
         Built with{" "}
@@ -23,10 +23,11 @@ export default function Footer() {
         >
           💚
         </motion.span>{" "}
-        by
+        by{" "}
         <a
           href="https://t.me/+ypTYelRWWm1iNmY0"
           target="_blank"
+          rel="noopener noreferrer"
           className="hover:underline"
         >
           Legxcy Solutions

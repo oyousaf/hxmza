@@ -101,7 +101,7 @@ export default function HomePage() {
   const clearFilters = () => {
     setFilters(defaultFilters);
     setSortBy("year-desc");
-    localStorage.removeItem("sortBy");
+    localStorage.setItem("sortBy", "year-desc");
     router.push("/");
   };
 

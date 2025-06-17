@@ -7,6 +7,9 @@ export default function CarCard({ car }: { car: Car }) {
       <Image
         src={car.image}
         alt={`${car.make} ${car.model}`}
+        onError={(e) => {
+          e.currentTarget.src ="/placeholder.webp"
+        }}
         width={400}
         height={250}
         className="w-full h-48 object-cover"

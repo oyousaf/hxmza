@@ -32,10 +32,9 @@ export default function HomePage() {
   };
 
   const [filters, setFilters] = useState(defaultFilters);
-  const [sortBy, setSortBy] = useState(
-    searchParams.get("sort") || localStorage.getItem("sortBy") || "year-desc"
-  );
+  const [sortBy, setSortBy] = useState("year-desc");
 
+  // Parse URL on load
   useEffect(() => {
     const initialFilters = {
       query: searchParams.get("query") || "",
@@ -46,12 +45,15 @@ export default function HomePage() {
       featured: searchParams.get("featured") === "true",
       available: searchParams.get("available") === "true",
     };
+    const sort =
+      searchParams.get("sort") || localStorage.getItem("sortBy") || "year-desc";
 
     setFilters(initialFilters);
-    const results = filterCars(initialFilters);
-    setCars(results);
-  }, []);
+    setSortBy(sort);
+    setCars(filterCars(initialFilters));
+  }, [searchParams.toString()]);
 
+  // Update URL and filter data
   useEffect(() => {
     const params = new URLSearchParams();
 
@@ -69,16 +71,16 @@ export default function HomePage() {
     }
 
     router.push(`/?${params.toString()}`);
-
     setLoading(true);
+
     const timer = setTimeout(() => {
       const filtered = filterCars(filters);
       setCars(filtered);
       setLoading(false);
-    }, 300);
+    }, 100);
 
     return () => clearTimeout(timer);
-  }, [filters, sortBy]);
+  }, [filters, sortBy, router]);
 
   const handleFilterChange = (updates: Partial<typeof filters>) => {
     setFilters((prev) => ({ ...prev, ...updates }));

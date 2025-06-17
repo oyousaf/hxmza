@@ -2,7 +2,13 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { getInitialTheme } from "@/lib/theme";
+import { Manrope } from "next/font/google";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Hxmza's Hub | Car Rentals UK",
@@ -45,19 +51,6 @@ export default function RootLayout({
   return (
     <html lang="en-gb" suppressHydrationWarning>
       <head>
-        {/* ✅ Font Preload */}
-        <link
-          rel="preload"
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
-          as="style"
-        />
-        <noscript>
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
-          />
-        </noscript>
-
         {/* ✅ Structured Data */}
         <script
           type="application/ld+json"
@@ -98,14 +91,14 @@ export default function RootLayout({
             }),
           }}
         />
-
-        {/* ✅ Meta keywords manually added */}
         <meta
           name="keywords"
           content="Car rentals UK, Luxury car hire, Electric car rental, Affordable car hire, Supercar rental UK, Hxmza's Hub, Rent a car online UK, Vehicle hire service, Car rental app"
         />
       </head>
-      <body className="pt-[60px] font-sans text-textPrimary bg-brand dark:bg-textPrimary dark:text-brand">
+      <body
+        className={`${manrope.className} pt-[60px] text-textPrimary bg-brand dark:bg-textPrimary dark:text-brand`}
+      >
         <Navbar />
         <main>{children}</main>
         <Footer />

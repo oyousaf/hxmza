@@ -17,4 +17,5 @@ export type Car = {
   availability?: string;
   features?: string[];
   isFeatured?: boolean;
+  status: string;
 };

@@ -13,6 +13,7 @@ export const mockCars: Car[] = [
     seats: 4,
     isFeatured: true,
     type: "electric",
+    status: "available",
   },
   {
     id: "2",
@@ -26,6 +27,7 @@ export const mockCars: Car[] = [
     seats: 5,
     isFeatured: true,
     type: "electric",
+    status: "available",
   },
   {
     id: "3",
@@ -39,6 +41,7 @@ export const mockCars: Car[] = [
     seats: 2,
     isFeatured: false,
     type: "supercar",
+    status: "sold",
   },
   {
     id: "4",
@@ -52,23 +55,40 @@ export const mockCars: Car[] = [
     seats: 2,
     isFeatured: false,
     type: "supercar",
+    status: "available",
   },
 ];
 
-export function filterCars(
-  query: string,
-  type: string = "",
-  fuel: string = "",
-  year?: string
-): Car[] {
+export function filterCars(filters: {
+  query: string;
+  type: string;
+  fuel: string;
+  year: string;
+  transmission: string;
+  featured: boolean;
+  available: boolean;
+}): Car[] {
   return mockCars.filter((car) => {
-    const matchesQuery = `${car.make} ${car.model}`
-      .toLowerCase()
-      .includes(query.toLowerCase());
-    const matchesType = type ? car.type === type : true;
-    const matchesFuel = fuel ? car.fuel === fuel : true;
-    const matchesYear = year ? car.year.toString() === year : true;
+    const { query, type, fuel, year, transmission, featured, available } =
+      filters;
 
-    return matchesQuery && matchesType && matchesFuel && matchesYear;
+    if (
+      query &&
+      !`${car.make} ${car.model}`.toLowerCase().includes(query.toLowerCase())
+    )
+      return false;
+
+    if (type && car.type.toLowerCase() !== type.toLowerCase()) return false;
+    if (fuel && car.fuel.toLowerCase() !== fuel.toLowerCase()) return false;
+    if (year && car.year.toString() !== year) return false;
+    if (
+      transmission &&
+      car.transmission.toLowerCase() !== transmission.toLowerCase()
+    )
+      return false;
+    if (featured && !car.isFeatured) return false;
+    if (available && car.status?.toLowerCase() !== "available") return false;
+
+    return true;
   });
 }

@@ -8,7 +8,9 @@ export function getInitialTheme(): Theme {
   const stored = localStorage.getItem(THEME_KEY) as Theme | null;
   if (stored === "light" || stored === "dark") return stored;
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 export function applyTheme(theme: Theme) {
@@ -16,7 +18,9 @@ export function applyTheme(theme: Theme) {
   root.classList.remove("light", "dark");
 
   if (theme === "system") {
-    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
     root.classList.add(systemPrefersDark ? "dark" : "light");
   } else {
     root.classList.add(theme);
@@ -29,7 +33,9 @@ export function setTheme(theme: Theme) {
 }
 
 export function toggleTheme(): Theme {
-  const current = document.documentElement.classList.contains("dark") ? "dark" : "light";
+  const current = document.documentElement.classList.contains("dark")
+    ? "dark"
+    : "light";
   const next: Theme = current === "dark" ? "light" : "dark";
   setTheme(next);
   return next;

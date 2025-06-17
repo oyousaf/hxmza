@@ -2,8 +2,9 @@ export type Car = {
   id: string;
   make: string;
   model: string;
-  year: string;
-  fuel: string;
+  year: number;
+  fuelType: string;
+  type: string;
   transmission: string;
   pricePerDay: number;
   image: string;
@@ -15,4 +16,5 @@ export type Car = {
   rating?: number;
   availability?: string;
   features?: string[];
+  isFeatured?: boolean;
 };

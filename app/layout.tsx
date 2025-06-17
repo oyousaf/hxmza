@@ -49,7 +49,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-gb">
-      <body className="pt-[60px] font-sans text-textPrimary bg-brand">
+      <body className="pt-[60px] font-sans text-textPrimary bg-brand dark:bg-textPrimary dark:text-brand">
         <Navbar />
         <main>{children}</main>
       </body>

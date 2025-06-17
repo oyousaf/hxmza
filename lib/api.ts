@@ -14,6 +14,9 @@ export const mockCars: Car[] = [
     isFeatured: true,
     type: "electric",
     status: "available",
+    engine: 800,
+    mileage: 5000,
+    rating: 4.9,
   },
   {
     id: "2",
@@ -28,6 +31,9 @@ export const mockCars: Car[] = [
     isFeatured: true,
     type: "electric",
     status: "available",
+    engine: 750,
+    mileage: 8000,
+    rating: 4.8,
   },
   {
     id: "3",
@@ -42,6 +48,9 @@ export const mockCars: Car[] = [
     isFeatured: false,
     type: "supercar",
     status: "sold",
+    engine: 1000,
+    mileage: 1200,
+    rating: 4.7,
   },
   {
     id: "4",
@@ -56,6 +65,9 @@ export const mockCars: Car[] = [
     isFeatured: false,
     type: "supercar",
     status: "available",
+    engine: 980,
+    mileage: 2000,
+    rating: 4.95,
   },
 ];
 

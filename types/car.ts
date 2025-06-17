@@ -8,10 +8,10 @@ export type Car = {
   transmission: string;
   pricePerDay: number;
   image: string;
-  mileage?: string;
+  mileage?: number;
   seats?: number;
   color?: string;
-  engine?: string;
+  engine?: number;
   location?: string;
   rating?: number;
   availability?: string;

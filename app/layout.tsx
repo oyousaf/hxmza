@@ -2,14 +2,28 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 
+// Metadata: for SEO + social preview
 export const metadata: Metadata = {
-  title: "Hxmza's Hub | Car Rentals",
-  description: "Find and rent cars easily",
+  title: "Hxmza's Hub | Car Rentals UK",
+  description:
+    "Modern, responsive car rental platform to rent supercars, EVs, and more.",
+  keywords: [
+    "Car rentals UK",
+    "Luxury car hire",
+    "Electric car rental",
+    "Affordable car hire",
+    "Supercar rental UK",
+    "Hxmza's Hub",
+    "Rent a car online UK",
+    "Vehicle hire service",
+    "Next.js car rental app",
+  ],
   metadataBase: new URL("https://hxmza.uk"),
   openGraph: {
-    title: "Hxmza's Hub – Car Rentals",
-    description: "Modern, responsive car rental app built with Next.js",
-    url: "/",
+    title: "Hxmza's Hub – Car Rentals UK",
+    description:
+      "Modern, responsive car rental platform to rent supercars, EVs, and more.",
+    url: "https://hxmza.uk",
     siteName: "Hxmza's Hub",
     images: [
       {
@@ -23,18 +37,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hxmza's Hub – Car Rentals",
-    description: "Built with Next.js, Tailwind, and Framer Motion",
+    title: "Hxmza's Hub – Car Rentals UK",
+    description:
+      "Modern, responsive car rental platform to rent supercars, EVs, and more.",
     images: ["/og-image.png"],
   },
   icons: {
     icon: "/favicon.ico",
-  },
-  themeColor: "#D1CBC1",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
   },
   other: {
     "google-font":
@@ -48,7 +57,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-gb">
+    <html lang="en-gb" suppressHydrationWarning>
+      <head />
       <body className="pt-[60px] font-sans text-textPrimary bg-brand dark:bg-textPrimary dark:text-brand">
         <Navbar />
         <main>{children}</main>

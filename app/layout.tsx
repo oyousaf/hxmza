@@ -2,22 +2,10 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 
-// Metadata: for SEO + social preview
 export const metadata: Metadata = {
   title: "Hxmza's Hub | Car Rentals UK",
   description:
     "Modern, responsive car rental platform to rent supercars, EVs, and more.",
-  keywords: [
-    "Car rentals UK",
-    "Luxury car hire",
-    "Electric car rental",
-    "Affordable car hire",
-    "Supercar rental UK",
-    "Hxmza's Hub",
-    "Rent a car online UK",
-    "Vehicle hire service",
-    "Next.js car rental app",
-  ],
   metadataBase: new URL("https://hxmza.uk"),
   openGraph: {
     title: "Hxmza's Hub – Car Rentals UK",
@@ -55,11 +43,11 @@ export default function RootLayout({
   return (
     <html lang="en-gb" suppressHydrationWarning>
       <head>
+        {/* ✅ Font Preload */}
         <link
           rel="preload"
           href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap"
           as="style"
-          onLoad="this.onload=null;this.rel='stylesheet'"
         />
         <noscript>
           <link
@@ -68,6 +56,7 @@ export default function RootLayout({
           />
         </noscript>
 
+        {/* ✅ Structured Data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -84,6 +73,21 @@ export default function RootLayout({
                 "@type": "PostalAddress",
                 addressCountry: "GB",
               },
+              openingHoursSpecification: [
+                {
+                  "@type": "OpeningHoursSpecification",
+                  dayOfWeek: [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                  ],
+                  opens: "10:00",
+                  closes: "18:00",
+                },
+              ],
               sameAs: [
                 "https://facebook.com/hxmzashub",
                 "https://instagram.com/hxmzashub",
@@ -91,6 +95,12 @@ export default function RootLayout({
               ],
             }),
           }}
+        />
+
+        {/* ✅ Meta keywords manually added */}
+        <meta
+          name="keywords"
+          content="Car rentals UK, Luxury car hire, Electric car rental, Affordable car hire, Supercar rental UK, Hxmza's Hub, Rent a car online UK, Vehicle hire service, Car rental app"
         />
       </head>
       <body className="pt-[60px] font-sans text-textPrimary bg-brand dark:bg-textPrimary dark:text-brand">

@@ -48,7 +48,7 @@ export default function HomePage() {
       available: false,
     };
     setFilters(cleared);
-    router.push("/"); // clear URL
+    router.push("/"); UR
   };
 
   // 🔄 Read filters from URL on initial load
@@ -128,7 +128,7 @@ export default function HomePage() {
           onClick={clearFilters}
           className="text-sm border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 transition"
         >
-          Clear Filters
+          Clear
         </button>
       </div>
 

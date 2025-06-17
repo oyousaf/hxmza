@@ -1,55 +1,101 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { CubeIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-];
+import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
+import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa";
+import Image from "next/image";
 
 export default function Navbar() {
-  const pathname = usePathname();
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("theme");
+    const prefersDark =
+      stored === "dark" ||
+      (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    setIsDark(prefersDark);
+    document.documentElement.classList.toggle("dark", prefersDark);
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDark;
+    setIsDark(newMode);
+    document.documentElement.classList.toggle("dark", newMode);
+    localStorage.setItem("theme", newMode ? "dark" : "light");
+  };
 
   return (
     <motion.nav
-      initial={{ y: -60, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="w-full bg-white/80 backdrop-blur border-b border-gray-200 fixed top-0 z-50"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="fixed top-0 z-50 w-full px-4 py-3 border-b border-gray-200 dark:border-textPrimary bg-brand dark:bg-textPrimary shadow-sm flex items-center justify-between"
     >
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-textPrimary font-bold text-lg"
-        >
+      {/* Logo */}
+      <div className="flex items-center gap-2">
+        {/* Light mode logo */}
+        <div className="block dark:hidden">
           <Image
-            src="/logo.png"
-            alt="Hxmza's Hub Logo"
-            width={200}
-            height={100}
-            className="rounded-sm object-contain"
+            src="/logoLight.png"
+            alt="Logo Light"
+            width={250}
+            height={24}
             priority
           />
-        </Link>
-
-        <div className="flex gap-6 items-center text-sm font-medium">
-          {navLinks.map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`hover:text-indigo-600 transition ${
-                pathname === href ? "text-indigo-600" : "text-textPrimary"
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
         </div>
+
+        {/* Dark mode logo */}
+        <div className="hidden dark:block">
+          <Image
+            src="/logoDark.png"
+            alt="Logo Dark"
+            width={250}
+            height={24}
+            priority
+          />
+        </div>
+      </div>
+
+      {/* Socials + Theme Toggle */}
+      <div className="flex items-center gap-4">
+        <a
+          href="https://facebook.com/hxmzashub"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Facebook"
+        >
+          <FaFacebook className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
+        </a>
+        <a
+          href="https://instagram.com/hxmzashub"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Instagram"
+        >
+          <FaInstagram className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
+        </a>
+        <a
+          href="https://tiktok.com/hxmzashub"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="TikTok"
+        >
+          <FaTiktok className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
+        </a>
+
+        <button
+          onClick={toggleTheme}
+          className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          aria-label="Toggle Dark Mode"
+        >
+          {isDark ? (
+            <SunIcon className="w-5 h-5 text-yellow-400" />
+          ) : (
+            <MoonIcon className="w-5 h-5 text-textPrimary dark:text-brand" />
+          )}
+        </button>
       </div>
     </motion.nav>
   );

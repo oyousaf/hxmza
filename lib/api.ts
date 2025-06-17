@@ -3,45 +3,70 @@ import { Car } from "@/types/car";
 export const mockCars: Car[] = [
   {
     id: "1",
-    make: "Tesla",
-    model: "Model 3",
-    year: 2022,
-    image: "/car1.jpg",
-    pricePerDay: 120,
+    make: "Porsche",
+    model: "Taycan Turbo S",
+    year: 2025,
+    image: "/cars/taycan.webp",
+    pricePerDay: 240,
     fuelType: "Electric",
     transmission: "Automatic",
-    seats: 5,
+    seats: 4,
     isFeatured: true,
+    type: "electric",
   },
   {
     id: "2",
-    make: "Toyota",
-    model: "Corolla",
-    year: 2020,
-    image: "/car2.jpg",
-    pricePerDay: 60,
-    fuelType: "Petrol",
-    transmission: "Manual",
-    seats: 5,
-    isFeatured: false,
-  },
-  {
-    id: "3",
-    make: "BMW",
-    model: "i4",
-    year: 2023,
-    image: "/car3.jpg",
-    pricePerDay: 150,
+    make: "Mercedes-Benz",
+    model: "EQS AMG",
+    year: 2025,
+    image: "/cars/eqs.webp",
+    pricePerDay: 220,
     fuelType: "Electric",
     transmission: "Automatic",
     seats: 5,
     isFeatured: true,
+    type: "electric",
+  },
+  {
+    id: "3",
+    make: "Lamborghini",
+    model: "Revuelto",
+    year: 2025,
+    image: "/cars/revuelto.jpg",
+    pricePerDay: 350,
+    fuelType: "Petrol",
+    transmission: "Automatic",
+    seats: 2,
+    isFeatured: false,
+    type: "supercar",
+  },
+  {
+    id: "4",
+    make: "Ferrari",
+    model: "SF90 Stradale",
+    year: 2025,
+    image: "/cars/sf90.jpg",
+    pricePerDay: 400,
+    fuelType: "Petrol",
+    transmission: "Automatic",
+    seats: 2,
+    isFeatured: false,
+    type: "supercar",
   },
 ];
 
-export function filterCars(query: string): Car[] {
-  const q = query.toLowerCase();
-  return mockCars.filter((car) =>
-    `${car.make} ${car.model}`.toLowerCase().includes(q)
-  );
+export function filterCars(
+  query: string,
+  type: string = "",
+  year?: number
+): Car[] {
+  return mockCars.filter((car) => {
+    const matchesQuery = `${car.make} ${car.model}`
+      .toLowerCase()
+      .includes(query.toLowerCase());
+    const matchesType = type ? car.type === type : true;
+    const matchesYear = year ? car.year === year : true;
+
+    return matchesQuery && matchesType && matchesYear;
+  });
 }

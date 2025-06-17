@@ -26,7 +26,7 @@ export default function SearchBar({
     >
       <input
         type="text"
-        placeholder="Make or model"
+        placeholder="Search..."
         value={query}
         onChange={(e) => onChange({ query: e.target.value })}
         className="flex-1 min-w-[140px] border px-3 py-2 rounded-md text-sm"

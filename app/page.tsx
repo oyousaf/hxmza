@@ -32,11 +32,12 @@ export default function HomePage() {
   };
 
   const [filters, setFilters] = useState(defaultFilters);
+
   const [sortBy, setSortBy] = useState(
     searchParams.get("sort") || localStorage.getItem("sortBy") || "year-desc"
   );
 
-  // 🔄 Load filters + sort from URL/localStorage on mount
+  // 🔁 Load filters on mount
   useEffect(() => {
     const initialFilters = {
       query: searchParams.get("query") || "",
@@ -48,26 +49,19 @@ export default function HomePage() {
       available: searchParams.get("available") === "true",
     };
 
-    const savedSort =
-      localStorage.getItem("sortBy") || searchParams.get("sort") || "year-desc";
-
     setFilters(initialFilters);
-    setSortBy(savedSort);
-
-    setLoading(true);
     const results = filterCars(initialFilters);
     setCars(results);
-    setLoading(false);
   }, []);
 
-  // 🔁 Sync filters + sort to URL + localStorage and refilter
+  // 🔄 Sync filters & sort to URL + localStorage
   useEffect(() => {
     const params = new URLSearchParams();
 
     Object.entries(filters).forEach(([key, value]) => {
       if (typeof value === "boolean" && value) {
         params.set(key, "true");
-      } else if (typeof value === "string" && value.trim() !== "") {
+      } else if (value) {
         params.set(key, value);
       }
     });
@@ -89,7 +83,7 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, [filters, sortBy]);
 
-  // 🔄 UI event handlers
+  // 🔧 Event Handlers
   const handleFilterChange = (updates: Partial<typeof filters>) => {
     setFilters((prev) => ({ ...prev, ...updates }));
   };
@@ -144,7 +138,7 @@ export default function HomePage() {
             onClick={clearFilters}
             className="text-sm border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 transition"
           >
-            Clear
+            Reset
           </button>
         </div>
       </div>

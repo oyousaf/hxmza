@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "Hxmza's Hub | Car Rentals UK",
@@ -106,6 +107,7 @@ export default function RootLayout({
       <body className="pt-[60px] font-sans text-textPrimary bg-brand dark:bg-textPrimary dark:text-brand">
         <Navbar />
         <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );

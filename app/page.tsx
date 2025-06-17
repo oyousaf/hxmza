@@ -1,19 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+
 import SearchBar from "@/components/layout/ui/SearchBar";
-import CarList from "@/components/CarList";
-import { filterCars } from "@/lib/api";
-import { Car } from "@/types/car";
-import CarModal from "@/components/CarModal";
 import Filters from "@/components/Filters";
 import Toggles from "@/components/Toggles";
+import CarList from "@/components/CarList";
+import CarModal from "@/components/CarModal";
+import { filterCars } from "@/lib/api";
+import { Car } from "@/types/car";
 
 export default function HomePage() {
   const [filteredCars, setFilteredCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [filters, setFilters] = useState({
     query: "",
@@ -33,7 +38,7 @@ export default function HomePage() {
   };
 
   const clearFilters = () => {
-    setFilters({
+    const cleared = {
       query: "",
       type: "",
       fuel: "",
@@ -41,11 +46,44 @@ export default function HomePage() {
       transmission: "",
       featured: false,
       available: false,
-    });
+    };
+    setFilters(cleared);
+    router.push("/"); // clear URL
   };
 
-  // Automatically filter when filters change
+  // 🔄 Read filters from URL on initial load
   useEffect(() => {
+    const defaultFilters = {
+      query: searchParams.get("query") || "",
+      type: searchParams.get("type") || "",
+      fuel: searchParams.get("fuel") || "",
+      year: searchParams.get("year") || "",
+      transmission: searchParams.get("transmission") || "",
+      featured: searchParams.get("featured") === "true",
+      available: searchParams.get("available") === "true",
+    };
+
+    setFilters(defaultFilters);
+    setLoading(true);
+    const results = filterCars(defaultFilters);
+    setFilteredCars(results);
+    setLoading(false);
+  }, []);
+
+  // 🔁 Update results + sync URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (typeof value === "boolean") {
+        if (value) params.set(key, "true");
+      } else if (value) {
+        params.set(key, value);
+      }
+    });
+
+    router.push(`/?${params.toString()}`);
+
     setLoading(true);
     const timer = setTimeout(() => {
       const results = filterCars(filters);
@@ -55,14 +93,6 @@ export default function HomePage() {
 
     return () => clearTimeout(timer);
   }, [filters]);
-
-  // Auto-load on mount
-  useEffect(() => {
-    setLoading(true);
-    const results = filterCars(filters);
-    setFilteredCars(results);
-    setLoading(false);
-  }, []);
 
   return (
     <main className="min-h-screen flex flex-col gap-8 px-4 py-12 max-w-6xl mx-auto">
@@ -107,6 +137,7 @@ export default function HomePage() {
         loading={loading}
         onCardClick={openCarModal}
       />
+
       <CarModal car={selectedCar} onClose={closeCarModal} />
     </main>
   );

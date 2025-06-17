@@ -58,15 +58,17 @@ export const mockCars: Car[] = [
 export function filterCars(
   query: string,
   type: string = "",
-  year?: number
+  fuel: string = "",
+  year?: string
 ): Car[] {
   return mockCars.filter((car) => {
     const matchesQuery = `${car.make} ${car.model}`
       .toLowerCase()
       .includes(query.toLowerCase());
     const matchesType = type ? car.type === type : true;
-    const matchesYear = year ? car.year === year : true;
+    const matchesFuel = fuel ? car.fuelType === fuel : true;
+    const matchesYear = year ? car.year.toString() === year : true;
 
-    return matchesQuery && matchesType && matchesYear;
+    return matchesQuery && matchesType && matchesFuel && matchesYear;
   });
 }

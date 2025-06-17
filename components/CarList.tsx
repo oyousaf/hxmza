@@ -1,24 +1,44 @@
-import type { Car } from "@/types/car";
+import { Car } from "@/types/car";
 import CarCard from "./CarCard";
+import Skeleton from "./layout/ui/Skeleton";
+import { motion } from "framer-motion";
 
 type Props = {
   cars: Car[];
+  loading?: boolean;
 };
 
-export default function CarList({ cars }: Props) {
+export default function CarList({ cars, loading = false }: Props) {
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
   if (cars.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-10">
-        <p className="text-lg font-medium">🚫 No cars found.</p>
+      <div className="text-center text-gray-500 py-12">
+        <p className="text-lg font-semibold">🚫 No cars found.</p>
         <p className="text-sm mt-2">Try a different search or reset filters.</p>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {cars.map((car) => (
-        <CarCard key={car.id} car={car} />
+        <motion.div
+          key={car.id}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <CarCard car={car} />
+        </motion.div>
       ))}
     </div>
   );

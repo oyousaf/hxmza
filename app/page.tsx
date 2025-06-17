@@ -1,14 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { filterCars, mockCars } from "@/lib/api"
-import CarList from "@/components/CarList"
-import SearchBar from "@/components/layout/ui/SearchBar"
-import { motion } from "framer-motion"
-import type { Car } from "@/types/car"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import SearchBar from "@/components/layout/ui/SearchBar";
+import CarList from "@/components/CarList";
+import { filterCars } from "@/lib/api";
+import { Car } from "@/types/car";
 
 export default function HomePage() {
-  const [filteredCars, setFilteredCars] = useState<Car[]>(mockCars)
+  const [filteredCars, setFilteredCars] = useState<Car[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleSearch = (query: string, type: string) => {
+    setLoading(true);
+    setTimeout(() => {
+      const results = filterCars(query, type);
+      setFilteredCars(results);
+      setLoading(false);
+    }, 300);
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      const results = filterCars("", "");
+      setFilteredCars(results);
+      setLoading(false);
+    }, 600);
+  }, []);
 
   return (
     <main className="min-h-screen flex flex-col gap-8 px-4 py-12 max-w-6xl mx-auto">
@@ -21,26 +40,8 @@ export default function HomePage() {
         Find your next ride
       </motion.h1>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-      >
-        <SearchBar
-          onSearch={(query, type) => {
-            const results = filterCars(query, type)
-            setFilteredCars(results)
-          }}
-        />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-      >
-        <CarList cars={filteredCars} />
-      </motion.div>
+      <SearchBar onSearch={handleSearch} loading={loading} />
+      <CarList cars={filteredCars} loading={loading} />
     </main>
-  )
+  );
 }

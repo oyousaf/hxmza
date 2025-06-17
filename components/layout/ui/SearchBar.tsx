@@ -1,20 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 type Props = {
-  onSearch: (query: string, type: string) => void;
+  onSearch: (query: string, type: string, fuel: string, year: string) => void;
+  loading?: boolean;
 };
 
-export default function SearchBar({ onSearch }: Props) {
+export default function SearchBar({ onSearch, loading = false }: Props) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState("");
+  const [fuel, setFuel] = useState("");
+  const [year, setYear] = useState("");
+
+  // Auto-trigger on filter change (not on text input)
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      onSearch(query, type, fuel, year);
+    }, 300); // debounce to avoid spam
+
+    return () => clearTimeout(debounce);
+  }, [type, fuel, year]); // only trigger on filter changes
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(query, type);
+    onSearch(query, type, fuel, year);
   };
 
   return (
@@ -23,38 +35,61 @@ export default function SearchBar({ onSearch }: Props) {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="w-full max-w-xl mx-auto bg-white shadow-md rounded-xl px-4 py-3 flex flex-col sm:flex-row gap-3 items-stretch"
+      className="w-full max-w-5xl mx-auto bg-white shadow-md rounded-xl px-4 py-4 flex flex-col sm:flex-row gap-3 flex-wrap justify-between"
     >
-      <div className="flex items-center gap-2 flex-1">
-        <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search make or model..."
-          className="w-full bg-transparent outline-none text-textPrimary"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </div>
+      <input
+        type="text"
+        placeholder="Make or model"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="flex-1 min-w-[140px] border px-3 py-2 rounded-md text-sm"
+      />
 
       <select
         value={type}
         onChange={(e) => setType(e.target.value)}
-        className="bg-white border text-sm text-textPrimary rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        className="min-w-[140px] border px-3 py-2 rounded-md text-sm"
       >
         <option value="">All Types</option>
-        <option value="sedan">Sedan</option>
-        <option value="suv">SUV</option>
         <option value="electric">Electric</option>
-        <option value="convertible">Convertible</option>
+        <option value="supercar">Supercar</option>
       </select>
 
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        type="submit"
-        className="bg-textPrimary/70 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-textPrimary transition"
+      <select
+        value={fuel}
+        onChange={(e) => setFuel(e.target.value)}
+        className="min-w-[140px] border px-3 py-2 rounded-md text-sm"
       >
-        Search
-      </motion.button>
+        <option value="">Any Fuel</option>
+        <option value="Electric">Electric</option>
+        <option value="Petrol">Petrol</option>
+      </select>
+
+      <select
+        value={year}
+        onChange={(e) => setYear(e.target.value)}
+        className="min-w-[100px] border px-3 py-2 rounded-md text-sm"
+      >
+        <option value="">All Years</option>
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+        <option value="2021">2021</option>
+        <option value="2020">2020</option>
+      </select>
+
+      <button
+        type="submit"
+        className="flex items-center justify-center w-10 h-10 rounded-md bg-textPrimary text-white hover:bg-textPrimary/90 transition"
+        aria-label="Search"
+      >
+        {loading ? (
+          <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-white rounded-full" />
+        ) : (
+          <MagnifyingGlassIcon className="h-5 w-5 text-white" />
+        )}
+      </button>
     </motion.form>
   );
 }

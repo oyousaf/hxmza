@@ -76,7 +76,7 @@ export default function CarModal({ car, onClose }: Props) {
         <motion.div
           ref={modalRef}
           onClick={(e) => e.stopPropagation()}
-          className="relative bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl p-6"
+          className="relative bg-white dark:bg-textPrimary w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl p-6"
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
@@ -86,7 +86,7 @@ export default function CarModal({ car, onClose }: Props) {
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
+            className="absolute top-4 right-4 text-gray-400 dark:text-white hover:text-gray-700"
             aria-label="Close"
           >
             <XMarkIcon className="w-6 h-6" />
@@ -103,9 +103,9 @@ export default function CarModal({ car, onClose }: Props) {
           <div className="mb-4">
             <h2 className="text-2xl font-bold">
               {car.make} {car.model}{" "}
-              <span className="text-gray-500">({car.year})</span>
+              <span className="text-gray-500 dark:text-white">({car.year})</span>
             </h2>
-            <div className="flex items-center text-sm text-gray-500 mt-1 gap-4 flex-wrap">
+            <div className="flex items-center text-sm text-gray-500 dark:text-white mt-1 gap-4 flex-wrap">
               {car.location && (
                 <span className="flex items-center gap-1">
                   <MapPinIcon className="w-4 h-4" /> {car.location}
@@ -130,7 +130,7 @@ export default function CarModal({ car, onClose }: Props) {
           </div>
 
           {/* Specs */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-700 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-700 dark:text-white mb-4">
             <div>
               <strong>Fuel:</strong> {car.fuel}
             </div>
@@ -155,7 +155,7 @@ export default function CarModal({ car, onClose }: Props) {
           {car.features && car.features.length > 0 && (
             <div className="mt-4">
               <h3 className="font-semibold mb-2">Features:</h3>
-              <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+              <ul className="list-disc list-inside text-sm text-gray-700 dark:text-white space-y-1">
                 {car.features.map((feat, i) => (
                   <li key={i}>{feat}</li>
                 ))}

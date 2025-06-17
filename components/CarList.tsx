@@ -22,7 +22,7 @@ export default function CarList({ cars, loading = false, onCardClick }: Props) {
 
   if (cars.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-12">
+      <div className="text-center text-gray-500 dark:text-white  py-12">
         <p className="text-lg font-semibold">🚫 No cars found.</p>
         <p className="text-sm mt-2">Try a different search or reset filters.</p>
       </div>

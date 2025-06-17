@@ -13,7 +13,7 @@ export default function CarCard({ car, onClick }: Props) {
     <motion.div
       whileHover={{ scale: 1.03 }}
       transition={{ duration: 0.3 }}
-      className="cursor-pointer bg-white rounded-xl shadow hover:shadow-md overflow-hidden"
+      className="cursor-pointer bg-white dark:bg-black/50 rounded-xl shadow hover:shadow-md overflow-hidden"
       onClick={() => onClick(car)}
     >
       <img

@@ -15,14 +15,13 @@ export default function SearchBar({ onSearch, loading = false }: Props) {
   const [fuel, setFuel] = useState("");
   const [year, setYear] = useState("");
 
-  // Auto-trigger on filter change (not on text input)
   useEffect(() => {
     const debounce = setTimeout(() => {
       onSearch(query, type, fuel, year);
-    }, 300); // debounce to avoid spam
+    }, 300);
 
     return () => clearTimeout(debounce);
-  }, [type, fuel, year]); // only trigger on filter changes
+  }, [type, fuel, year]); 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +61,9 @@ export default function SearchBar({ onSearch, loading = false }: Props) {
       >
         <option value="">Any Fuel</option>
         <option value="Electric">Electric</option>
+        <option value="Hybrid">Hybrid</option>
         <option value="Petrol">Petrol</option>
+        <option value="Diesel">Diesel</option>
       </select>
 
       <select

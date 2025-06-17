@@ -1,6 +1,6 @@
-import "@/styles/globals.css"
-import type { Metadata } from "next"
-import Navbar from "@/components/layout/Navbar"
+import "@/styles/globals.css";
+import type { Metadata } from "next";
+import Navbar from "@/components/layout/Navbar";
 
 export const metadata: Metadata = {
   title: "Hxmza's Hub | Car Rentals",
@@ -37,14 +37,15 @@ export const metadata: Metadata = {
     maximumScale: 1,
   },
   other: {
-    "google-font": "https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap",
+    "google-font":
+      "https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap",
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en-gb">
@@ -53,5 +54,5 @@ export default function RootLayout({
         <main>{children}</main>
       </body>
     </html>
-  )
+  );
 }

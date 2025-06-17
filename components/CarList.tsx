@@ -17,9 +17,9 @@ const sortCars = (cars: Car[], sortBy: string): Car[] => {
       return [...cars].sort((a, b) => b.year - a.year);
     case "year-asc":
       return [...cars].sort((a, b) => a.year - b.year);
-    case "engineSize-desc":
+    case "engine-desc":
       return [...cars].sort((a, b) => (b.engine || 0) - (a.engine || 0));
-    case "engineSize-asc":
+    case "engine-asc":
       return [...cars].sort((a, b) => (a.engine || 0) - (b.engine || 0));
     case "mileage-desc":
       return [...cars].sort((a, b) => (b.mileage || 0) - (a.mileage || 0));

@@ -32,7 +32,9 @@ export default function HomePage() {
   };
 
   const [filters, setFilters] = useState(defaultFilters);
-  const [sortBy, setSortBy] = useState("");
+  const [sortBy, setSortBy] = useState(
+    searchParams.get("sort") || localStorage.getItem("sortBy") || "year-desc"
+  );
 
   // 🔄 Load filters + sort from URL/localStorage on mount
   useEffect(() => {
@@ -46,7 +48,8 @@ export default function HomePage() {
       available: searchParams.get("available") === "true",
     };
 
-    const savedSort = localStorage.getItem("sortBy") || searchParams.get("sort") || "year-desc";
+    const savedSort =
+      localStorage.getItem("sortBy") || searchParams.get("sort") || "year-desc";
 
     setFilters(initialFilters);
     setSortBy(savedSort);

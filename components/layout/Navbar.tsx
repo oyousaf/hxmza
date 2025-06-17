@@ -31,71 +31,73 @@ export default function Navbar() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="fixed top-0 z-50 w-full px-4 py-3 border-b border-gray-200 dark:border-textPrimary bg-brand dark:bg-textPrimary shadow-sm flex items-center justify-between"
+      className="fixed top-0 z-50 w-full px-4 py-3 border-b border-gray-200 dark:border-textPrimary bg-brand dark:bg-textPrimary shadow-sm"
     >
-      {/* Logo */}
-      <div className="flex items-center gap-2">
-        {/* Light mode logo */}
-        <div className="block dark:hidden">
-          <Image
-            src="/logoLight.png"
-            alt="Logo Light"
-            width={250}
-            height={24}
-            priority
-          />
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-6xl mx-auto">
+        {/* Left: Logo */}
+        <div className="flex items-center gap-2">
+          <div className="block dark:hidden">
+            <Image
+              src="/logoLight.png"
+              alt="Logo Light"
+              width={180}
+              height={24}
+              priority
+            />
+          </div>
+          <div className="hidden dark:block">
+            <Image
+              src="/logoDark.png"
+              alt="Logo Dark"
+              width={180}
+              height={24}
+              priority
+            />
+          </div>
         </div>
 
-        {/* Dark mode logo */}
-        <div className="hidden dark:block">
-          <Image
-            src="/logoDark.png"
-            alt="Logo Dark"
-            width={250}
-            height={24}
-            priority
-          />
+        {/* Center: Theme Toggle */}
+        <div className="flex items-center">
+          <button
+            onClick={toggleTheme}
+            className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            aria-label="Toggle Dark Mode"
+          >
+            {isDark ? (
+              <SunIcon className="w-6 h-6 text-yellow-400" />
+            ) : (
+              <MoonIcon className="w-6 h-6 text-textPrimary dark:text-brand" />
+            )}
+          </button>
         </div>
-      </div>
 
-      {/* Socials + Theme Toggle */}
-      <div className="flex items-center gap-4">
-        <a
-          href="https://facebook.com/hxmzashub"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Facebook"
-        >
-          <FaFacebook className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
-        </a>
-        <a
-          href="https://instagram.com/hxmzashub"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Instagram"
-        >
-          <FaInstagram className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
-        </a>
-        <a
-          href="https://tiktok.com/hxmzashub"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="TikTok"
-        >
-          <FaTiktok className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
-        </a>
-
-        <button
-          onClick={toggleTheme}
-          className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-          aria-label="Toggle Dark Mode"
-        >
-          {isDark ? (
-            <SunIcon className="w-5 h-5 text-yellow-400" />
-          ) : (
-            <MoonIcon className="w-5 h-5 text-textPrimary dark:text-brand" />
-          )}
-        </button>
+        {/* Right: Socials */}
+        <div className="flex items-center gap-4">
+          <a
+            href="https://facebook.com/hxmzashub"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+          >
+            <FaFacebook className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
+          </a>
+          <a
+            href="https://instagram.com/hxmzashub"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+          >
+            <FaInstagram className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
+          </a>
+          <a
+            href="https://tiktok.com/hxmzashub"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="TikTok"
+          >
+            <FaTiktok className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
+          </a>
+        </div>
       </div>
     </motion.nav>
   );

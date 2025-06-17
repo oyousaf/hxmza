@@ -17,7 +17,7 @@ export default function Footer() {
           transition={{
             repeat: Infinity,
             duration: 4,
-            ease: "linear"
+            ease: "linear",
           }}
           className="inline-block"
         >

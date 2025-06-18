@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 import SearchBar from "@/components/layout/ui/SearchBar";
@@ -14,9 +13,6 @@ import { filterCars } from "@/lib/api";
 import { Car } from "@/types/car";
 
 export default function HomePage() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
@@ -36,47 +32,19 @@ export default function HomePage() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
-    const initialFilters = {
-      query: searchParams.get("query") || "",
-      type: searchParams.get("type") || "",
-      fuel: searchParams.get("fuel") || "",
-      year: searchParams.get("year") || "",
-      transmission: searchParams.get("transmission") || "",
-      featured: searchParams.get("featured") === "true",
-      available: searchParams.get("available") === "true",
-    };
-
-    const sort = localStorage.getItem("sortBy") || "year-desc";
-
-    setFilters(initialFilters);
-    setSortBy(sort);
-    setCars(filterCars(initialFilters));
-  }, [searchParams]);
+    const storedSort = sessionStorage.getItem("sortBy") || "year-desc";
+    setSortBy(storedSort);
+    setFilters(defaultFilters);
+    setCars(filterCars(defaultFilters));
+  }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams();
-
-    Object.entries(filters).forEach(([key, value]) => {
-      if (typeof value === "boolean" && value) {
-        params.set(key, "true");
-      } else if (value) {
-        params.set(key, value);
-      }
-    });
-
-    localStorage.setItem("sortBy", sortBy);
-
-    router.push(`/?${params.toString()}`);
+    sessionStorage.setItem("sortBy", sortBy);
     setLoading(true);
-
-    const timer = setTimeout(() => {
-      const filtered = filterCars(filters);
-      setCars(filtered);
-      setLoading(false);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [filters, sortBy, router]);
+    const filtered = filterCars(filters);
+    setCars(filtered);
+    setLoading(false);
+  }, [filters, sortBy]);
 
   const handleFilterChange = (updates: Partial<typeof filters>) => {
     setFilters((prev) => ({ ...prev, ...updates }));
@@ -89,8 +57,7 @@ export default function HomePage() {
   const clearFilters = () => {
     setFilters(defaultFilters);
     setSortBy("year-desc");
-    localStorage.setItem("sortBy", "year-desc");
-    router.push("/");
+    sessionStorage.setItem("sortBy", "year-desc");
   };
 
   return (
@@ -118,7 +85,7 @@ export default function HomePage() {
         <div className="block sm:hidden mt-4">
           <button
             onClick={() => setMobileFiltersOpen((prev) => !prev)}
-            className="text-sm border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 transition w-full"
+            className="text-sm border border-textPrimary px-4 py-2 rounded-md dark:border-brand hover:bg-brand dark:hover:bg-brand dark:hover:text-textPrimary transition w-full"
           >
             {mobileFiltersOpen ? "Hide Filters" : "Show Filters"}
           </button>
@@ -165,19 +132,26 @@ export default function HomePage() {
         <div className="mt-4 sm:mt-2 flex justify-end">
           <button
             onClick={clearFilters}
-            className="text-sm border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 transition"
+            className="text-sm font-medium text-red-600 border border-red-600 rounded-md px-4 py-2 transition hover:bg-red-600 hover:text-white dark:hover:bg-red-500"
           >
             Clear
           </button>
         </div>
       </div>
 
-      <CarList
-        cars={cars}
-        loading={loading}
-        sortBy={sortBy}
-        onCardClick={(car) => setSelectedCar(car)}
-      />
+      <motion.div
+        key={JSON.stringify(cars) + sortBy}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.4 }}
+      >
+        <CarList
+          cars={cars}
+          loading={loading}
+          sortBy={sortBy}
+          onCardClick={(car) => setSelectedCar(car)}
+        />
+      </motion.div>
 
       <CarModal car={selectedCar} onClose={() => setSelectedCar(null)} />
     </main>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 import SearchBar from "@/components/layout/ui/SearchBar";
 import Filters from "@/components/Filters";
@@ -33,6 +33,7 @@ export default function HomePage() {
 
   const [filters, setFilters] = useState(defaultFilters);
   const [sortBy, setSortBy] = useState("year-desc");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
     const initialFilters = {
@@ -45,8 +46,7 @@ export default function HomePage() {
       available: searchParams.get("available") === "true",
     };
 
-    const sort =
-      searchParams.get("sort") || localStorage.getItem("sortBy") || "year-desc";
+    const sort = localStorage.getItem("sortBy") || "year-desc";
 
     setFilters(initialFilters);
     setSortBy(sort);
@@ -64,10 +64,7 @@ export default function HomePage() {
       }
     });
 
-    if (sortBy) {
-      params.set("sort", sortBy);
-      localStorage.setItem("sortBy", sortBy);
-    }
+    localStorage.setItem("sortBy", sortBy);
 
     router.push(`/?${params.toString()}`);
     setLoading(true);
@@ -118,21 +115,54 @@ export default function HomePage() {
           <SortDropdown value={sortBy} onChange={handleSortChange} />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mt-4">
-          <div className="flex flex-wrap gap-4">
-            <Filters
-              fuel={filters.fuel}
-              year={filters.year}
-              transmission={filters.transmission}
-              onChange={handleFilterChange}
-            />
-            <Toggles
-              featured={filters.featured}
-              available={filters.available}
-              onChange={handleFilterChange}
-            />
-          </div>
+        <div className="block sm:hidden mt-4">
+          <button
+            onClick={() => setMobileFiltersOpen((prev) => !prev)}
+            className="text-sm border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 transition w-full"
+          >
+            {mobileFiltersOpen ? "Hide Filters" : "Show Filters"}
+          </button>
 
+          <AnimatePresence>
+            {mobileFiltersOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden mt-4 space-y-4"
+              >
+                <Filters
+                  fuel={filters.fuel}
+                  year={filters.year}
+                  transmission={filters.transmission}
+                  onChange={handleFilterChange}
+                />
+                <Toggles
+                  featured={filters.featured}
+                  available={filters.available}
+                  onChange={handleFilterChange}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="hidden sm:flex flex-wrap gap-4 mt-4">
+          <Filters
+            fuel={filters.fuel}
+            year={filters.year}
+            transmission={filters.transmission}
+            onChange={handleFilterChange}
+          />
+          <Toggles
+            featured={filters.featured}
+            available={filters.available}
+            onChange={handleFilterChange}
+          />
+        </div>
+
+        <div className="mt-4 sm:mt-2 flex justify-end">
           <button
             onClick={clearFilters}
             className="text-sm border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-800 transition"

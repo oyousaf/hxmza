@@ -19,7 +19,7 @@ export default function Filters({ fuel, year, transmission, onChange }: Props) {
         onChange={(e) => onChange({ fuel: e.target.value })}
         className="min-w-[140px] border px-3 py-2 rounded-md text-sm dark:bg-textPrimary"
       >
-        <option value="">Any Fuel</option>
+        <option value="">Fuel</option>
         <option value="Electric">Electric</option>
         <option value="Petrol">Petrol</option>
         <option value="Diesel">Diesel</option>
@@ -30,7 +30,7 @@ export default function Filters({ fuel, year, transmission, onChange }: Props) {
         onChange={(e) => onChange({ year: e.target.value })}
         className="min-w-[100px] border px-3 py-2 rounded-md text-sm dark:bg-textPrimary"
       >
-        <option value="">All Years</option>
+        <option value="">Year</option>
         {[2025, 2024, 2023, 2022, 2021, 2020].map((y) => (
           <option key={y} value={y}>
             {y}
@@ -43,7 +43,7 @@ export default function Filters({ fuel, year, transmission, onChange }: Props) {
         onChange={(e) => onChange({ transmission: e.target.value })}
         className="min-w-[140px] border px-3 py-2 rounded-md text-sm dark:bg-textPrimary"
       >
-        <option value="">Any Transmission</option>
+        <option value="">Transmission</option>
         <option value="Automatic">Automatic</option>
         <option value="Manual">Manual</option>
       </select>

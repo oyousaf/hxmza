@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa";
 import Image from "next/image";
+import Link from "next/link";
 import { getInitialTheme, toggleTheme } from "@/lib/theme";
 
 export default function Navbar() {
@@ -30,7 +31,7 @@ export default function Navbar() {
     >
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-6xl mx-auto">
         {/* Left: Logo */}
-        <div className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <div className="block dark:hidden">
             <Image
               src="/logoLight.png"
@@ -49,49 +50,58 @@ export default function Navbar() {
               priority
             />
           </div>
-        </div>
+        </Link>
 
         {/* Center: Theme Toggle */}
-        <div className="flex items-center">
-          <button
-            onClick={handleToggle}
-            className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-violet-950 transition"
-            aria-label="Toggle Dark Mode"
-          >
-            {isDark ? (
-              <SunIcon className="w-6 h-6 text-yellow-400" />
-            ) : (
-              <MoonIcon className="w-6 h-6 text-textPrimary dark:text-brand" />
-            )}
-          </button>
-        </div>
+        <button
+          onClick={handleToggle}
+          className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-violet-950 transition"
+          aria-label="Toggle Dark Mode"
+        >
+          {isDark ? (
+            <SunIcon className="w-6 h-6 text-yellow-400" />
+          ) : (
+            <MoonIcon className="w-6 h-6 text-textPrimary dark:text-brand" />
+          )}
+        </button>
 
-        {/* Right: Socials */}
+        {/* Right: Social Icons with bouncy motion.div */}
         <div className="flex items-center gap-4">
-          <a
-            href="https://facebook.com/hxmzashub"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Facebook"
-          >
-            <FaFacebook className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
-          </a>
-          <a
-            href="https://instagram.com/hxmzashub"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Instagram"
-          >
-            <FaInstagram className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
-          </a>
-          <a
-            href="https://tiktok.com/hxmzashub"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="TikTok"
-          >
-            <FaTiktok className="w-5 h-5 text-textPrimary dark:text-brand hover:opacity-80 transition" />
-          </a>
+          {[
+            {
+              href: "https://facebook.com/hxmzashub",
+              label: "Facebook",
+              icon: <FaFacebook className="w-7 h-7" />,
+            },
+            {
+              href: "https://instagram.com/hxmzashub",
+              label: "Instagram",
+              icon: <FaInstagram className="w-7 h-7" />,
+            },
+            {
+              href: "https://tiktok.com/hxmzashub",
+              label: "TikTok",
+              icon: <FaTiktok className="w-7 h-7" />,
+            },
+          ].map(({ href, label, icon }) => (
+            <motion.div
+              key={label}
+              whileHover={{ scale: 1.3 }}
+              whileTap={{ scale: 0.85 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="text-textPrimary dark:text-brand cursor-pointer"
+            >
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="hover:opacity-90 transition"
+              >
+                {icon}
+              </a>
+            </motion.div>
+          ))}
         </div>
       </div>
     </motion.nav>

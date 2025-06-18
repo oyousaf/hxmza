@@ -104,7 +104,7 @@ export default function HomePage() {
         Find your next ride
       </motion.h1>
 
-      <div className="sticky top-[64px] z-20 bg-white dark:bg-textPrimary border border-gray-200 dark:border-gray-700 rounded-md shadow-sm px-4 py-5">
+      <div className="sticky top-[64px] z-20 dark:bg-textPrimary border border-textPrimary dark:border-brand rounded-md shadow-sm px-4 py-5">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <SearchBar
             query={filters.query}

@@ -55,7 +55,7 @@ export default function CarModal({ car, onClose }: Props) {
 
   if (!car) return null;
 
-  const capitalise = (val?: string) =>
+  const format = (val?: string) =>
     val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "–";
 
   return (
@@ -106,7 +106,7 @@ export default function CarModal({ car, onClose }: Props) {
               className="mb-4"
             >
               <h2 className="text-2xl font-bold">
-                {car.make} {car.model}{" "}
+                {format(car.make)} {format(car.model)}{" "}
                 <span className="text-gray-500 dark:text-white">
                   ({car.year})
                 </span>
@@ -124,7 +124,7 @@ export default function CarModal({ car, onClose }: Props) {
                   {car.rating.toFixed(1)} / 5
                 </span>
                 <span className="text-green-600 font-semibold">
-                  {capitalise(car.status)}
+                  {format(car.status)}
                 </span>
               </div>
             </motion.div>
@@ -150,25 +150,25 @@ export default function CarModal({ car, onClose }: Props) {
               className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-700 dark:text-white mb-6"
             >
               <div>
-                <strong>Fuel:</strong> {capitalise(car.fuel)}
+                <strong>Fuel:</strong> {format(car.fuel)}
               </div>
               <div>
-                <strong>Transmission:</strong> {car.transmission}
+                <strong>Transmission:</strong> {format(car.transmission)}
               </div>
               <div>
                 <strong>Mileage:</strong>{" "}
                 {car.mileage
-                  ? `${new Intl.NumberFormat("en-UK").format(car.mileage)} mi`
+                  ? `${new Intl.NumberFormat("en-UK").format(car.mileage)} miles`
                   : "–"}
               </div>
               <div>
                 <strong>Seats:</strong> {car.seats}
               </div>
               <div>
-                <strong>Colour:</strong> {capitalise(car.color)}
+                <strong>Colour:</strong> {format(car.color)}
               </div>
               <div>
-                <strong>Displacement:</strong>{" "}
+                <strong>Engine:</strong>{" "}
                 {car.displacement ? `${car.displacement} cc` : "–"}
               </div>
             </motion.div>

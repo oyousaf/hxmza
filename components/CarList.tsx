@@ -26,11 +26,7 @@ const itemVariants = {
   show: { opacity: 1, y: 0 },
 };
 
-export default function CarList({
-  cars,
-  loading,
-  onCardClick,
-}: Props) {
+export default function CarList({ cars, loading, onCardClick }: Props) {
   const [itemsToShow, setItemsToShow] = useState(10);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 

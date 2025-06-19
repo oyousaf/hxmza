@@ -10,8 +10,8 @@ type Props = {
 };
 
 export default function CarCard({ car, onClick }: Props) {
-  const capitalise = (value: string) =>
-    value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+  const format = (val: string) =>
+    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "";
 
   return (
     <motion.div
@@ -32,16 +32,16 @@ export default function CarCard({ car, onClick }: Props) {
       </div>
       <div className="p-4 space-y-1">
         <h3 className="text-lg font-semibold">
-          {car.make} {car.model}
+          {format(car.make)} {format(car.model)}
         </h3>
         <p className="text-sm text-gray-500">{car.year}</p>
         <p className="text-sm text-gray-500">
           {car.mileage
             ? `${new Intl.NumberFormat("en-UK").format(car.mileage)} mi`
             : "–"}{" "}
-          · {capitalise(car.transmission)}
+          · {format(car.transmission)}
         </p>
-        <p className="text-sm text-gray-500">{capitalise(car.fuel)}</p>
+        <p className="text-sm text-gray-500">{format(car.fuel)}</p>
         <p className="mt-1 font-bold text-textPrimary dark:text-white">
           £{new Intl.NumberFormat("en-UK").format(car.pricePerDay)} / day
         </p>

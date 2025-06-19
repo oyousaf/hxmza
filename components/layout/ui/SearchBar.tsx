@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
@@ -9,7 +9,6 @@ type Props = {
   type: string;
   loading?: boolean;
   onChange: (updates: { query?: string; type?: string }) => void;
-  onSearch?: (model: string) => void; // ✨ new prop
 };
 
 export default function SearchBar({
@@ -17,20 +16,26 @@ export default function SearchBar({
   type,
   loading = false,
   onChange,
-  onSearch,
 }: Props) {
-  const [localQuery, setLocalQuery] = useState(query);
+  const [inputValue, setInputValue] = useState(query);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (onSearch && localQuery.trim()) {
-      onSearch(localQuery.trim());
-    }
-  };
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (inputValue.trim() !== query.trim()) {
+        onChange({ query: inputValue.trim() });
+      }
+    }, 600); // ⏱ debounce delay (ms)
+
+    return () => clearTimeout(timeout);
+  }, [inputValue]);
+
+  useEffect(() => {
+    setInputValue(query); // keep input in sync externally
+  }, [query]);
 
   return (
     <motion.form
-      onSubmit={handleSubmit}
+      onSubmit={(e) => e.preventDefault()}
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -39,11 +44,8 @@ export default function SearchBar({
       <input
         type="text"
         placeholder="Search for model..."
-        value={localQuery}
-        onChange={(e) => {
-          setLocalQuery(e.target.value);
-          onChange({ query: e.target.value });
-        }}
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
         className="flex-1 min-w-[140px] border px-3 py-2 rounded-md text-sm"
       />
 

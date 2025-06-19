@@ -14,13 +14,21 @@ import { fetchCarsFromAPI } from "@/lib/api";
 import { Car } from "@/types/car";
 
 function sortCars(cars: Car[], sortBy: string): Car[] {
-  const [field, order] = sortBy.split("-");
-  return [...cars].sort((a, b) => {
-    const dir = order === "asc" ? 1 : -1;
-    const aVal = (a as any)[field];
-    const bVal = (b as any)[field];
+  const [field, order] = sortBy.split("-") as [keyof Car, "asc" | "desc"];
+  const dir = order === "asc" ? 1 : -1;
 
-    return aVal > bVal ? dir : aVal < bVal ? -dir : 0;
+  return [...cars].sort((a, b) => {
+    const aVal = a[field];
+    const bVal = b[field];
+
+    if (aVal == null) return 1;
+    if (bVal == null) return -1;
+
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return (aVal - bVal) * dir;
+    }
+
+    return String(aVal).localeCompare(String(bVal)) * dir;
   });
 }
 
@@ -185,7 +193,6 @@ export default function HomePage() {
         <CarList
           cars={filteredCars}
           loading={loading}
-          sortBy={sortBy}
           onCardClick={(car) => setSelectedCar(car)}
         />
       </motion.div>

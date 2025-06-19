@@ -9,7 +9,6 @@ import { motion } from "framer-motion";
 type Props = {
   cars: Car[];
   loading: boolean;
-  sortBy?: string;
   onCardClick?: (car: Car) => void;
 };
 
@@ -30,7 +29,6 @@ const itemVariants = {
 export default function CarList({
   cars,
   loading,
-  sortBy = "",
   onCardClick,
 }: Props) {
   const [itemsToShow, setItemsToShow] = useState(10);

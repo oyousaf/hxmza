@@ -5,7 +5,10 @@ const CAR_API_HOST = "cars-by-api-ninjas.p.rapidapi.com";
 const API_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY!;
 const CAR_API_URL = `https://${CAR_API_HOST}/v1/cars`;
 
-export async function fetchCarsFromAPI(make = "porsche", model?: string): Promise<Car[]> {
+export async function fetchCarsFromAPI(
+  make = "porsche",
+  model?: string
+): Promise<Car[]> {
   const params = new URLSearchParams();
   params.set("make", make);
   if (model) params.set("model", model);
@@ -26,5 +29,7 @@ export async function fetchCarsFromAPI(make = "porsche", model?: string): Promis
   }
 
   const json = await res.json();
-  return (json as Record<string, unknown>[]).map((car, i) => mapApiCarToInternalCar(car, i));
+  return (json as Record<string, unknown>[]).map((car, i) =>
+    mapApiCarToInternalCar(car, i)
+  );
 }

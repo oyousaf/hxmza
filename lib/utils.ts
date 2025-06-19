@@ -2,9 +2,16 @@ import { Car } from "@/types/car";
 
 const placeholderImage = "/cars/placeholder.webp";
 
-function generateFakeMileage(year: number): number {
+function safeYear(value: unknown): number {
+  const parsed = parseInt(String(value), 10);
   const currentYear = new Date().getFullYear();
-  const age = Math.max(0, currentYear - year);
+  return Number.isNaN(parsed) || parsed < 1950 || parsed > currentYear + 1
+    ? 2020
+    : parsed;
+}
+
+function generateFakeMileage(year: number): number {
+  const age = Math.max(0, new Date().getFullYear() - year);
 
   if (age === 0) return Math.floor(Math.random() * 10_000);
   if (age <= 2)
@@ -29,7 +36,7 @@ export function mapApiCarToInternalCar(
   apiCar: Record<string, unknown>,
   index: number
 ): Car {
-  const year = Number(apiCar.year) || 2020;
+  const year = safeYear(apiCar.year);
   const make = String(apiCar.make ?? "Unknown");
   const model = String(apiCar.model ?? "Model");
   const fuelRaw = String(apiCar.fuel_type ?? "petrol").toLowerCase();

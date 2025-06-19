@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useEffect, useState, useMemo } from "react";
 import { Car } from "@/types/car";
 import CarCard from "./CarCard";
 import Skeleton from "./layout/ui/Skeleton";
@@ -12,32 +13,18 @@ type Props = {
   onCardClick?: (car: Car) => void;
 };
 
-const sortCars = (cars: Car[], sortBy: string): Car[] => {
-  const sorted = [...cars];
-  switch (sortBy) {
-    case "pricePerDay-asc":
-      return sorted.sort((a, b) => a.pricePerDay - b.pricePerDay);
-    case "pricePerDay-desc":
-      return sorted.sort((a, b) => b.pricePerDay - a.pricePerDay);
-    case "year-desc":
-      return sorted.sort((a, b) => b.year - a.year);
-    case "year-asc":
-      return sorted.sort((a, b) => a.year - b.year);
-    case "engine-desc":
-      return sorted.sort((a, b) => (b.engine || 0) - (a.engine || 0));
-    case "engine-asc":
-      return sorted.sort((a, b) => (a.engine || 0) - (b.engine || 0));
-    case "mileage-desc":
-      return sorted.sort((a, b) => (b.mileage || 0) - (a.mileage || 0));
-    case "mileage-asc":
-      return sorted.sort((a, b) => (a.mileage || 0) - (b.mileage || 0));
-    case "rating-desc":
-      return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    case "rating-asc":
-      return sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0));
-    default:
-      return cars;
-  }
+const containerVariants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
 };
 
 export default function CarList({
@@ -46,8 +33,27 @@ export default function CarList({
   sortBy = "",
   onCardClick,
 }: Props) {
-  const sorted = sortCars(cars, sortBy);
-  const visibleCars = sorted.slice(0, 10);
+  const [itemsToShow, setItemsToShow] = useState(10);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setItemsToShow((prev) => prev + 6);
+        }
+      },
+      { rootMargin: "300px" }
+    );
+
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const visibleCars = useMemo(
+    () => cars.slice(0, itemsToShow),
+    [cars, itemsToShow]
+  );
 
   if (loading) {
     return (
@@ -69,17 +75,28 @@ export default function CarList({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {visibleCars.map((car) => (
-        <motion.div
-          key={car.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
+    <>
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
+        {visibleCars.map((car) => (
+          <motion.div key={car.id} variants={itemVariants}>
+            <CarCard car={car} onClick={() => onCardClick?.(car)} />
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {visibleCars.length < cars.length && (
+        <div
+          ref={sentinelRef}
+          className="h-12 mt-6 flex justify-center items-center text-gray-400 text-sm"
         >
-          <CarCard car={car} onClick={() => onCardClick?.(car)} />
-        </motion.div>
-      ))}
-    </div>
+          Loading more cars...
+        </div>
+      )}
+    </>
   );
 }

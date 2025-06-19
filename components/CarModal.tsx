@@ -55,8 +55,8 @@ export default function CarModal({ car, onClose }: Props) {
 
   if (!car) return null;
 
-  const capitalise = (value?: string) =>
-    value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : "–";
+  const capitalise = (val?: string) =>
+    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "–";
 
   return (
     <AnimatePresence>
@@ -78,7 +78,7 @@ export default function CarModal({ car, onClose }: Props) {
           transition={{ duration: 0.3 }}
           style={{ y }}
         >
-          {/* Image section */}
+          {/* Image */}
           <div className="relative w-full h-56 sm:h-64 rounded-t-2xl overflow-hidden">
             <Image
               src={car.image}
@@ -96,8 +96,9 @@ export default function CarModal({ car, onClose }: Props) {
             </button>
           </div>
 
-          {/* Details section */}
+          {/* Details */}
           <div className="p-6">
+            {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -114,19 +115,17 @@ export default function CarModal({ car, onClose }: Props) {
               <div className="flex flex-wrap items-center text-sm text-gray-500 dark:text-white mt-2 gap-4">
                 {car.location && (
                   <span className="flex items-center gap-1">
-                    <MapPinIcon className="w-4 h-4" /> {car.location}
+                    <MapPinIcon className="w-4 h-4" />
+                    {car.location}
                   </span>
                 )}
-                {car.rating && (
-                  <span className="flex items-center gap-1">
-                    <StarIcon className="w-4 h-4" /> {car.rating}/5
-                  </span>
-                )}
-                {car.availability && (
-                  <span className="text-green-600 font-semibold">
-                    {car.availability}
-                  </span>
-                )}
+                <span className="flex items-center gap-1">
+                  <StarIcon className="w-4 h-4" />
+                  {car.rating.toFixed(1)} / 5
+                </span>
+                <span className="text-green-600 font-semibold">
+                  {capitalise(car.status)}
+                </span>
               </div>
             </motion.div>
 
@@ -143,7 +142,7 @@ export default function CarModal({ car, onClose }: Props) {
               </span>
             </motion.div>
 
-            {/* Specs grid */}
+            {/* Specs */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -158,19 +157,19 @@ export default function CarModal({ car, onClose }: Props) {
               </div>
               <div>
                 <strong>Mileage:</strong>{" "}
-                {typeof car.mileage === "number"
-                  ? new Intl.NumberFormat("en-UK").format(car.mileage)
+                {car.mileage
+                  ? `${new Intl.NumberFormat("en-UK").format(car.mileage)} mi`
                   : "–"}
               </div>
-
               <div>
-                <strong>Seats:</strong> {car.seats ?? "–"}
+                <strong>Seats:</strong> {car.seats}
               </div>
               <div>
                 <strong>Colour:</strong> {capitalise(car.color)}
               </div>
               <div>
-                <strong>Engine:</strong> {car.engine ?? "–"}
+                <strong>Displacement:</strong>{" "}
+                {car.displacement ? `${car.displacement} cc` : "–"}
               </div>
             </motion.div>
 

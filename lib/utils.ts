@@ -6,66 +6,56 @@ function generateFakeMileage(year: number): number {
   const currentYear = new Date().getFullYear();
   const age = Math.max(0, currentYear - year);
 
-  if (age === 0) {
-    return Math.floor(Math.random() * 10000); // 0–10k
-  } else if (age <= 2) {
-    return Math.floor(Math.random() * (25000 - 15000 + 1)) + 15000; // 15k–25k
-  } else {
-    return Math.floor(Math.random() * (50000 - 25000 + 1)) + 25000; // 25k–50k
-  }
+  if (age === 0) return Math.floor(Math.random() * 10_000);
+  if (age <= 2)
+    return Math.floor(Math.random() * (25_000 - 15_000 + 1)) + 15_000;
+
+  return Math.floor(Math.random() * (50_000 - 25_000 + 1)) + 25_000;
 }
 
 function generateFakeRating(): number {
   return parseFloat((4.2 + Math.random() * 0.6).toFixed(1));
 }
 
-function generateFakePricePerDay(engineSize: number, year: number): number {
-  const currentYear = new Date().getFullYear();
-  const age = Math.max(0, currentYear - year);
+function generateFakePricePerDay(displacement: number, year: number): number {
+  const age = Math.max(0, new Date().getFullYear() - year);
+  const engineMultiplier = displacement / 100;
+  const base = age === 0 ? 2200 : age <= 2 ? 1500 : 800;
 
-  const engineMultiplier = engineSize / 100;
-
-  let base: number;
-  if (age === 0) {
-    base = 2200;
-  } else if (age <= 2) {
-    base = 1500;
-  } else {
-    base = 800;
-  }
-
-  const price = base + Math.random() * 400 * engineMultiplier;
-  return Math.floor(price);
+  return Math.floor(base + Math.random() * 400 * engineMultiplier);
 }
 
-export function mapApiCarToInternalCar(apiCar: any, index: number): Car {
+export function mapApiCarToInternalCar(
+  apiCar: Record<string, unknown>,
+  index: number
+): Car {
   const year = Number(apiCar.year) || 2020;
-  const make = apiCar.make || "Unknown";
-  const model = apiCar.model || "Model";
-  const fuel = (apiCar.fuel_type || "petrol").toLowerCase();
-  const transmission = (apiCar.transmission || "").toLowerCase();
-  const engine = (apiCar.cylinders || 2) * 100;
+  const make = String(apiCar.make ?? "Unknown");
+  const model = String(apiCar.model ?? "Model");
+  const fuelRaw = String(apiCar.fuel_type ?? "petrol").toLowerCase();
+  const transmissionRaw = String(apiCar.transmission ?? "").toLowerCase();
+  const displacement = Number(apiCar.displacement ?? 1200);
 
   return {
     id: `${make}-${model}-${index}`,
     make,
     model,
     year,
-    image: apiCar.image || placeholderImage,
+    image: placeholderImage,
     color: "grey",
-    fuel: fuel.includes("electric")
+    fuel: fuelRaw.includes("electric")
       ? "electric"
-      : fuel.includes("hybrid")
+      : fuelRaw.includes("hybrid")
       ? "hybrid"
-      : fuel.includes("diesel")
+      : fuelRaw.includes("diesel")
       ? "diesel"
       : "petrol",
-    transmission: transmission.includes("auto") ? "Automatic" : "Manual",
-    type: apiCar.class?.toLowerCase() || "sedan",
-    pricePerDay: generateFakePricePerDay(engine, year),
-    engine,
+    transmission: transmissionRaw.includes("auto") ? "Automatic" : "Manual",
+    type: String(apiCar.class ?? "sedan").toLowerCase(),
+    pricePerDay: generateFakePricePerDay(displacement, year),
+    displacement,
     mileage: generateFakeMileage(year),
-    seats: 4,
+    seats: Number(apiCar.doors ?? 4),
     status: "available",
     rating: generateFakeRating(),
     isFeatured: index % 5 === 0,

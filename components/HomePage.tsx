@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import SearchBar from "@/components/layout/ui/SearchBar";
@@ -9,8 +9,20 @@ import Toggles from "@/components/Toggles";
 import SortDropdown from "@/components/SortDropdown";
 import CarList from "@/components/CarList";
 import CarModal from "@/components/CarModal";
+
 import { fetchCarsFromAPI } from "@/lib/api";
 import { Car } from "@/types/car";
+
+function sortCars(cars: Car[], sortBy: string): Car[] {
+  const [field, order] = sortBy.split("-");
+  return [...cars].sort((a, b) => {
+    const dir = order === "asc" ? 1 : -1;
+    const aVal = (a as any)[field];
+    const bVal = (b as any)[field];
+
+    return aVal > bVal ? dir : aVal < bVal ? -dir : 0;
+  });
+}
 
 export default function HomePage() {
   const [allCars, setAllCars] = useState<Car[]>([]);
@@ -37,17 +49,14 @@ export default function HomePage() {
     const loadCars = async () => {
       try {
         setLoading(true);
-        const modelSearch = filters.query.trim().toLowerCase();
-        const cacheKey = modelSearch || "porsche";
+        const query = filters.query.trim().toLowerCase();
+        const make = query || "porsche";
 
-        if (cache.current[cacheKey]) {
-          setAllCars(cache.current[cacheKey]);
+        if (cache.current[make]) {
+          setAllCars(cache.current[make]);
         } else {
-          const cars = await fetchCarsFromAPI(
-            "porsche",
-            modelSearch || undefined
-          );
-          cache.current[cacheKey] = cars;
+          const cars = await fetchCarsFromAPI(make);
+          cache.current[make] = cars;
           setAllCars(cars);
         }
       } catch (err) {
@@ -64,24 +73,19 @@ export default function HomePage() {
     const result = allCars.filter((car) => {
       return (
         (!filters.query ||
-          `${car.make} ${car.model}`
-            .toLowerCase()
-            .includes(filters.query.toLowerCase())) &&
-        (!filters.type ||
-          car.type.toLowerCase() === filters.type.toLowerCase()) &&
-        (!filters.fuel ||
-          car.fuel.toLowerCase() === filters.fuel.toLowerCase()) &&
+          car.make.toLowerCase().includes(filters.query.toLowerCase())) &&
+        (!filters.type || car.type.toLowerCase() === filters.type) &&
+        (!filters.fuel || car.fuel === filters.fuel) &&
         (!filters.year || car.year.toString() === filters.year) &&
         (!filters.transmission ||
-          car.transmission.toLowerCase() ===
-            filters.transmission.toLowerCase()) &&
+          car.transmission.toLowerCase() === filters.transmission) &&
         (!filters.featured || car.isFeatured) &&
-        (!filters.available || car.status?.toLowerCase() === "available")
+        (!filters.available || car.status === "available")
       );
     });
 
-    setFilteredCars(result);
-  }, [filters, allCars]);
+    setFilteredCars(sortCars(result, sortBy));
+  }, [filters, allCars, sortBy]);
 
   const handleFilterChange = (updates: Partial<typeof filters>) =>
     setFilters((prev) => ({ ...prev, ...updates }));
@@ -102,7 +106,7 @@ export default function HomePage() {
         Find your next ride
       </motion.h1>
 
-      {/* Top Filters Section */}
+      {/* Top Filters */}
       <div className="sticky top-[64px] z-20 bg-brand dark:bg-textPrimary border border-textPrimary dark:border-brand rounded-md shadow-sm px-4 py-5">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <SearchBar
@@ -114,7 +118,6 @@ export default function HomePage() {
           <SortDropdown value={sortBy} onChange={setSortBy} />
         </div>
 
-        {/* Mobile Filters */}
         <div className="block sm:hidden mt-4">
           <button
             onClick={() => setMobileFiltersOpen((prev) => !prev)}
@@ -148,7 +151,6 @@ export default function HomePage() {
           </AnimatePresence>
         </div>
 
-        {/* Desktop Filters */}
         <div className="hidden sm:flex flex-wrap gap-4 mt-4">
           <Filters
             fuel={filters.fuel}

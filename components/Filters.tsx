@@ -11,8 +11,8 @@ type Props = {
   }) => void;
 };
 
-const yearOptions = [2025, 2024, 2023, 2022, 2021, 2020];
-const fuelOptions = ["Electric", "Petrol", "Diesel"];
+const yearOptions = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015];
+const fuelOptions = ["Petrol", "Diesel", "Electric", "Hybrid"];
 const transmissionOptions = ["Automatic", "Manual"];
 
 export default function Filters({ fuel, year, transmission, onChange }: Props) {
@@ -20,13 +20,13 @@ export default function Filters({ fuel, year, transmission, onChange }: Props) {
     <div className="flex flex-wrap gap-3">
       <select
         value={fuel}
-        onChange={(e) => onChange({ fuel: e.target.value })}
+        onChange={(e) => onChange({ fuel: e.target.value.toLowerCase() })}
         className="min-w-[140px] border px-3 py-2 rounded-md text-sm dark:bg-textPrimary dark:text-brand"
         aria-label="Filter by fuel type"
       >
         <option value="">Fuel</option>
         {fuelOptions.map((f) => (
-          <option key={f} value={f}>
+          <option key={f} value={f.toLowerCase()}>
             {f}
           </option>
         ))}
@@ -40,7 +40,7 @@ export default function Filters({ fuel, year, transmission, onChange }: Props) {
       >
         <option value="">Year</option>
         {yearOptions.map((y) => (
-          <option key={y} value={y}>
+          <option key={y} value={String(y)}>
             {y}
           </option>
         ))}
@@ -48,13 +48,15 @@ export default function Filters({ fuel, year, transmission, onChange }: Props) {
 
       <select
         value={transmission}
-        onChange={(e) => onChange({ transmission: e.target.value })}
+        onChange={(e) =>
+          onChange({ transmission: e.target.value.toLowerCase() })
+        }
         className="min-w-[140px] border px-3 py-2 rounded-md text-sm dark:bg-textPrimary dark:text-brand"
         aria-label="Filter by transmission"
       >
         <option value="">Transmission</option>
         {transmissionOptions.map((t) => (
-          <option key={t} value={t}>
+          <option key={t} value={t.toLowerCase()}>
             {t}
           </option>
         ))}

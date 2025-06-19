@@ -10,6 +10,9 @@ type Props = {
 };
 
 export default function CarCard({ car, onClick }: Props) {
+  const capitalise = (value: string) =>
+    value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
   return (
     <motion.div
       whileHover={{ scale: 1.03 }}
@@ -27,12 +30,21 @@ export default function CarCard({ car, onClick }: Props) {
           priority
         />
       </div>
-      <div className="p-4">
+      <div className="p-4 space-y-1">
         <h3 className="text-lg font-semibold">
           {car.make} {car.model}
         </h3>
         <p className="text-sm text-gray-500">{car.year}</p>
-        <p className="mt-2 font-bold">£{car.pricePerDay} / day</p>
+        <p className="text-sm text-gray-500">
+          {car.mileage
+            ? `${new Intl.NumberFormat("en-UK").format(car.mileage)} mi`
+            : "–"}{" "}
+          · {capitalise(car.transmission)}
+        </p>
+        <p className="text-sm text-gray-500">{capitalise(car.fuel)}</p>
+        <p className="mt-1 font-bold text-textPrimary dark:text-white">
+          £{new Intl.NumberFormat("en-UK").format(car.pricePerDay)} / day
+        </p>
       </div>
     </motion.div>
   );

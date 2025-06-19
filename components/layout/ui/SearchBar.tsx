@@ -11,6 +11,8 @@ type Props = {
   onChange: (updates: { query?: string; type?: string }) => void;
 };
 
+const DEBOUNCE_DELAY = 500;
+
 export default function SearchBar({
   query,
   type,
@@ -19,23 +21,25 @@ export default function SearchBar({
 }: Props) {
   const [inputValue, setInputValue] = useState(query);
 
+  // Debounce input to avoid rapid API calls
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (inputValue.trim() !== query.trim()) {
-        onChange({ query: inputValue.trim() });
+      const trimmed = inputValue.trim().toLowerCase();
+      if (trimmed !== query.trim().toLowerCase()) {
+        onChange({ query: trimmed });
       }
-    }, 600); // ⏱ debounce delay (ms)
+    }, DEBOUNCE_DELAY);
 
     return () => clearTimeout(timeout);
-  }, [inputValue]);
+  }, [inputValue, query, onChange]);
 
+  // Sync input if external query changes
   useEffect(() => {
-    setInputValue(query); // keep input in sync externally
+    setInputValue(query);
   }, [query]);
 
   return (
-    <motion.form
-      onSubmit={(e) => e.preventDefault()}
+    <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -43,10 +47,12 @@ export default function SearchBar({
     >
       <input
         type="text"
-        placeholder="Search for model..."
+        placeholder="Search…"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         className="flex-1 min-w-[140px] border px-3 py-2 rounded-md text-sm"
+        autoCapitalize="off"
+        autoCorrect="off"
       />
 
       <select
@@ -60,9 +66,10 @@ export default function SearchBar({
       </select>
 
       <button
-        type="submit"
+        type="button"
         className="flex items-center justify-center w-10 h-10 rounded-md bg-textPrimary text-white hover:bg-textPrimary/90 transition"
         aria-label="Search"
+        disabled
       >
         {loading ? (
           <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-white rounded-full" />
@@ -70,6 +77,6 @@ export default function SearchBar({
           <MagnifyingGlassIcon className="h-5 w-5 text-white" />
         )}
       </button>
-    </motion.form>
+    </motion.div>
   );
 }

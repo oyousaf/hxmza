@@ -12,18 +12,21 @@ export default function Toggles({ featured, available, onChange }: Props) {
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
+          className="accent-brand"
           checked={featured}
           onChange={(e) => onChange({ featured: e.target.checked })}
         />
-        Featured
+        <span>Featured</span>
       </label>
+
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
+          className="accent-brand"
           checked={available}
           onChange={(e) => onChange({ available: e.target.checked })}
         />
-        Available only
+        <span>Available only</span>
       </label>
     </div>
   );

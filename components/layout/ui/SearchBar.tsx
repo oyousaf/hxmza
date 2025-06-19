@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
@@ -8,6 +9,7 @@ type Props = {
   type: string;
   loading?: boolean;
   onChange: (updates: { query?: string; type?: string }) => void;
+  onSearch?: (model: string) => void; // ✨ new prop
 };
 
 export default function SearchBar({
@@ -15,10 +17,20 @@ export default function SearchBar({
   type,
   loading = false,
   onChange,
+  onSearch,
 }: Props) {
+  const [localQuery, setLocalQuery] = useState(query);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSearch && localQuery.trim()) {
+      onSearch(localQuery.trim());
+    }
+  };
+
   return (
     <motion.form
-      onSubmit={(e) => e.preventDefault()}
+      onSubmit={handleSubmit}
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -26,9 +38,12 @@ export default function SearchBar({
     >
       <input
         type="text"
-        placeholder="Search..."
-        value={query}
-        onChange={(e) => onChange({ query: e.target.value })}
+        placeholder="Search for model..."
+        value={localQuery}
+        onChange={(e) => {
+          setLocalQuery(e.target.value);
+          onChange({ query: e.target.value });
+        }}
         className="flex-1 min-w-[140px] border px-3 py-2 rounded-md text-sm"
       />
 

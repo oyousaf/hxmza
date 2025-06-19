@@ -157,8 +157,12 @@ export default function CarModal({ car, onClose }: Props) {
                 <strong>Transmission:</strong> {car.transmission}
               </div>
               <div>
-                <strong>Mileage:</strong> {car.mileage ?? "–"}
+                <strong>Mileage:</strong>{" "}
+                {typeof car.mileage === "number"
+                  ? new Intl.NumberFormat("en-UK").format(car.mileage)
+                  : "–"}
               </div>
+
               <div>
                 <strong>Seats:</strong> {car.seats ?? "–"}
               </div>

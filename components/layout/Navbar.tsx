@@ -39,6 +39,7 @@ export default function Navbar() {
               width={180}
               height={24}
               priority
+              style={{ width: "auto", height: "auto" }}
             />
           </div>
           <div className="hidden dark:block">
@@ -48,6 +49,7 @@ export default function Navbar() {
               width={180}
               height={24}
               priority
+              style={{ width: "auto", height: "auto" }}
             />
           </div>
         </Link>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import SearchBar from "@/components/layout/ui/SearchBar";
@@ -9,13 +9,16 @@ import Toggles from "@/components/Toggles";
 import SortDropdown from "@/components/SortDropdown";
 import CarList from "@/components/CarList";
 import CarModal from "@/components/CarModal";
-import { filterCars } from "@/lib/api";
+import { fetchCarsFromAPI } from "@/lib/api";
 import { Car } from "@/types/car";
 
 export default function HomePage() {
-  const [cars, setCars] = useState<Car[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [allCars, setAllCars] = useState<Car[]>([]);
+  const [filteredCars, setFilteredCars] = useState<Car[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("year-desc");
 
   const defaultFilters = {
     query: "",
@@ -28,36 +31,64 @@ export default function HomePage() {
   };
 
   const [filters, setFilters] = useState(defaultFilters);
-  const [sortBy, setSortBy] = useState("year-desc");
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const cache = useRef<Record<string, Car[]>>({});
 
   useEffect(() => {
-    const storedSort = sessionStorage.getItem("sortBy") || "year-desc";
-    setSortBy(storedSort);
-    setFilters(defaultFilters);
-    setCars(filterCars(defaultFilters));
-  }, []);
+    const loadCars = async () => {
+      try {
+        setLoading(true);
+        const modelSearch = filters.query.trim().toLowerCase();
+        const cacheKey = modelSearch || "porsche";
+
+        if (cache.current[cacheKey]) {
+          setAllCars(cache.current[cacheKey]);
+        } else {
+          const cars = await fetchCarsFromAPI(
+            "porsche",
+            modelSearch || undefined
+          );
+          cache.current[cacheKey] = cars;
+          setAllCars(cars);
+        }
+      } catch (err) {
+        console.error("❌ Failed to fetch cars:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCars();
+  }, [filters.query]);
 
   useEffect(() => {
-    sessionStorage.setItem("sortBy", sortBy);
-    setLoading(true);
-    const filtered = filterCars(filters);
-    setCars(filtered);
-    setLoading(false);
-  }, [filters, sortBy]);
+    const result = allCars.filter((car) => {
+      return (
+        (!filters.query ||
+          `${car.make} ${car.model}`
+            .toLowerCase()
+            .includes(filters.query.toLowerCase())) &&
+        (!filters.type ||
+          car.type.toLowerCase() === filters.type.toLowerCase()) &&
+        (!filters.fuel ||
+          car.fuel.toLowerCase() === filters.fuel.toLowerCase()) &&
+        (!filters.year || car.year.toString() === filters.year) &&
+        (!filters.transmission ||
+          car.transmission.toLowerCase() ===
+            filters.transmission.toLowerCase()) &&
+        (!filters.featured || car.isFeatured) &&
+        (!filters.available || car.status?.toLowerCase() === "available")
+      );
+    });
 
-  const handleFilterChange = (updates: Partial<typeof filters>) => {
+    setFilteredCars(result);
+  }, [filters, allCars]);
+
+  const handleFilterChange = (updates: Partial<typeof filters>) =>
     setFilters((prev) => ({ ...prev, ...updates }));
-  };
-
-  const handleSortChange = (value: string) => {
-    setSortBy(value);
-  };
 
   const clearFilters = () => {
     setFilters(defaultFilters);
     setSortBy("year-desc");
-    sessionStorage.setItem("sortBy", "year-desc");
   };
 
   return (
@@ -71,6 +102,7 @@ export default function HomePage() {
         Find your next ride
       </motion.h1>
 
+      {/* Top Filters Section */}
       <div className="sticky top-[64px] z-20 bg-brand dark:bg-textPrimary border border-textPrimary dark:border-brand rounded-md shadow-sm px-4 py-5">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <SearchBar
@@ -79,9 +111,10 @@ export default function HomePage() {
             loading={loading}
             onChange={handleFilterChange}
           />
-          <SortDropdown value={sortBy} onChange={handleSortChange} />
+          <SortDropdown value={sortBy} onChange={setSortBy} />
         </div>
 
+        {/* Mobile Filters */}
         <div className="block sm:hidden mt-4">
           <button
             onClick={() => setMobileFiltersOpen((prev) => !prev)}
@@ -115,6 +148,7 @@ export default function HomePage() {
           </AnimatePresence>
         </div>
 
+        {/* Desktop Filters */}
         <div className="hidden sm:flex flex-wrap gap-4 mt-4">
           <Filters
             fuel={filters.fuel}
@@ -139,14 +173,15 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Car List */}
       <motion.div
-        key={JSON.stringify(cars) + sortBy}
+        key={JSON.stringify(filteredCars) + sortBy}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
       >
         <CarList
-          cars={cars}
+          cars={filteredCars}
           loading={loading}
           sortBy={sortBy}
           onCardClick={(car) => setSelectedCar(car)}

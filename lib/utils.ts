@@ -63,6 +63,7 @@ export function mapApiCarToInternalCar(
     displacement,
     mileage: generateFakeMileage(year),
     seats: Number(apiCar.doors ?? 4),
+    status: "available",
     rating: generateFakeRating(),
     isFeatured: index % 5 === 0,
   };

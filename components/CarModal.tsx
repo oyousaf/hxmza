@@ -130,7 +130,7 @@ export default function CarModal({ car, onClose }: Props) {
         <motion.div
           ref={modalRef}
           onClick={(e) => e.stopPropagation()}
-          className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6"
+          className="bg-white dark:bg-textPrimary rounded-xl shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
@@ -155,7 +155,7 @@ export default function CarModal({ car, onClose }: Props) {
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
               >
-                <SiAstonmartin className="w-12 h-12 text-green-600" />
+                <SiAstonmartin className="w-24 h-24 text-textPrimary dark:text-brand animate-spin" />
               </motion.div>
             </div>
           )}

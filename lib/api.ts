@@ -144,3 +144,30 @@ export async function fetchSpecs(trimId: number): Promise<any | null> {
     return null;
   }
 }
+
+/**
+ * Fetch up to `limit` mapped Car objects from the full model → generation → trim chain
+ */
+export async function fetchCarsFromAPI(makeId: number, limit = 10): Promise<Car[]> {
+  try {
+    const models = await fetchModels(makeId);
+    const cars: Car[] = [];
+
+    for (let i = 0; i < models.length && cars.length < limit; i++) {
+      const model = models[i];
+      const generations = await fetchGenerations(model.id);
+      if (!generations.length) continue;
+
+      const trims = await fetchTrims(generations[0].id);
+      if (!trims.length) continue;
+
+      const car = mapApiCarToInternalCar(trims[0], cars.length, model.id);
+      cars.push(car);
+    }
+
+    return cars;
+  } catch (error) {
+    console.error("❌ fetchCarsFromAPI failed:", error);
+    return [];
+  }
+}

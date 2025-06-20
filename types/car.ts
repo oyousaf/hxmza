@@ -15,6 +15,7 @@ export type Car = {
   displacement: number;
   rating: number;
   isFeatured: boolean;
+  status: "available" | "sold" | "reserved";
   features?: string[];
   location?: string;
 };

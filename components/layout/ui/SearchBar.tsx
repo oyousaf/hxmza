@@ -12,6 +12,7 @@ type Props = {
   loading?: boolean;
   onChange: (updates: { query?: string; type?: string }) => void;
   onMakeSelect?: (make: Make) => void;
+  placeholder?: string;
 };
 
 const DEBOUNCE_DELAY = 400;
@@ -89,7 +90,7 @@ export default function SearchBar({
       <div className="relative w-full">
         <input
           type="text"
-          placeholder="Search makes…"
+          placeholder="Search…"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onFocus={() => setShowDropdown(true)}
@@ -123,30 +124,19 @@ export default function SearchBar({
             </motion.ul>
           )}
         </AnimatePresence>
+        <button
+          type="button"
+          className="flex items-center justify-center w-10 h-10 rounded-md bg-textPrimary text-white hover:bg-textPrimary/90 transition"
+          aria-label="Search"
+          disabled
+        >
+          {loading ? (
+            <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-white rounded-full" />
+          ) : (
+            <MagnifyingGlassIcon className="h-5 w-5 text-white" />
+          )}
+        </button>
       </div>
-
-      <select
-        value={type}
-        onChange={(e) => onChange({ type: e.target.value })}
-        className="min-w-[140px] border px-3 py-2 rounded-md text-sm"
-      >
-        <option value="">All Types</option>
-        <option value="electric">Electric</option>
-        <option value="supercar">Supercar</option>
-      </select>
-
-      <button
-        type="button"
-        className="flex items-center justify-center w-10 h-10 rounded-md bg-textPrimary text-white hover:bg-textPrimary/90 transition"
-        aria-label="Search"
-        disabled
-      >
-        {loading ? (
-          <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-white rounded-full" />
-        ) : (
-          <MagnifyingGlassIcon className="h-5 w-5 text-white" />
-        )}
-      </button>
     </motion.div>
   );
 }

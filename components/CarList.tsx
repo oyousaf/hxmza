@@ -26,7 +26,7 @@ export default function CarList({ cars, loading, onCardClick }: Props) {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <SiAstonmartin className="w-12 h-12 text-green-600 animate-spin" />
+        <SiAstonmartin className="w-24 h-24 text-textPrimary dark:text-brand animate-spin" />
       </div>
     );
   }

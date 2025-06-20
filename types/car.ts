@@ -2,6 +2,7 @@ export type Car = {
   id: string;
   make: string;
   model: string;
+  modelId: number;
   year: number;
   fuel: "petrol" | "diesel" | "electric" | "hybrid";
   type: string;
@@ -11,10 +12,9 @@ export type Car = {
   mileage: number;
   seats: number;
   color: string;
-  displacement: number; 
+  displacement: number;
   rating: number;
   isFeatured: boolean;
-  status: "available" | "sold" | "reserved";
   features?: string[];
   location?: string;
 };

@@ -1,194 +1,249 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { SiAstonmartin } from "react-icons/si";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+
 import { Car } from "@/types/car";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
-import { XMarkIcon, MapPinIcon, StarIcon } from "@heroicons/react/24/outline";
-import { useDrag } from "@use-gesture/react";
-import Image from "next/image";
+
+const API_HOST = "car-specs.p.rapidapi.com";
+const API_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY!;
+const HEADERS = {
+  "X-RapidAPI-Key": API_KEY,
+  "X-RapidAPI-Host": API_HOST,
+};
 
 type Props = {
   car: Car | null;
   onClose: () => void;
 };
 
+type Generation = {
+  id: number;
+  name: string;
+  yearFrom: number;
+  yearTo?: number | null;
+};
+type Trim = { id: number; trim: string; bodyType: string };
+
 export default function CarModal({ car, onClose }: Props) {
-  const y = useMotionValue(0);
-  const opacity = useTransform(y, [-100, 0, 100], [0, 1, 0]);
-  const modalRef = useRef<HTMLDivElement | null>(null);
+  const [step, setStep] = useState<"generation" | "trim" | "spec" | "done">(
+    "generation"
+  );
+  const [generations, setGenerations] = useState<Generation[]>([]);
+  const [trims, setTrims] = useState<Trim[]>([]);
+  const [specs, setSpecs] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedGeneration, setSelectedGeneration] =
+    useState<Generation | null>(null);
+  const [selectedTrim, setSelectedTrim] = useState<Trim | null>(null);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  const modalRef = useRef<HTMLDivElement>(null);
 
+  // Fetch generations on car change
   useEffect(() => {
-    document.body.style.overflow = car ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    if (!car) return resetState();
+    loadGenerations(car.modelId);
   }, [car]);
 
-  useDrag(
-    ({ down, movement: [, my], velocity: [, vy], direction: [, dy] }) => {
-      y.set(my);
-      if (!down && (Math.abs(my) > 120 || (vy > 0.5 && dy > 0))) {
-        onClose();
-      }
-      if (!down) y.set(0);
-    },
-    {
-      target: modalRef,
-      axis: "y",
-      filterTaps: true,
-      pointer: { touch: true },
+  // Reset modal state
+  function resetState() {
+    setStep("generation");
+    setGenerations([]);
+    setTrims([]);
+    setSpecs(null);
+    setLoading(false);
+    setError(null);
+    setSelectedGeneration(null);
+    setSelectedTrim(null);
+  }
+
+  async function fetchData(url: string) {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(url, { headers: HEADERS });
+      if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+      const data = await res.json();
+      return Array.isArray(data) ? data : data?.data ?? [];
+    } catch (err) {
+      setError((err as Error).message || "Failed to fetch data");
+      return [];
+    } finally {
+      setLoading(false);
     }
-  );
+  }
+
+  async function loadGenerations(modelId: number) {
+    resetState();
+    setStep("generation");
+    const gens = await fetchData(
+      `https://${API_HOST}/v2/cars/models/${modelId}/generations`
+    );
+    setGenerations(gens);
+  }
+
+  async function loadTrims(generationId: number) {
+    setStep("trim");
+    setTrims([]);
+    setSpecs(null);
+    setSelectedTrim(null);
+    const trimsData = await fetchData(
+      `https://${API_HOST}/v2/cars/generations/${generationId}/trims`
+    );
+    setTrims(trimsData);
+  }
+
+  async function loadSpecs(trimId: number) {
+    setStep("spec");
+    setSpecs(null);
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(`https://${API_HOST}/v2/cars/trims/${trimId}`, {
+        headers: HEADERS,
+      });
+      if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+      const data = await res.json();
+      setSpecs(data);
+      setStep("done");
+    } catch (err) {
+      setError((err as Error).message || "Failed to fetch specs");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   if (!car) return null;
-
-  const format = (val?: string) =>
-    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "–";
 
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center px-4"
+        className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        style={{ opacity }}
       >
         <motion.div
           ref={modalRef}
           onClick={(e) => e.stopPropagation()}
-          className="relative bg-white dark:bg-textPrimary w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl"
-          initial={{ scale: 0.95, opacity: 0 }}
+          className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6"
+          initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
+          exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.3 }}
-          style={{ y }}
         >
-          {/* Image */}
-          <div className="relative w-full h-56 sm:h-64 rounded-t-2xl overflow-hidden">
-            <Image
-              src={car.image}
-              alt={`${car.make} ${car.model}`}
-              fill
-              className="object-cover"
-              priority
-            />
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">
+              {car.make} {car.model}
+            </h2>
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 bg-white dark:bg-black/60 backdrop-blur-md p-2 rounded-full text-gray-500 hover:text-black dark:hover:text-white transition"
-              aria-label="Close"
+              className="text-gray-600 hover:text-gray-900 dark:hover:text-white"
+              aria-label="Close modal"
             >
-              <XMarkIcon className="w-5 h-5" />
+              <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
 
-          {/* Details */}
-          <div className="p-6">
-            {/* Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mb-4"
-            >
-              <h2 className="text-2xl font-bold">
-                {format(car.make)} {format(car.model)}{" "}
-                <span className="text-gray-500 dark:text-white">
-                  ({car.year})
-                </span>
-              </h2>
-
-              <div className="flex flex-wrap items-center text-sm text-gray-500 dark:text-white mt-2 gap-4">
-                {car.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPinIcon className="w-4 h-4" />
-                    {car.location}
-                  </span>
-                )}
-                <span className="flex items-center gap-1">
-                  <StarIcon className="w-4 h-4" />
-                  {car.rating.toFixed(1)} / 5
-                </span>
-                <span className="text-green-600 font-semibold">
-                  {format(car.status)}
-                </span>
-              </div>
-            </motion.div>
-
-            {/* Price */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="text-xl font-semibold text-textPrimary dark:text-white mb-6"
-            >
-              £{car.pricePerDay}{" "}
-              <span className="text-sm font-normal text-gray-500 dark:text-white">
-                / day
-              </span>
-            </motion.div>
-
-            {/* Specs */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-700 dark:text-white mb-6"
-            >
-              <div>
-                <strong>Fuel:</strong> {format(car.fuel)}
-              </div>
-              <div>
-                <strong>Transmission:</strong> {format(car.transmission)}
-              </div>
-              <div>
-                <strong>Mileage:</strong>{" "}
-                {car.mileage
-                  ? `${new Intl.NumberFormat("en-UK").format(car.mileage)} miles`
-                  : "–"}
-              </div>
-              <div>
-                <strong>Seats:</strong> {car.seats}
-              </div>
-              <div>
-                <strong>Colour:</strong> {format(car.color)}
-              </div>
-              <div>
-                <strong>Engine:</strong>{" "}
-                {car.displacement ? `${car.displacement} cc` : "–"}
-              </div>
-            </motion.div>
-
-            {/* Features */}
-            {Array.isArray(car.features) && car.features.length > 0 && (
+          {loading && (
+            <div className="flex justify-center py-10">
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
               >
-                <h3 className="font-semibold mb-2">Features:</h3>
-                <ul className="list-disc list-inside text-sm space-y-1 text-gray-700 dark:text-white">
-                  {car.features.map((feat, i) => (
-                    <li key={i}>{feat}</li>
-                  ))}
-                </ul>
+                <SiAstonmartin className="w-12 h-12 text-green-600" />
               </motion.div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-red-500 text-center mb-4">{error}</div>
+          )}
+
+          {!loading && step === "generation" && (
+            <>
+              {generations.length === 0 ? (
+                <p className="text-center italic text-gray-600 dark:text-gray-400">
+                  No generations found for this model.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  <p className="mb-2 font-semibold text-gray-700 dark:text-gray-300">
+                    Select a Generation:
+                  </p>
+                  {generations.map((gen) => (
+                    <button
+                      key={gen.id}
+                      className="w-full text-left px-4 py-2 rounded bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+                      onClick={() => {
+                        setSelectedGeneration(gen);
+                        loadTrims(gen.id);
+                      }}
+                    >
+                      {gen.name} ({gen.yearFrom} – {gen.yearTo ?? "present"})
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {!loading && step === "trim" && (
+            <>
+              {trims.length === 0 ? (
+                <p className="text-center italic text-gray-600 dark:text-gray-400">
+                  No trims found for this generation.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  <p className="mb-2 font-semibold text-gray-700 dark:text-gray-300">
+                    Select a Trim:
+                  </p>
+                  {trims.map((trim) => (
+                    <button
+                      key={trim.id}
+                      className="w-full text-left px-4 py-2 rounded bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
+                      onClick={() => {
+                        setSelectedTrim(trim);
+                        loadSpecs(trim.id);
+                      }}
+                    >
+                      {trim.trim} • {trim.bodyType}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {!loading && step === "spec" && specs && (
+            <div className="space-y-3 text-gray-700 dark:text-gray-200 text-sm">
+              <p>
+                <strong>Trim:</strong> {specs.trim ?? "Unknown"}
+              </p>
+              <p>
+                <strong>Engine:</strong> {specs.engineType ?? "Unknown"}{" "}
+                {specs.capacityCm3 ?? ""} cc • {specs.engineHp ?? "N/A"} HP
+              </p>
+              <p>
+                <strong>Transmission:</strong> {specs.transmission ?? "Unknown"}
+              </p>
+              <p>
+                <strong>Drive:</strong> {specs.driveWheels ?? "Unknown"}
+              </p>
+              <p>
+                <strong>Top Speed:</strong> {specs.maxSpeedKmPerH ?? "Unknown"}{" "}
+                km/h
+              </p>
+              <p>
+                <strong>Weight:</strong> {specs.curbWeightKg ?? "Unknown"} kg
+              </p>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>

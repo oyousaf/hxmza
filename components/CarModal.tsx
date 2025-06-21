@@ -31,37 +31,31 @@ const trimCache = new Map<number, Trim[]>();
 const specCache = new Map<number, any>();
 
 export default function CarModal({ car, onClose }: Props) {
-  const [step, setStep] = useState<"generation" | "trim" | "spec">(
-    "generation"
-  );
+  const [step, setStep] = useState<"generation" | "trim" | "spec">("generation");
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [trims, setTrims] = useState<Trim[]>([]);
   const [specs, setSpecs] = useState<any>(null);
   const [selectedTrim, setSelectedTrim] = useState<Trim | null>(null);
-  const [selectedGeneration, setSelectedGeneration] =
-    useState<Generation | null>(null);
+  const [selectedGeneration, setSelectedGeneration] = useState<Generation | null>(null);
   const [loading, setLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const specSections = useMemo(
-    () => ({
-      Performance: [
-        "engineHp",
-        "engineHpRpm",
-        "maximumTorqueNM",
-        "acceleration0To100KmPerHS",
-        "maxSpeedKmPerH",
-      ],
-      Chassis: [
-        "driveWheels",
-        "transmission",
-        "curbWeightKg",
-        "fuelTankCapacityL",
-      ],
-      Dimensions: ["lengthMm", "widthMm", "heightMm", "wheelbaseMm"],
-    }),
-    []
-  );
+  const specSections = useMemo(() => ({
+    Performance: [
+      "engineHp",
+      "engineHpRpm",
+      "maximumTorqueNM",
+      "acceleration0To100KmPerHS",
+      "maxSpeedKmPerH",
+    ],
+    Chassis: [
+      "driveWheels",
+      "transmission",
+      "curbWeightKg",
+      "fuelTankCapacityL",
+    ],
+    Dimensions: ["lengthMm", "widthMm", "heightMm", "wheelbaseMm"],
+  }), []);
 
   useEffect(() => {
     if (!car) return resetState();
@@ -130,6 +124,13 @@ export default function CarModal({ car, onClose }: Props) {
     setLoading(false);
   }
 
+  function formatSpecKey(key: string): string {
+    return key
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
   if (!car) return null;
 
   return (
@@ -139,7 +140,10 @@ export default function CarModal({ car, onClose }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={() => {
+          setTimeout(resetState, 300);
+          onClose();
+        }}
       >
         <motion.div
           ref={modalRef}
@@ -155,7 +159,10 @@ export default function CarModal({ car, onClose }: Props) {
               {car.make} {car.model}
             </h2>
             <button
-              onClick={onClose}
+              onClick={() => {
+                setTimeout(resetState, 300);
+                onClose();
+              }}
               className="text-gray-600 hover:text-gray-900 dark:hover:text-white"
               aria-label="Close modal"
             >
@@ -219,7 +226,7 @@ export default function CarModal({ car, onClose }: Props) {
                     {keys.map((key) => (
                       <div key={key}>
                         <p className="uppercase text-xs font-semibold text-gray-500 dark:text-gray-400">
-                          {key}
+                          {formatSpecKey(key)}
                         </p>
                         <p>{specs[key] ?? "—"}</p>
                       </div>
@@ -230,8 +237,9 @@ export default function CarModal({ car, onClose }: Props) {
 
               <div className="rounded-lg overflow-hidden mt-6">
                 <img
-                  src="/cars/placeholder.webp"
+                  src={car.image || "/cars/placeholder.webp"}
                   alt={`${car.make} ${car.model}`}
+                  onError={(e) => (e.currentTarget.src = "/cars/placeholder.webp")}
                   className="w-full h-auto object-cover rounded-md shadow"
                 />
               </div>

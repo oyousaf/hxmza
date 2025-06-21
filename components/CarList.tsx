@@ -2,7 +2,6 @@
 
 import { Car } from "@/types/car";
 import CarCard from "./CarCard";
-import Skeleton from "./layout/ui/Skeleton";
 import { motion } from "framer-motion";
 import { SiAstonmartin } from "react-icons/si";
 
@@ -14,7 +13,9 @@ type Props = {
 
 const containerVariants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
+  show: {
+    transition: { staggerChildren: 0.08 },
+  },
 };
 
 const itemVariants = {
@@ -25,7 +26,11 @@ const itemVariants = {
 export default function CarList({ cars, loading, onCardClick }: Props) {
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-20">
+      <div
+        className="flex justify-center items-center py-20"
+        aria-busy="true"
+        aria-label="Loading cars"
+      >
         <SiAstonmartin className="w-24 h-24 text-textPrimary dark:text-brand animate-spin" />
       </div>
     );
@@ -47,8 +52,8 @@ export default function CarList({ cars, loading, onCardClick }: Props) {
       initial="hidden"
       animate="show"
     >
-      {cars.map((car) => (
-        <motion.div key={car.id} variants={itemVariants}>
+      {cars.map((car, index) => (
+        <motion.div key={`${car.id}-${index}`} variants={itemVariants}>
           <CarCard car={car} onClick={() => onCardClick?.(car)} />
         </motion.div>
       ))}

@@ -98,7 +98,7 @@ export default function SearchBar({
         />
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
           {loading ? (
-            <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-gray-600 dark:border-gray-200 rounded-full" />
+            <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-textPrimary dark:border-gray-200 rounded-full" />
           ) : (
             <MagnifyingGlassIcon className="h-5 w-5 text-textPrimary" />
           )}
@@ -110,12 +110,12 @@ export default function SearchBar({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 6 }}
-              className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto bg-white dark:bg-brand border border-gray-200 dark:border-zinc-700 rounded shadow-md text-sm"
+              className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto bg-white dark:bg-brand border border-gray-200 dark:border-brand rounded shadow-md text-sm"
             >
               {suggestions.map((make) => (
                 <li
                   key={make.id}
-                  className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer"
+                  className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-textPrimary dark:hover:text-brand cursor-pointer"
                   onMouseDown={() => {
                     setInputValue(make.name);
                     onChange({ query: make.name });

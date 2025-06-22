@@ -1,5 +1,4 @@
-import { mapTrimToSpec } from "../mappers/mapTrimToSpec";
-import type { TrimSpec } from "../mappers/mapTrimToSpec";
+import { mapTrimToSpec, TrimSpec } from "../mappers/mapTrimToSpec";
 
 const API_HOST = "car-specs.p.rapidapi.com";
 const HEADERS = {

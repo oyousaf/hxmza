@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 import SearchBar from "@/components/layout/ui/SearchBar";
@@ -27,33 +27,40 @@ export default function HomePage() {
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const loadCars = async (reset = false) => {
-    setLoading(true);
-    try {
-      const newCars = await fetchCarsFromAPI(
-        makeId,
-        reset ? 1 : page,
-        MODELS_PER_PAGE,
-        {
-          fuel,
-          transmission,
-          featured,
-        }
-      );
-      setCars((prev) => (reset ? newCars : [...prev, ...newCars]));
-    } catch (err) {
-      console.error("❌ Failed to fetch cars:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const loadCars = useCallback(
+    async (reset = false) => {
+      setLoading(true);
+      try {
+        const newCars = await fetchCarsFromAPI(
+          makeId,
+          reset ? 1 : page,
+          MODELS_PER_PAGE,
+          {
+            fuel,
+            transmission,
+            featured,
+          }
+        );
+        setCars((prev) => (reset ? newCars : [...prev, ...newCars]));
+      } catch (err) {
+        console.error("❌ Failed to fetch cars:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [makeId, page, fuel, transmission, featured]
+  );
 
   // Trigger load on make or filter change
   useEffect(() => {
     setPage(1);
     setCars([]);
     loadCars(true);
-  }, [makeId, fuel, transmission, featured]);
+  }, [loadCars]);
+
+  useEffect(() => {
+    if (page > 1) loadCars();
+  }, [page, loadCars]);
 
   // Infinite scroll setup
   useEffect(() => {

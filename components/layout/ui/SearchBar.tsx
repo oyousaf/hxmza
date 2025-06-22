@@ -19,6 +19,7 @@ const DEBOUNCE_DELAY = 300;
 
 export default function SearchBar({
   query,
+  type,
   loading = false,
   onChange,
   onMakeSelect,
@@ -27,13 +28,16 @@ export default function SearchBar({
   const [inputValue, setInputValue] = useState(query);
   const [suggestions, setSuggestions] = useState<Make[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+
   const cachedMakes = useRef<Make[] | null>(null);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const filterSuggestions = useCallback((value: string) => {
     const q = value.toLowerCase().trim();
-    if (!cachedMakes.current || !q) return setSuggestions([]);
-
+    if (!cachedMakes.current || !q) {
+      setSuggestions([]);
+      return;
+    }
     const filtered = cachedMakes.current.filter((make) =>
       make.name.toLowerCase().includes(q)
     );

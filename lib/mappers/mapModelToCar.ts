@@ -8,14 +8,11 @@ const placeholderImage = "/cars/placeholder.webp";
  */
 export function mapModelToCar(apiModel: any, globalIndex: number): Car {
   const id = Number(apiModel.id ?? globalIndex);
-  const yearFrom = apiModel.yearFrom ?? 0;
-  const yearTo = apiModel.yearTo ?? null;
 
   return {
     id,
     modelId: id,
     model: apiModel.name || "Unknown Model",
-    year: `${yearFrom}${yearTo ? `–${yearTo}` : "–"}`,
     image: placeholderImage,
 
     // Custom local app metadata

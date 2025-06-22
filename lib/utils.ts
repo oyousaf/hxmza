@@ -64,8 +64,6 @@ export function mapApiCarToInternalCar(apiCar: ApiCar, index: number): Car {
     return "unknown";
   };
 
-  const yearFrom = Number(apiCar.yearFrom) || 0;
-  const yearTo = apiCar.yearTo ? Number(apiCar.yearTo) : null;
   const model = String(apiCar.model ?? "Model");
   const make = String(apiCar.make ?? "Unknown");
 

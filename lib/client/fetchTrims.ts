@@ -4,6 +4,14 @@ export type Trim = {
   bodyType: string;
 };
 
+type ApiTrim = {
+  id: number | string;
+  trim?: string;
+  name?: string;
+  bodyType?: string;
+  series?: string;
+};
+
 export async function fetchTrims(generationId: number): Promise<Trim[]> {
   const res = await fetch(
     `https://car-specs.p.rapidapi.com/v2/cars/generations/${generationId}/trims`,
@@ -20,9 +28,11 @@ export async function fetchTrims(generationId: number): Promise<Trim[]> {
     return [];
   }
 
-  const data = await res.json();
+  const data: unknown = await res.json();
 
-  return (data || []).map((item: any) => ({
+  if (!Array.isArray(data)) return [];
+
+  return data.map((item: ApiTrim) => ({
     id: Number(item.id),
     trim: item.trim || item.name || "Unknown Trim",
     bodyType: item.bodyType || item.series || "Unknown",

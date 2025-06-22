@@ -19,11 +19,10 @@ const DEBOUNCE_DELAY = 300;
 
 export default function SearchBar({
   query,
-  type,
   loading = false,
   onChange,
   onMakeSelect,
-  placeholder = "Search make…",
+  placeholder = "Search…",
 }: Props) {
   const [inputValue, setInputValue] = useState(query);
   const [suggestions, setSuggestions] = useState<Make[]>([]);

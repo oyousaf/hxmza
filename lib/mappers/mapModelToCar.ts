@@ -14,12 +14,6 @@ export interface ModelInput {
 
 export function mapModelToCar(apiModel: ModelInput, globalIndex: number): Car {
   const id = Number(apiModel.id ?? globalIndex);
-  const yearFrom =
-    apiModel.yearFrom !== undefined ? Number(apiModel.yearFrom) : undefined;
-  const yearTo =
-    apiModel.yearTo !== undefined && apiModel.yearTo !== null
-      ? Number(apiModel.yearTo)
-      : null;
 
   return {
     id,

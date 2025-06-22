@@ -9,7 +9,7 @@ type Make = { id: number; name: string };
 type Props = {
   query: string;
   loading?: boolean;
-  onChange: (updates: { query?: string; }) => void;
+  onChange: (updates: { query?: string }) => void;
   onMakeSelect?: (make: Make) => void;
   placeholder?: string;
 };
@@ -32,10 +32,8 @@ export default function SearchBar({
 
   const filterSuggestions = useCallback((value: string) => {
     const q = value.toLowerCase().trim();
-    if (!cachedMakes.current || !q) {
-      setSuggestions([]);
-      return;
-    }
+    if (!cachedMakes.current || !q) return setSuggestions([]);
+
     const filtered = cachedMakes.current.filter((make) =>
       make.name.toLowerCase().includes(q)
     );

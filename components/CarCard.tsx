@@ -32,7 +32,7 @@ function prefetchOnHoverDebounced(modelId: number) {
         });
       }
     });
-  }, 700); // 700ms debounce to respect API rate limits
+  }, 700);
 }
 
 export default function CarCard({ car, onClick }: Props) {

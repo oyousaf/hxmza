@@ -1,12 +1,14 @@
 "use client";
 
-import { Car } from "@/types/car";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+
+import { Car } from "@/types/car";
 import { fetchGenerations } from "@/lib/client/fetchGenerations";
 import { fetchTrims } from "@/lib/client/fetchTrims";
-import { trimCache } from "@/lib/cache/carCache";
+import { fetchSpecs } from "@/lib/client/fetchSpecs";
+import { trimCache, specCache } from "@/lib/cache/carCache";
 
 type Props = {
   car: Car;
@@ -15,18 +17,30 @@ type Props = {
 
 const prefetched = new Set<number>();
 
-function prefetchOnHover(modelId: number) {
+async function prefetchOnHover(modelId: number) {
   if (prefetched.has(modelId)) return;
   prefetched.add(modelId);
 
-  fetchGenerations(modelId).then((gens) => {
-    const firstGen = gens?.[0];
-    if (firstGen && !trimCache.has(firstGen.id)) {
-      fetchTrims(firstGen.id).then((trims) => {
-        trimCache.set(firstGen.id, trims);
-      });
+  try {
+    const generations = await fetchGenerations(modelId);
+    const firstGen = generations?.[0];
+    if (!firstGen) return;
+
+    if (!trimCache.has(firstGen.id)) {
+      const trims = await fetchTrims(firstGen.id);
+      trimCache.set(firstGen.id, trims || []);
+
+      const firstTrim = trims?.[0];
+      if (firstTrim && !specCache.has(firstTrim.id)) {
+        const spec = await fetchSpecs(firstTrim.id);
+        if (spec) {
+          specCache.set(firstTrim.id, spec);
+        }
+      }
     }
-  });
+  } catch (err) {
+    console.error("❌ Prefetch failed:", err);
+  }
 }
 
 export default function CarCard({ car, onClick }: Props) {

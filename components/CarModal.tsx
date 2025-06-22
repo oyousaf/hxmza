@@ -2,8 +2,11 @@
 
 import { useEffect, useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { XMarkIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { SiAstonmartin } from "react-icons/si";
+import { FaTachometerAlt } from "react-icons/fa";
+import { GiCarWheel } from "react-icons/gi";
+import { LuRuler } from "react-icons/lu";
+import { FaXmark, FaLeftLong } from "react-icons/fa6";
 
 import { fetchGenerations } from "@/lib/client/fetchGenerations";
 import { fetchTrims } from "@/lib/client/fetchTrims";
@@ -45,30 +48,42 @@ export default function CarModal({ car, onClose }: Props) {
 
   const specSections = useMemo(
     () => ({
-      Performance: [
-        "engineHp",
-        "engineHpRpm",
-        "maximumTorqueNM",
-        "acceleration0To100KmPerHS",
-        "maxSpeedKmPerH",
-      ],
-      Chassis: [
-        "driveWheels",
-        "transmission",
-        "curbWeightKg",
-        "fuelTankCapacityL",
-      ],
-      Dimensions: ["lengthMm", "widthMm", "heightMm", "wheelbaseMm"],
+      Performance: {
+        icon: <FaTachometerAlt className="inline-block mr-2 text-brand" />,
+        keys: {
+          engineHp: "BHP",
+          engineHpRpm: "RPM",
+          maximumTorqueNM: "Max Torque",
+          acceleration0To100KmPerHS: "0–100 km/h",
+          maxSpeedKmPerH: "Top Speed",
+        },
+      },
+      Chassis: {
+        icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
+        keys: {
+          driveWheels: "Drive",
+          transmission: "Transmission",
+          curbWeightKg: "Weight",
+          fuelTankCapacityL: "Fuel Tank",
+        },
+      },
+      Dimensions: {
+        icon: <LuRuler className="inline-block mr-2 text-brand" />,
+        keys: {
+          lengthMm: "Length (mm)",
+          widthMm: "Width (mm)",
+          heightMm: "Height (mm)",
+          wheelbaseMm: "Wheelbase (mm)",
+        },
+      },
     }),
     []
   );
 
   useEffect(() => {
-    if (!car || !car.modelId || typeof car.modelId !== "number") return;
-
+    if (!car || !car.modelId) return;
     resetState();
     loadGenerations(car.modelId);
-
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
@@ -89,7 +104,7 @@ export default function CarModal({ car, onClose }: Props) {
     setLoading(true);
     try {
       const gens = await fetchGenerations(modelId);
-      setGenerations(gens || []);
+      setGenerations(gens);
     } catch (err) {
       console.error("❌ Failed to fetch generations:", err);
     } finally {
@@ -101,14 +116,13 @@ export default function CarModal({ car, onClose }: Props) {
     setStep("trim");
     setSelectedGeneration(generation);
     setLoading(true);
-
     try {
       if (trimCache.has(generation.id)) {
         setTrims(trimCache.get(generation.id)!);
       } else {
         const trims = await fetchTrims(generation.id);
-        trimCache.set(generation.id, trims || []);
-        setTrims(trims || []);
+        trimCache.set(generation.id, trims);
+        setTrims(trims);
       }
     } catch (err) {
       console.error("❌ Failed to fetch trims:", err);
@@ -121,27 +135,19 @@ export default function CarModal({ car, onClose }: Props) {
     setStep("spec");
     setSelectedTrim(trim);
     setLoading(true);
-
     try {
       if (specCache.has(trim.id)) {
         setSpecs(specCache.get(trim.id));
       } else {
-        const result = await fetchSpecs(trim.id);
-        specCache.set(trim.id, result);
-        setSpecs(result);
+        const data = await fetchSpecs(trim.id);
+        specCache.set(trim.id, data);
+        setSpecs(data);
       }
     } catch (err) {
       console.error("❌ Failed to fetch specs:", err);
     } finally {
       setLoading(false);
     }
-  }
-
-  function formatSpecKey(key: string): string {
-    return key
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
   function formatGenerationLabel(name: string): string {
@@ -162,7 +168,7 @@ export default function CarModal({ car, onClose }: Props) {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -180,9 +186,9 @@ export default function CarModal({ car, onClose }: Props) {
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Header */}
+          {/* Top */}
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-textPrimary dark:text-white">
+            <h2 className="text-xl md:text-2xl font-bold text-textPrimary dark:text-white">
               {car.make} {car.model}
             </h2>
             <button
@@ -190,35 +196,34 @@ export default function CarModal({ car, onClose }: Props) {
                 setTimeout(resetState, 300);
                 onClose();
               }}
-              className="text-gray-600 hover:text-gray-900 dark:hover:text-white"
+              className="text-textPrimary hover:text-textPrimary/50 dark:text-brand dark:hover:text-brand/50"
               aria-label="Close"
             >
-              <XMarkIcon className="w-6 h-6" />
+              <FaXmark className="w-6 h-6" />
             </button>
           </div>
 
-          {/* Back Button */}
+          {/* Prominent Back Button */}
           {!loading && step !== "generation" && (
-            <button
-              onClick={() => {
-                if (step === "spec") {
-                  setStep("trim");
-                  setSpecs(null);
-                  setSelectedTrim(null);
-                } else if (step === "trim") {
-                  setStep("generation");
-                  setTrims([]);
-                  setSelectedGeneration(null);
-                }
-              }}
-              className="flex items-center gap-2 mb-4 text-sm font-medium text-textPrimary dark:text-brand hover:underline"
-            >
-              <ArrowLeftIcon className="w-4 h-4" />
-              Back
-            </button>
+            <div className="flex justify-center mb-6">
+              <button
+                onClick={() => {
+                  if (step === "spec") {
+                    setStep("trim");
+                    setSpecs(null);
+                  } else if (step === "trim") {
+                    setStep("generation");
+                    setTrims([]);
+                  }
+                }}
+                className="px-6 py-2 rounded-full text-textPrimary hover:text-textPrimary/50 dark:text-brand dark:hover:text-brand/50 font-semibold text-base shadow transition"
+              >
+                <FaLeftLong className="inline-block mr-2 text-4xl" />
+              </button>
+            </div>
           )}
 
-          {/* Loading Spinner */}
+          {/* Spinner */}
           {loading && (
             <div className="flex justify-center py-10">
               <motion.div
@@ -237,23 +242,20 @@ export default function CarModal({ car, onClose }: Props) {
                 Select a Generation:
               </p>
               <div className="flex flex-wrap gap-3">
-                {generations.map((gen) => {
-                  const isSelected = selectedGeneration?.id === gen.id;
-                  return (
-                    <button
-                      key={gen.id}
-                      onClick={() => loadTrims(gen)}
-                      className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
-                        isSelected
-                          ? "bg-brand text-white"
-                          : "bg-white text-textPrimary dark:bg-brand dark:text-textPrimary hover:bg-gray-100 dark:hover:bg-brand/50 dark:hover:text-white"
-                      }`}
-                    >
-                      {formatGenerationLabel(gen.name)} ({gen.yearFrom}
-                      {gen.yearTo ? `–${gen.yearTo}` : "–"})
-                    </button>
-                  );
-                })}
+                {generations.map((gen) => (
+                  <button
+                    key={gen.id}
+                    onClick={() => loadTrims(gen)}
+                    className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
+                      selectedGeneration?.id === gen.id
+                        ? "bg-brand text-white"
+                        : "bg-white text-textPrimary dark:bg-brand dark:text-textPrimary hover:bg-gray-100 dark:hover:bg-brand/50 dark:hover:text-white"
+                    }`}
+                  >
+                    {formatGenerationLabel(gen.name)} ({gen.yearFrom}–
+                    {gen.yearTo ?? "present"})
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -265,45 +267,41 @@ export default function CarModal({ car, onClose }: Props) {
                 Select a Trim:
               </p>
               <div className="flex flex-wrap gap-3">
-                {trims.length === 0 ? (
-                  <p className="text-sm text-gray-500 italic">
-                    No trims found for this generation.
-                  </p>
-                ) : (
-                  trims.map((trim) => {
-                    const isSelected = selectedTrim?.id === trim.id;
-                    return (
-                      <button
-                        key={trim.id}
-                        onClick={() => loadSpecs(trim)}
-                        className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
-                          isSelected
-                            ? "bg-brand text-white"
-                            : "bg-white text-textPrimary dark:bg-brand dark:text-textPrimary hover:bg-gray-100 dark:hover:bg-brand/50 dark:hover:text-white"
-                        }`}
-                      >
-                        {trim.trim} • {trim.bodyType}
-                      </button>
-                    );
-                  })
-                )}
+                {trims.map((trim) => (
+                  <button
+                    key={trim.id}
+                    onClick={() => loadSpecs(trim)}
+                    onMouseEnter={() =>
+                      fetchSpecs(trim.id).then((res) =>
+                        specCache.set(trim.id, res)
+                      )
+                    }
+                    className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
+                      selectedTrim?.id === trim.id
+                        ? "bg-brand text-white"
+                        : "bg-white text-textPrimary dark:bg-brand dark:text-textPrimary hover:bg-gray-100 dark:hover:bg-brand/50 dark:hover:text-white"
+                    }`}
+                  >
+                    {trim.trim} • {trim.bodyType}
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
           {/* Spec Display */}
           {!loading && step === "spec" && specs && (
-            <div className="space-y-6 mt-4">
-              {Object.entries(specSections).map(([section, keys]) => (
+            <div className="space-y-8 mt-6">
+              {Object.entries(specSections).map(([section, { icon, keys }]) => (
                 <div key={section}>
-                  <h3 className="text-lg font-bold text-textPrimary dark:text-white mb-2">
-                    {section}
+                  <h3 className="text-lg md:text-xl font-bold text-textPrimary dark:text-white mb-2 flex items-center">
+                    {icon} {section}
                   </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-200">
-                    {keys.map((key) => (
+                  <div className="grid grid-cols-2 gap-4 text-base text-gray-700 dark:text-gray-200">
+                    {Object.entries(keys).map(([key, label]) => (
                       <div key={key}>
                         <p className="uppercase text-xs font-semibold text-gray-500 dark:text-gray-400">
-                          {formatSpecKey(key)}
+                          {label}
                         </p>
                         <p>{specs[key] ?? "—"}</p>
                       </div>
@@ -311,6 +309,7 @@ export default function CarModal({ car, onClose }: Props) {
                   </div>
                 </div>
               ))}
+
               <div className="rounded-lg overflow-hidden mt-6">
                 <img
                   src={car.image || "/cars/placeholder.webp"}

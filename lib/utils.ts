@@ -2,19 +2,14 @@ import { Car } from "@/types/car";
 
 const placeholderImage = "/cars/placeholder.webp";
 
-/**
- * Maps Car Specs API's /trims/:id response into full Car object with specs
- */
 export function mapApiCarToInternalCar(
-  apiCar: Record<string, unknown>,
+  apiCar: Record<string, any>,
   index: number
 ): Car {
-  const engine = String(apiCar.capacityCm3) || "1200";
-  const fuelType = String(apiCar.engineType ?? "").toLowerCase();
+  const engine = String(apiCar.capacityCm3 ?? "—");
   const transmission = String(apiCar.transmission ?? "").toLowerCase();
-  const body = String(apiCar.bodyType ?? apiCar.series ?? "hatchback");
-  const yearFrom = apiCar.yearFrom || 0;
-  const yearTo = apiCar.yearTo ?? null;
+  const fuelType = String(apiCar.engineType ?? "").toLowerCase();
+  const body = String(apiCar.bodyType ?? apiCar.series ?? "Hatchback");
 
   const getFuelCategory = (): Car["fuel"] => {
     if (fuelType.includes("electric")) return "electric";
@@ -25,13 +20,19 @@ export function mapApiCarToInternalCar(
     return "unknown";
   };
 
+  const yearFrom = Number(apiCar.yearFrom) || 0;
+  const yearTo = apiCar.yearTo ? Number(apiCar.yearTo) : null;
+  const model = String(apiCar.model ?? "Model");
+  const make = String(apiCar.make ?? "Unknown");
+
   return {
     id: Number(apiCar.id ?? index),
-    make: String(apiCar.make ?? "Unknown"),
-    model: String(apiCar.model ?? "Model"),
-    modelId: Number(apiCar.modelId),
+    modelId: Number(apiCar.modelId ?? index),
+    make,
+    model,
     year: `${yearFrom}${yearTo ? `–${yearTo}` : "–"}`,
     image: placeholderImage,
+
     fuel: getFuelCategory(),
     type: body.toLowerCase(),
     transmission:
@@ -42,14 +43,14 @@ export function mapApiCarToInternalCar(
     mileage: 0,
     pricePerDay: 0,
     rating: 0,
-    status: "available",
     isFeatured: false,
-    numberOfSeats: String(apiCar.numberOfSeats) || "4",
+    status: "available",
+    numberOfSeats: String(apiCar.numberOfSeats ?? "—"),
 
-    // Full extended spec mapping
     trim: String(apiCar.trim ?? ""),
     series: String(apiCar.series ?? ""),
     bodyType: body,
+
     lengthMm: String(apiCar.lengthMm ?? ""),
     widthMm: String(apiCar.widthMm ?? ""),
     heightMm: String(apiCar.heightMm ?? ""),

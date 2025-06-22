@@ -52,8 +52,4 @@ export type Car = {
   rearBrakes?: string;
   frontBrakes?: string;
   frontSuspension?: string;
-
-  // Optional metadata
-  features?: string[];
-  location?: string;
 };

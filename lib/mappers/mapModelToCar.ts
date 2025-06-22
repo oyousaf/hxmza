@@ -3,21 +3,22 @@ import { Car } from "@/types/car";
 const placeholderImage = "/cars/placeholder.webp";
 
 /**
- * Maps /models response into a full Car object with default values
- * where data is not available (e.g., fuel, engine, etc.)
+ * Maps /models response into a lightweight Car object with defaults.
+ * This only uses fields available from the /models endpoint.
  */
 export function mapModelToCar(apiModel: any, globalIndex: number): Car {
-  const yearFrom = apiModel.yearFrom || 0;
+  const id = Number(apiModel.id ?? globalIndex);
+  const yearFrom = apiModel.yearFrom ?? 0;
   const yearTo = apiModel.yearTo ?? null;
 
   return {
-    id: Number(apiModel.id ?? globalIndex),
-    modelId: Number(apiModel.id ?? globalIndex),
+    id,
+    modelId: id,
     model: apiModel.name || "Unknown Model",
     year: `${yearFrom}${yearTo ? `–${yearTo}` : "–"}`,
     image: placeholderImage,
 
-    // Preserved custom/default fields
+    // Custom local app metadata
     make: "",
     fuel: "unknown",
     type: "—",
@@ -30,7 +31,7 @@ export function mapModelToCar(apiModel: any, globalIndex: number): Car {
     status: "available",
     numberOfSeats: "—",
 
-    // Placeholder for trim/spec fields
+    // Specs will be populated later
     trim: "",
     series: "",
     bodyType: "",

@@ -2,10 +2,54 @@ import { Car } from "@/types/car";
 
 const placeholderImage = "/cars/placeholder.webp";
 
-export function mapApiCarToInternalCar(
-  apiCar: Record<string, any>,
-  index: number
-): Car {
+// Define what shape the API car object is expected to have
+export type ApiCar = {
+  id?: number | string;
+  modelId?: number | string;
+  make?: string;
+  model?: string;
+  yearFrom?: number | string;
+  yearTo?: number | string | null;
+  capacityCm3?: number | string;
+  transmission?: string;
+  engineType?: string;
+  bodyType?: string;
+  series?: string;
+  numberOfSeats?: number | string;
+
+  lengthMm?: string | number;
+  widthMm?: string | number;
+  heightMm?: string | number;
+  wheelbaseMm?: string | number;
+  frontTrackMm?: string | number;
+  rearTrackMm?: string | number;
+  curbWeightKg?: string | number;
+  maximumTorqueNM?: string | number;
+  injectionType?: string;
+  cylinderLayout?: string;
+  numberOfCylinders?: string | number;
+  valvesPerCylinder?: string | number;
+  turnoverOfMaximumTorqueRpm?: string | number;
+  engineHp?: string | number;
+  engineHpRpm?: string | number;
+  driveWheels?: string;
+  turningCircleM?: string | number;
+  cityFuelPer100KmL?: string | number;
+  mixedFuelConsumptionPer100KmL?: string | number;
+  highwayFuelPer100KmL?: string | number;
+  rangeKm?: string | number;
+  fuelTankCapacityL?: string | number;
+  acceleration0To100KmPerHS?: string | number;
+  maxSpeedKmPerH?: string | number;
+  fuelGrade?: string;
+  backSuspension?: string;
+  rearBrakes?: string;
+  frontBrakes?: string;
+  frontSuspension?: string;
+  trim?: string;
+};
+
+export function mapApiCarToInternalCar(apiCar: ApiCar, index: number): Car {
   const engine = String(apiCar.capacityCm3 ?? "—");
   const transmission = String(apiCar.transmission ?? "").toLowerCase();
   const fuelType = String(apiCar.engineType ?? "").toLowerCase();
@@ -30,7 +74,6 @@ export function mapApiCarToInternalCar(
     modelId: Number(apiCar.modelId ?? index),
     make,
     model,
-    year: `${yearFrom}${yearTo ? `–${yearTo}` : "–"}`,
     image: placeholderImage,
 
     fuel: getFuelCategory(),
@@ -43,7 +86,7 @@ export function mapApiCarToInternalCar(
     mileage: 0,
     pricePerDay: 0,
     rating: 0,
-    isFeatured: false,
+    featured: false,
     status: "available",
     numberOfSeats: String(apiCar.numberOfSeats ?? "—"),
 

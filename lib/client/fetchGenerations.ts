@@ -1,4 +1,18 @@
-export async function fetchGenerations(modelId: number): Promise<any[]> {
+type ApiGeneration = {
+  id: number | string;
+  name: string;
+  yearFrom: number;
+  yearTo?: number | null;
+};
+
+type Generation = {
+  id: number;
+  name: string;
+  yearFrom: number;
+  yearTo: number | null;
+};
+
+export async function fetchGenerations(modelId: number): Promise<Generation[]> {
   const res = await fetch(
     `https://car-specs.p.rapidapi.com/v2/cars/models/${modelId}/generations`,
     {
@@ -9,14 +23,12 @@ export async function fetchGenerations(modelId: number): Promise<any[]> {
     }
   );
 
-  const data = await res.json();
+  const data: ApiGeneration[] = await res.json();
 
-  const generations = data.map((g: any) => ({
+  return data.map((g): Generation => ({
     id: Number(g.id),
     name: g.name,
     yearFrom: g.yearFrom,
     yearTo: g.yearTo ?? null,
   }));
-
-  return generations;
 }

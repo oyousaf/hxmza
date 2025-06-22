@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SiAstonmartin } from "react-icons/si";
-import { GiCarWheel } from "react-icons/gi";
 import { FaTachometerAlt } from "react-icons/fa";
 import { FaLeftLong, FaXmark } from "react-icons/fa6";
+import { SiAstonmartin } from "react-icons/si";
+import { GiCarWheel } from "react-icons/gi";
 import { MdEventSeat } from "react-icons/md";
 import { LuRuler } from "react-icons/lu";
 import { PiEngine } from "react-icons/pi";
@@ -45,10 +45,10 @@ const isValid = (val: unknown) =>
 const capitalise = (val: string) =>
   val.replace(/\b\w/g, (char) => char.toUpperCase());
 
-const formatValue = (val: any, label: string, path?: string): string => {
+const formatValue = (val: unknown, label: string, path?: string): string => {
   if (!isValid(val)) return "—";
 
-  const num = parseFloat(val);
+  const num = parseFloat(String(val));
 
   if (path?.includes("acceleration")) return `${num.toFixed(1)} s`;
   if (path?.includes("torque")) return `${num} Nm`;
@@ -70,9 +70,16 @@ const formatValue = (val: any, label: string, path?: string): string => {
   return capitalise(String(val));
 };
 
-const resolvePath = (obj: any, path: string): any => {
-  return path.split(".").reduce((acc, key) => acc?.[key], obj);
-};
+function resolvePath<T extends object>(obj: T | null, path: string): unknown {
+  if (!obj) return undefined;
+
+  return path.split(".").reduce<unknown>((acc, key) => {
+    if (typeof acc === "object" && acc !== null && key in acc) {
+      return (acc as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, obj);
+}
 
 export default function CarModal({ car, onClose }: Props) {
   const [step, setStep] = useState<"generation" | "trim" | "spec">(
@@ -166,7 +173,8 @@ export default function CarModal({ car, onClose }: Props) {
   async function loadGenerations(modelId: number) {
     setLoading(true);
     try {
-      setGenerations(await fetchGenerations(modelId));
+      const res = await fetchGenerations(modelId);
+      setGenerations(res);
     } finally {
       setLoading(false);
     }
@@ -177,8 +185,9 @@ export default function CarModal({ car, onClose }: Props) {
     setSelectedGeneration(generation);
     setLoading(true);
     try {
-      if (trimCache.has(generation.id)) {
-        setTrims(trimCache.get(generation.id)!);
+      const cached = trimCache.get(generation.id);
+      if (cached) {
+        setTrims(cached);
       } else {
         const rawTrims = await fetchTrims(generation.id);
         const cleaned = rawTrims.map((t) => ({
@@ -199,12 +208,15 @@ export default function CarModal({ car, onClose }: Props) {
     setSelectedTrim(trim);
     setLoading(true);
     try {
-      if (specCache.has(trim.id)) {
-        setSpecs(specCache.get(trim.id)!);
+      const cached = specCache.get(trim.id);
+      if (cached) {
+        setSpecs(cached);
       } else {
         const res = await fetchSpecs(trim.id);
-        specCache.set(trim.id, res);
-        setSpecs(res);
+        if (res) {
+          specCache.set(trim.id, res);
+          setSpecs(res);
+        }
       }
     } finally {
       setLoading(false);
@@ -245,6 +257,7 @@ export default function CarModal({ car, onClose }: Props) {
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
+          {/* Header */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl md:text-2xl font-bold text-textPrimary dark:text-white">
               {car.make} {car.model}
@@ -261,6 +274,7 @@ export default function CarModal({ car, onClose }: Props) {
             </button>
           </div>
 
+          {/* Back button */}
           {!loading && step !== "generation" && (
             <div className="flex justify-center mb-6">
               <button
@@ -280,6 +294,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
+          {/* Spinner */}
           {loading && (
             <div className="flex justify-center py-10">
               <motion.div
@@ -291,6 +306,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
+          {/* Generation Step */}
           {!loading && step === "generation" && (
             <div className="space-y-4">
               <p className="font-semibold text-textPrimary dark:text-white mb-2">
@@ -315,6 +331,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
+          {/* Trim Step */}
           {!loading && step === "trim" && (
             <div className="space-y-4 mt-6">
               <p className="font-semibold text-textPrimary dark:text-white mb-2">
@@ -327,9 +344,11 @@ export default function CarModal({ car, onClose }: Props) {
                     onClick={() => loadSpecs(trim)}
                     onMouseEnter={() => {
                       if (!specCache.has(trim.id)) {
-                        fetchSpecs(trim.id).then((res) =>
-                          specCache.set(trim.id, res)
-                        );
+                        fetchSpecs(trim.id).then((res) => {
+                          if (res) {
+                            specCache.set(trim.id, res);
+                          }
+                        });
                       }
                     }}
                     className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
@@ -345,6 +364,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
+          {/* Specs Step */}
           {!loading && step === "spec" && specs && (
             <div className="space-y-8 mt-6">
               {Object.entries(specSections).map(([section, { icon, keys }]) => (
@@ -370,9 +390,10 @@ export default function CarModal({ car, onClose }: Props) {
                 <img
                   src={car.image || "/cars/placeholder.webp"}
                   alt={`${car.make} ${car.model}`}
-                  onError={(e) =>
-                    (e.currentTarget.src = "/cars/placeholder.webp")
-                  }
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      "/cars/placeholder.webp";
+                  }}
                   className="w-full h-auto object-cover rounded-md shadow"
                 />
               </div>

@@ -44,25 +44,67 @@ export type TrimSpec = {
   turningCircle: number;
 };
 
-function toNumber(value: any): number {
+// Define the expected shape of the raw API object (optional keys)
+export type RawTrimSpec = Partial<{
+  trim: string;
+  bodyType: string;
+
+  engineHp: string | number;
+  maximumTorqueNM: string | number;
+  engineHpRpm: string | number;
+  engineType: string;
+  injectionType: string;
+  cylinderLayout: string;
+  numberOfCylinders: string | number;
+  capacityCm3: string | number;
+
+  acceleration0To100KmPerHS: string | number;
+  maxSpeedKmPerH: string | number;
+  rangeKm: string;
+
+  cityFuelPer100KmL: string | number;
+  mixedFuelConsumptionPer100KmL: string | number;
+  highwayFuelPer100KmL: string | number;
+  fuelTankCapacityL: string | number;
+  fuelGrade: string;
+
+  lengthMm: string | number;
+  widthMm: string | number;
+  heightMm: string | number;
+  wheelbaseMm: string | number;
+  curbWeightKg: string | number;
+
+  numberOfSeats: string | number;
+
+  frontBrakes: string;
+  rearBrakes: string;
+  frontSuspension: string;
+  backSuspension: string;
+
+  driveWheels: string;
+  transmission: string;
+  turningCircleM: string | number;
+}>;
+
+function toNumber(value: unknown): number {
   if (typeof value === "number") return value;
   if (typeof value === "string")
     return Number(value.replace(",", ".").replace(/[^\d.]/g, "")) || 0;
   return 0;
 }
 
-export function mapTrimToSpec(raw: any): TrimSpec {
+export function mapTrimToSpec(raw: RawTrimSpec): TrimSpec {
   return {
-    trim: raw.trim || "",
-    bodyType: raw.bodyType || "",
+    trim: raw.trim ?? "",
+    bodyType: raw.bodyType ?? "",
 
     engine: {
       horsepower: toNumber(raw.engineHp),
       torqueNm: toNumber(raw.maximumTorqueNM),
       rpm: toNumber(raw.engineHpRpm),
-      fuelType: raw.engineType || "",
-      injection: raw.injectionType || "",
-      layout: raw.cylinderLayout || "",
+      fuelType: raw.engineType ?? "",
+      injection: raw.injectionType ?? "",
+      layout: raw.cylinderLayout ?? "",
       cylinders: toNumber(raw.numberOfCylinders),
       displacement: toNumber(raw.capacityCm3),
     },
@@ -70,7 +112,7 @@ export function mapTrimToSpec(raw: any): TrimSpec {
     performance: {
       acceleration0To100: toNumber(raw.acceleration0To100KmPerHS),
       topSpeed: toNumber(raw.maxSpeedKmPerH),
-      range: raw.rangeKm || "",
+      range: raw.rangeKm ?? "",
     },
 
     fuel: {
@@ -78,7 +120,7 @@ export function mapTrimToSpec(raw: any): TrimSpec {
       mixed: toNumber(raw.mixedFuelConsumptionPer100KmL),
       highway: toNumber(raw.highwayFuelPer100KmL),
       tankCapacity: toNumber(raw.fuelTankCapacityL),
-      grade: raw.fuelGrade || "",
+      grade: raw.fuelGrade ?? "",
     },
 
     dimensions: {
@@ -92,17 +134,17 @@ export function mapTrimToSpec(raw: any): TrimSpec {
     seats: toNumber(raw.numberOfSeats),
 
     brakes: {
-      front: raw.frontBrakes || "",
-      rear: raw.rearBrakes || "",
+      front: raw.frontBrakes ?? "",
+      rear: raw.rearBrakes ?? "",
     },
 
     suspension: {
-      front: raw.frontSuspension || "",
-      rear: raw.backSuspension || "",
+      front: raw.frontSuspension ?? "",
+      rear: raw.backSuspension ?? "",
     },
 
-    drive: raw.driveWheels || "",
-    transmission: raw.transmission || "",
+    drive: raw.driveWheels ?? "",
+    transmission: raw.transmission ?? "",
     turningCircle: toNumber(raw.turningCircleM),
   };
 }

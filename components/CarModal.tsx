@@ -42,6 +42,9 @@ const isValid = (val: unknown) =>
     ? val > 0
     : false;
 
+const capitalise = (val: string) =>
+  val.replace(/\b\w/g, (char) => char.toUpperCase());
+
 const formatValue = (val: any, label: string, path?: string): string => {
   if (!isValid(val)) return "—";
 
@@ -64,9 +67,8 @@ const formatValue = (val: any, label: string, path?: string): string => {
     return `${num} mm`;
   if (path?.includes("turningCircle")) return `${num} m`;
 
-  return String(val);
+  return capitalise(String(val));
 };
-
 
 const resolvePath = (obj: any, path: string): any => {
   return path.split(".").reduce((acc, key) => acc?.[key], obj);
@@ -243,7 +245,6 @@ export default function CarModal({ car, onClose }: Props) {
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Header */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl md:text-2xl font-bold text-textPrimary dark:text-white">
               {car.make} {car.model}
@@ -260,7 +261,6 @@ export default function CarModal({ car, onClose }: Props) {
             </button>
           </div>
 
-          {/* Back Button */}
           {!loading && step !== "generation" && (
             <div className="flex justify-center mb-6">
               <button
@@ -280,7 +280,6 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Spinner */}
           {loading && (
             <div className="flex justify-center py-10">
               <motion.div
@@ -292,7 +291,6 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Generation View */}
           {!loading && step === "generation" && (
             <div className="space-y-4">
               <p className="font-semibold text-textPrimary dark:text-white mb-2">
@@ -317,7 +315,6 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Trim View */}
           {!loading && step === "trim" && (
             <div className="space-y-4 mt-6">
               <p className="font-semibold text-textPrimary dark:text-white mb-2">
@@ -348,7 +345,6 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Spec View */}
           {!loading && step === "spec" && specs && (
             <div className="space-y-8 mt-6">
               {Object.entries(specSections).map(([section, { icon, keys }]) => (
@@ -362,7 +358,9 @@ export default function CarModal({ car, onClose }: Props) {
                         <p className="uppercase text-xs font-semibold text-gray-500 dark:text-gray-400">
                           {label}
                         </p>
-                        <p>{formatValue(resolvePath(specs, path), label, path)}</p>
+                        <p>
+                          {formatValue(resolvePath(specs, path), label, path)}
+                        </p>
                       </div>
                     ))}
                   </div>

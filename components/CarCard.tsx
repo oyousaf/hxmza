@@ -63,14 +63,6 @@ export default function CarCard({ car, onClick }: Props) {
         <h3 className="text-xl font-semibold text-textPrimary dark:text-white leading-tight">
           {car.model}
         </h3>
-
-        <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-          {car.year}
-        </p>
-
-        <p className="text-sm mt-1 italic text-gray-400">
-          Tap to view trims & specs →
-        </p>
       </div>
     </motion.div>
   );

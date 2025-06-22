@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 import SearchBar from "@/components/layout/ui/SearchBar";
+import Filters from "@/components/Filters";
+import Toggles from "@/components/Toggles";
 import CarList from "@/components/CarList";
 import CarModal from "@/components/CarModal";
 
@@ -19,29 +21,45 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [fuel, setFuel] = useState("");
+  const [transmission, setTransmission] = useState("");
+  const [featured, setFeatured] = useState(false);
+
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
+  const loadCars = async (reset = false) => {
+    setLoading(true);
+    try {
+      const newCars = await fetchCarsFromAPI(
+        makeId,
+        reset ? 1 : page,
+        MODELS_PER_PAGE,
+        {
+          fuel,
+          transmission,
+          featured,
+        }
+      );
+      setCars((prev) => (reset ? newCars : [...prev, ...newCars]));
+    } catch (err) {
+      console.error("❌ Failed to fetch cars:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Trigger load on make or filter change
   useEffect(() => {
-    const loadCars = async () => {
-      setLoading(true);
-      try {
-        const newCars = await fetchCarsFromAPI(makeId, page, MODELS_PER_PAGE);
-        setCars((prev) => [...prev, ...newCars]);
-      } catch (err) {
-        console.error("❌ Failed to fetch cars:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setPage(1);
+    setCars([]);
+    loadCars(true);
+  }, [makeId, fuel, transmission, featured]);
 
-    loadCars();
-  }, [makeId, page]);
-
+  // Infinite scroll setup
   useEffect(() => {
     if (!sentinelRef.current) return;
 
     let ticking = false;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !loading && !ticking) {
@@ -59,6 +77,11 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, [loading]);
 
+  // Load more cars when page increases
+  useEffect(() => {
+    if (page > 1) loadCars();
+  }, [page]);
+
   return (
     <main className="min-h-screen flex flex-col gap-8 px-4 py-12 max-w-6xl mx-auto">
       <motion.h1
@@ -70,19 +93,36 @@ export default function HomePage() {
         Find your next ride
       </motion.h1>
 
-      <div className="sticky top-[64px] z-20 bg-brand dark:bg-textPrimary border border-textPrimary dark:border-brand rounded-md shadow-sm px-4 py-5">
+      <div className="sticky top-[64px] z-20 bg-brand dark:bg-textPrimary border border-textPrimary dark:border-brand rounded-md shadow-sm px-4 py-5 flex flex-col gap-4">
         <SearchBar
           query=""
           type=""
           loading={loading}
           onChange={() => {}}
           onMakeSelect={({ id }) => {
-            setCars([]);
-            setPage(1);
             setMakeId(id);
             setSelectedCar(null);
           }}
         />
+
+        <div className="flex flex-wrap gap-4 items-center justify-between">
+          <Filters
+            fuel={fuel}
+            transmission={transmission}
+            onChange={(update) => {
+              if (update.fuel !== undefined) setFuel(update.fuel);
+              if (update.transmission !== undefined)
+                setTransmission(update.transmission);
+            }}
+          />
+
+          <Toggles
+            featured={featured}
+            onChange={(update) => {
+              if (update.featured !== undefined) setFeatured(update.featured);
+            }}
+          />
+        </div>
       </div>
 
       <motion.div

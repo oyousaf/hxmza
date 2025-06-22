@@ -27,7 +27,7 @@ export function mapModelToCar(apiModel: any, globalIndex: number): Car {
     mileage: 0,
     pricePerDay: 0,
     rating: 0,
-    isFeatured: false,
+    featured: false,
     status: "available",
     numberOfSeats: "—",
 
@@ -66,7 +66,5 @@ export function mapModelToCar(apiModel: any, globalIndex: number): Car {
     rearBrakes: "",
     frontBrakes: "",
     frontSuspension: "",
-    features: [],
-    location: "",
   };
 }

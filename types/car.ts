@@ -12,7 +12,7 @@ export type Car = {
   mileage: number;
   pricePerDay: number;
   rating: number;
-  isFeatured: boolean;
+  featured: boolean;
   status: "available" | "sold" | "reserved";
   numberOfSeats: string;
 

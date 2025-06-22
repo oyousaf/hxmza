@@ -68,77 +68,85 @@ function formatSpecValue(key: string, value: any): string {
 }
 
 export default function CarModal({ car, onClose }: Props) {
-  const [step, setStep] = useState<"generation" | "trim" | "spec">("generation");
+  const [step, setStep] = useState<"generation" | "trim" | "spec">(
+    "generation"
+  );
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [trims, setTrims] = useState<Trim[]>([]);
   const [specs, setSpecs] = useState<any>(null);
-  const [selectedGeneration, setSelectedGeneration] = useState<Generation | null>(null);
+  const [selectedGeneration, setSelectedGeneration] =
+    useState<Generation | null>(null);
   const [selectedTrim, setSelectedTrim] = useState<Trim | null>(null);
   const [loading, setLoading] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const specSections = useMemo(() => ({
-    Performance: {
-      icon: <FaTachometerAlt className="inline-block mr-2 text-brand" />,
-      keys: {
-        engineHp: "BHP",
-        engineHpRpm: "RPM",
-        maximumTorqueNM: "Max Torque",
-        acceleration0To100KmPerHS: "0–100 km/h",
-        maxSpeedKmPerH: "Top Speed",
+  const specSections = useMemo(
+    () => ({
+      Performance: {
+        icon: <FaTachometerAlt className="inline-block mr-2 text-brand" />,
+        keys: {
+          engineHp: "BHP",
+          engineHpRpm: "RPM",
+          maximumTorqueNM: "Max Torque",
+          acceleration0To100KmPerHS: "0–100 km/h",
+          maxSpeedKmPerH: "Top Speed",
+        },
       },
-    },
-    Chassis: {
-      icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
-      keys: {
-        driveWheels: "Drive",
-        transmission: "Transmission",
-        curbWeightKg: "Weight",
-        fuelTankCapacityL: "Fuel Tank",
+      Chassis: {
+        icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
+        keys: {
+          driveWheels: "Drive",
+          transmission: "Transmission",
+          curbWeightKg: "Weight",
+          fuelTankCapacityL: "Fuel Tank",
+        },
       },
-    },
-    Dimensions: {
-      icon: <LuRuler className="inline-block mr-2 text-brand" />,
-      keys: {
-        lengthMm: "Length",
-        widthMm: "Width",
-        heightMm: "Height",
-        wheelbaseMm: "Wheelbase",
+      Dimensions: {
+        icon: <LuRuler className="inline-block mr-2 text-brand" />,
+        keys: {
+          lengthMm: "Length",
+          widthMm: "Width",
+          heightMm: "Height",
+          wheelbaseMm: "Wheelbase",
+        },
       },
-    },
-    Engine: {
-      icon: <PiEngine className="inline-block mr-2 text-brand" />,
-      keys: {
-        engineType: "Fuel Type",
-        capacityCm3: "Engine Size",
-        numberOfCylinders: "Cylinders",
-        injectionType: "Injection",
-        valvesPerCylinder: "Valves/Cyl",
+      Engine: {
+        icon: <PiEngine className="inline-block mr-2 text-brand" />,
+        keys: {
+          engineType: "Fuel Type",
+          capacityCm3: "Engine Size",
+          numberOfCylinders: "Cylinders",
+          injectionType: "Injection",
+          valvesPerCylinder: "Valves/Cyl",
+        },
       },
-    },
-    Wheels: {
-      icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
-      keys: {
-        turningCircleM: "Turning Circle",
-        frontTrackMm: "Front Track",
-        rearTrackMm: "Rear Track",
+      Wheels: {
+        icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
+        keys: {
+          turningCircleM: "Turning Circle",
+          frontTrackMm: "Front Track",
+          rearTrackMm: "Rear Track",
+        },
       },
-    },
-    Comfort: {
-      icon: <MdEventSeat className="inline-block mr-2 text-brand" />,
-      keys: {
-        numberOfSeats: "Seats",
+      Comfort: {
+        icon: <MdEventSeat className="inline-block mr-2 text-brand" />,
+        keys: {
+          numberOfSeats: "Seats",
+        },
       },
-    },
-  }), []);
+    }),
+    []
+  );
 
   useEffect(() => {
     if (!car || !car.modelId) return;
     resetState();
     loadGenerations(car.modelId);
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [car]);
 
   function resetState() {
@@ -210,9 +218,10 @@ export default function CarModal({ car, onClose }: Props) {
     const match = name.trim().match(/^(\d+)\s*generation$/i);
     if (match) {
       const num = parseInt(match[1]);
-      const suffix = [, "st", "nd", "rd"][num % 10] && ![11, 12, 13].includes(num % 100)
-        ? [, "st", "nd", "rd"][num % 10]
-        : "th";
+      const suffix =
+        [, "st", "nd", "rd"][num % 10] && ![11, 12, 13].includes(num % 100)
+          ? [, "st", "nd", "rd"][num % 10]
+          : "th";
       return `${num}${suffix} Generation`;
     }
     return name;

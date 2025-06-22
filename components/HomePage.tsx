@@ -16,65 +16,64 @@ const MODELS_PER_PAGE = 10;
 const DEFAULT_MAKE_ID = 72318;
 
 export default function HomePage() {
-  const [makeId, setMakeId] = useState(DEFAULT_MAKE_ID);
+  const [makeId, setMakeId] = useState<number>(DEFAULT_MAKE_ID);
   const [cars, setCars] = useState<Car[]>([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-  const [fuel, setFuel] = useState("");
-  const [transmission, setTransmission] = useState("");
-  const [featured, setFeatured] = useState(false);
-
+  const [fuel, setFuel] = useState<string>("");
+  const [transmission, setTransmission] = useState<string>("");
+  const [featured, setFeatured] = useState<boolean>(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const loadCars = useCallback(
-    async (reset = false) => {
+    async (targetPage: number, reset = false) => {
       setLoading(true);
       try {
         const newCars = await fetchCarsFromAPI(
           makeId,
-          reset ? 1 : page,
+          targetPage,
           MODELS_PER_PAGE,
-          {
-            fuel,
-            transmission,
-            featured,
-          }
+          { fuel, transmission, featured }
         );
-        setCars((prev) => (reset ? newCars : [...prev, ...newCars]));
+
+        setCars((prev) =>
+          reset
+            ? newCars
+            : [
+                ...prev,
+                ...newCars.filter((c) => !prev.some((pc) => pc.id === c.id)),
+              ]
+        );
       } catch (err) {
         console.error("❌ Failed to fetch cars:", err);
       } finally {
         setLoading(false);
       }
     },
-    [makeId, page, fuel, transmission, featured]
+    [makeId, fuel, transmission, featured]
   );
 
-  // Trigger load on make or filter change
+  // Reset on filter or make change
   useEffect(() => {
-    setPage(1);
     setCars([]);
-    loadCars(true);
+    setPage(1);
+    loadCars(1, true);
   }, [loadCars]);
 
+  // Load more cars when page increases (after first page)
   useEffect(() => {
-    if (page > 1) loadCars();
+    if (page > 1) loadCars(page);
   }, [page, loadCars]);
 
-  // Infinite scroll setup
+  // Infinite scroll
   useEffect(() => {
     if (!sentinelRef.current) return;
 
-    let ticking = false;
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loading && !ticking) {
-          ticking = true;
-          setTimeout(() => {
-            setPage((prev) => prev + 1);
-            ticking = false;
-          }, 300);
+      ([entry]) => {
+        if (entry.isIntersecting && !loading) {
+          setPage((prev) => prev + 1);
         }
       },
       { rootMargin: "300px" }
@@ -83,11 +82,6 @@ export default function HomePage() {
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [loading]);
-
-  // Load more cars when page increases
-  useEffect(() => {
-    if (page > 1) loadCars();
-  }, [page]);
 
   return (
     <main className="min-h-screen flex flex-col gap-8 px-4 py-12 max-w-6xl mx-auto">
@@ -103,7 +97,6 @@ export default function HomePage() {
       <div className="sticky top-[64px] z-20 bg-brand dark:bg-textPrimary border border-textPrimary dark:border-brand rounded-md shadow-sm px-4 py-5 flex flex-col gap-4">
         <SearchBar
           query=""
-          type=""
           loading={loading}
           onChange={() => {}}
           onMakeSelect={({ id }) => {

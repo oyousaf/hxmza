@@ -1,19 +1,23 @@
 import { Car } from "@/types/car";
-import { ModelInput } from "../client/fetchModels";
+import { CarModel } from "@/lib/client/fetchModels";
 
 const placeholderImage = "/cars/placeholder.webp";
 
-export function mapModelToCar(apiModel: ModelInput, globalIndex: number): Car {
+/**
+ * Maps CarModel to Car object with defaults.
+ */
+export function mapModelToCar(apiModel: CarModel, globalIndex: number): Car {
   const id = Number(apiModel.id ?? globalIndex);
+  const modelId = Number(apiModel.modelId);
 
   return {
     id,
-    modelId: id,
-    model: apiModel.name || "Unknown Model",
+    modelId,
+    model: apiModel.model || "Unknown Model",
     image: placeholderImage,
 
     // Custom local app metadata
-    make: "",
+    make: apiModel.make || "",
     fuel: "unknown",
     type: "—",
     engine: "—",
@@ -25,7 +29,7 @@ export function mapModelToCar(apiModel: ModelInput, globalIndex: number): Car {
     status: "available",
     numberOfSeats: "—",
 
-    // Specs will be populated later
+    // Specs to be hydrated later
     trim: "",
     series: "",
     bodyType: "",

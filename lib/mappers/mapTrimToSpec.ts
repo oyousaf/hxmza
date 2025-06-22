@@ -1,4 +1,4 @@
-type TrimSpec = {
+export type TrimSpec = {
   trim: string;
   bodyType: string;
   engine: {

@@ -5,9 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SiAstonmartin } from "react-icons/si";
 import { GiCarWheel } from "react-icons/gi";
 import { FaTachometerAlt } from "react-icons/fa";
+import { FaLeftLong, FaXmark } from "react-icons/fa6";
 import { MdEventSeat } from "react-icons/md";
 import { LuRuler } from "react-icons/lu";
-import { FaXmark, FaLeftLong } from "react-icons/fa6";
 import { PiEngine } from "react-icons/pi";
 
 import { fetchGenerations } from "@/lib/client/fetchGenerations";
@@ -15,6 +15,7 @@ import { fetchTrims } from "@/lib/client/fetchTrims";
 import { fetchSpecs } from "@/lib/client/fetchSpecs";
 import { trimCache, specCache } from "@/lib/cache/carCache";
 import { Car } from "@/types/car";
+import { TrimSpec } from "@/lib/mappers/mapTrimToSpec";
 
 type Props = {
   car: Car | null;
@@ -34,51 +35,17 @@ type Trim = {
   bodyType: string;
 };
 
-function formatSpecValue(key: string, value: any): string {
-  if (!value || value === "null") return "—";
-  const clean = typeof value === "string" ? value.replace(",", ".") : value;
-
-  switch (key) {
-    case "acceleration0To100KmPerHS":
-      return parseFloat(clean).toFixed(1) + " s";
-    case "fuelTankCapacityL":
-      return clean + " L";
-    case "capacityCm3":
-      return clean + " cc";
-    case "maximumTorqueNM":
-      return clean + " Nm";
-    case "engineHp":
-      return clean + " hp";
-    case "engineHpRpm":
-      return clean + " rpm";
-    case "curbWeightKg":
-      return clean + " kg";
-    case "lengthMm":
-    case "widthMm":
-    case "heightMm":
-    case "wheelbaseMm":
-    case "frontTrackMm":
-    case "rearTrackMm":
-      return clean + " mm";
-    case "turningCircleM":
-      return clean + " m";
-    default:
-      return value;
-  }
-}
-
 export default function CarModal({ car, onClose }: Props) {
   const [step, setStep] = useState<"generation" | "trim" | "spec">(
     "generation"
   );
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [trims, setTrims] = useState<Trim[]>([]);
-  const [specs, setSpecs] = useState<any>(null);
+  const [specs, setSpecs] = useState<TrimSpec | null>(null);
   const [selectedGeneration, setSelectedGeneration] =
     useState<Generation | null>(null);
   const [selectedTrim, setSelectedTrim] = useState<Trim | null>(null);
   const [loading, setLoading] = useState(false);
-
   const modalRef = useRef<HTMLDivElement>(null);
 
   const specSections = useMemo(
@@ -86,53 +53,51 @@ export default function CarModal({ car, onClose }: Props) {
       Performance: {
         icon: <FaTachometerAlt className="inline-block mr-2 text-brand" />,
         keys: {
-          engineHp: "BHP",
-          engineHpRpm: "RPM",
-          maximumTorqueNM: "Max Torque",
-          acceleration0To100KmPerHS: "0–100 km/h",
-          maxSpeedKmPerH: "Top Speed",
+          "engine.horsepower": "BHP",
+          "engine.rpm": "RPM",
+          "engine.torqueNm": "Max Torque",
+          "performance.acceleration0To100": "0–100 km/h",
+          "performance.topSpeed": "Top Speed",
         },
       },
       Chassis: {
         icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
         keys: {
-          driveWheels: "Drive",
+          drive: "Drive",
           transmission: "Transmission",
-          curbWeightKg: "Weight",
-          fuelTankCapacityL: "Fuel Tank",
+          "dimensions.weight": "Weight",
+          "fuel.tankCapacity": "Fuel Tank",
         },
       },
       Dimensions: {
         icon: <LuRuler className="inline-block mr-2 text-brand" />,
         keys: {
-          lengthMm: "Length",
-          widthMm: "Width",
-          heightMm: "Height",
-          wheelbaseMm: "Wheelbase",
+          "dimensions.length": "Length",
+          "dimensions.width": "Width",
+          "dimensions.height": "Height",
+          "dimensions.wheelbase": "Wheelbase",
         },
       },
       Engine: {
         icon: <PiEngine className="inline-block mr-2 text-brand" />,
         keys: {
-          engineType: "Fuel Type",
-          capacityCm3: "Engine Size",
-          numberOfCylinders: "Cylinders",
-          injectionType: "Injection",
-          valvesPerCylinder: "Valves/Cyl",
+          "engine.fuelType": "Fuel Type",
+          "engine.displacement": "Engine Size",
+          "engine.cylinders": "Cylinders",
+          "engine.injection": "Injection",
+          "engine.layout": "Layout",
         },
       },
       Wheels: {
         icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
         keys: {
-          turningCircleM: "Turning Circle",
-          frontTrackMm: "Front Track",
-          rearTrackMm: "Rear Track",
+          turningCircle: "Turning Circle",
         },
       },
       Comfort: {
         icon: <MdEventSeat className="inline-block mr-2 text-brand" />,
         keys: {
-          numberOfSeats: "Seats",
+          seats: "Seats",
         },
       },
     }),
@@ -164,8 +129,6 @@ export default function CarModal({ car, onClose }: Props) {
     try {
       const gens = await fetchGenerations(modelId);
       setGenerations(gens);
-    } catch (err) {
-      console.error("❌ Failed to fetch generations:", err);
     } finally {
       setLoading(false);
     }
@@ -188,8 +151,6 @@ export default function CarModal({ car, onClose }: Props) {
         trimCache.set(generation.id, cleaned);
         setTrims(cleaned);
       }
-    } catch (err) {
-      console.error("❌ Failed to fetch trims:", err);
     } finally {
       setLoading(false);
     }
@@ -207,11 +168,36 @@ export default function CarModal({ car, onClose }: Props) {
         specCache.set(trim.id, data);
         setSpecs(data);
       }
-    } catch (err) {
-      console.error("❌ Failed to fetch specs:", err);
     } finally {
       setLoading(false);
     }
+  }
+
+  function formatValue(value: any, label: string): string {
+    if (value === null || value === undefined || value === "") return "—";
+    if (typeof value === "number" && Number.isNaN(value)) return "—";
+
+    if (label.includes("BHP")) return value + " hp";
+    if (label.includes("Torque")) return value + " Nm";
+    if (label.includes("RPM")) return value + " rpm";
+    if (label.includes("Acceleration")) return value.toFixed(1) + " s";
+    if (label.includes("Top Speed")) return value + " km/h";
+    if (label.includes("Tank")) return value + " L";
+    if (label.includes("Weight")) return value + " kg";
+    if (label.includes("Size")) return value + " cc";
+    if (
+      label.includes("Length") ||
+      label.includes("Width") ||
+      label.includes("Height") ||
+      label.includes("Wheelbase")
+    )
+      return value + " mm";
+    if (label.includes("Turning")) return value + " m";
+    return String(value);
+  }
+
+  function resolvePath(obj: any, path: string): any {
+    return path.split(".").reduce((acc, key) => acc?.[key], obj);
   }
 
   function formatGenerationLabel(name: string): string {
@@ -250,6 +236,7 @@ export default function CarModal({ car, onClose }: Props) {
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
+          {/* Header */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl md:text-2xl font-bold text-textPrimary dark:text-white">
               {car.make} {car.model}
@@ -260,11 +247,13 @@ export default function CarModal({ car, onClose }: Props) {
                 onClose();
               }}
               className="text-textPrimary hover:text-textPrimary/50 dark:text-brand dark:hover:text-brand/50"
+              aria-label="Close"
             >
               <FaXmark className="w-6 h-6" />
             </button>
           </div>
 
+          {/* Back Button */}
           {!loading && step !== "generation" && (
             <div className="flex justify-center mb-6">
               <button
@@ -284,6 +273,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
+          {/* Spinner */}
           {loading && (
             <div className="flex justify-center py-10">
               <motion.div
@@ -295,6 +285,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
+          {/* Generation Picker */}
           {!loading && step === "generation" && (
             <div className="space-y-4">
               <p className="font-semibold text-textPrimary dark:text-white mb-2">
@@ -319,6 +310,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
+          {/* Trim Picker */}
           {!loading && step === "trim" && (
             <div className="space-y-4 mt-6">
               <p className="font-semibold text-textPrimary dark:text-white mb-2">
@@ -347,6 +339,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
+          {/* Spec Display */}
           {!loading && step === "spec" && specs && (
             <div className="space-y-8 mt-6">
               {Object.entries(specSections).map(([section, { icon, keys }]) => (
@@ -355,17 +348,18 @@ export default function CarModal({ car, onClose }: Props) {
                     {icon} {section}
                   </h3>
                   <div className="grid grid-cols-2 gap-4 text-base text-gray-700 dark:text-gray-200">
-                    {Object.entries(keys).map(([key, label]) => (
-                      <div key={key}>
+                    {Object.entries(keys).map(([path, label]) => (
+                      <div key={path}>
                         <p className="uppercase text-xs font-semibold text-gray-500 dark:text-gray-400">
                           {label}
                         </p>
-                        <p>{formatSpecValue(key, specs[key])}</p>
+                        <p>{formatValue(resolvePath(specs, path), label)}</p>
                       </div>
                     ))}
                   </div>
                 </div>
               ))}
+
               <div className="rounded-lg overflow-hidden mt-6">
                 <img
                   src={car.image || "/cars/placeholder.webp"}

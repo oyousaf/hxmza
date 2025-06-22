@@ -3,10 +3,12 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SiAstonmartin } from "react-icons/si";
-import { FaTachometerAlt } from "react-icons/fa";
 import { GiCarWheel } from "react-icons/gi";
+import { FaTachometerAlt } from "react-icons/fa";
+import { MdEventSeat } from "react-icons/md";
 import { LuRuler } from "react-icons/lu";
 import { FaXmark, FaLeftLong } from "react-icons/fa6";
+import { PiEngine } from "react-icons/pi";
 
 import { fetchGenerations } from "@/lib/client/fetchGenerations";
 import { fetchTrims } from "@/lib/client/fetchTrims";
@@ -76,6 +78,32 @@ export default function CarModal({ car, onClose }: Props) {
           wheelbaseMm: "Wheelbase (mm)",
         },
       },
+      Engine: {
+        icon: <PiEngine className="inline-block mr-2 text-brand" />,
+        keys: {
+          engineType: "Fuel Type",
+          capacityCm3: "Engine Size (cc)",
+          numberOfCylinders: "Cylinders",
+          injectionType: "Injection",
+          valvesPerCylinder: "Valves/Cyl",
+        },
+      },
+      Wheels: {
+        icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
+        keys: {
+          turningCircleM: "Turning Circle",
+          frontTrackMm: "Front Track",
+          rearTrackMm: "Rear Track",
+        },
+      },
+      Comfort: {
+        icon: <MdEventSeat className="inline-block mr-2 text-brand" />,
+        keys: {
+          numberOfSeats: "Seats",
+          climateControl: "Climate",
+          infotainmentSystem: "Infotainment",
+        },
+      },
     }),
     []
   );
@@ -116,13 +144,22 @@ export default function CarModal({ car, onClose }: Props) {
     setStep("trim");
     setSelectedGeneration(generation);
     setLoading(true);
+
     try {
       if (trimCache.has(generation.id)) {
         setTrims(trimCache.get(generation.id)!);
       } else {
-        const trims = await fetchTrims(generation.id);
-        trimCache.set(generation.id, trims);
-        setTrims(trims);
+        const rawTrims = await fetchTrims(generation.id);
+
+        // Optional: sanitize trims to avoid early spec fields bleeding through
+        const cleanedTrims = rawTrims.map((t) => ({
+          id: t.id,
+          trim: t.trim,
+          bodyType: t.bodyType || "—",
+        }));
+
+        trimCache.set(generation.id, cleanedTrims);
+        setTrims(cleanedTrims);
       }
     } catch (err) {
       console.error("❌ Failed to fetch trims:", err);

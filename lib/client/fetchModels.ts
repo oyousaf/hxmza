@@ -67,13 +67,14 @@ export async function fetchModels(makeId: number): Promise<CarModel[]> {
       const id = Number(m.id ?? idx);
       const modelId = Number(m.modelId ?? id);
       const model = typeof m.name === "string" ? m.name : `Model ${idx}`;
-      const make = typeof m.make === "string" ? m.make : "Unknown";
+      const make =
+        typeof m.make === "string" && m.make.trim() !== "" ? m.make : "";
 
       return {
         id,
         modelId,
         model,
-        make
+        make,
       };
     });
 

@@ -34,6 +34,39 @@ type Trim = {
   bodyType: string;
 };
 
+function formatSpecValue(key: string, value: any): string {
+  if (!value || value === "null") return "—";
+  const clean = typeof value === "string" ? value.replace(",", ".") : value;
+
+  switch (key) {
+    case "acceleration0To100KmPerHS":
+      return parseFloat(clean).toFixed(1) + " s";
+    case "fuelTankCapacityL":
+      return clean + " L";
+    case "capacityCm3":
+      return clean + " cc";
+    case "maximumTorqueNM":
+      return clean + " Nm";
+    case "engineHp":
+      return clean + " hp";
+    case "engineHpRpm":
+      return clean + " rpm";
+    case "curbWeightKg":
+      return clean + " kg";
+    case "lengthMm":
+    case "widthMm":
+    case "heightMm":
+    case "wheelbaseMm":
+    case "frontTrackMm":
+    case "rearTrackMm":
+      return clean + " mm";
+    case "turningCircleM":
+      return clean + " m";
+    default:
+      return value;
+  }
+}
+
 export default function CarModal({ car, onClose }: Props) {
   const [step, setStep] = useState<"generation" | "trim" | "spec">("generation");
   const [generations, setGenerations] = useState<Generation[]>([]);
@@ -43,72 +76,69 @@ export default function CarModal({ car, onClose }: Props) {
   const [selectedTrim, setSelectedTrim] = useState<Trim | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const specSections = useMemo(
-    () => ({
-      Performance: {
-        icon: <FaTachometerAlt className="inline-block mr-2 text-brand" />,
-        keys: {
-          engineHp: "BHP",
-          engineHpRpm: "RPM",
-          maximumTorqueNM: "Max Torque",
-          acceleration0To100KmPerHS: "0–100 km/h",
-          maxSpeedKmPerH: "Top Speed",
-        },
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  const specSections = useMemo(() => ({
+    Performance: {
+      icon: <FaTachometerAlt className="inline-block mr-2 text-brand" />,
+      keys: {
+        engineHp: "BHP",
+        engineHpRpm: "RPM",
+        maximumTorqueNM: "Max Torque",
+        acceleration0To100KmPerHS: "0–100 km/h",
+        maxSpeedKmPerH: "Top Speed",
       },
-      Chassis: {
-        icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
-        keys: {
-          driveWheels: "Drive",
-          transmission: "Transmission",
-          curbWeightKg: "Weight",
-          fuelTankCapacityL: "Fuel Tank",
-        },
+    },
+    Chassis: {
+      icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
+      keys: {
+        driveWheels: "Drive",
+        transmission: "Transmission",
+        curbWeightKg: "Weight",
+        fuelTankCapacityL: "Fuel Tank",
       },
-      Dimensions: {
-        icon: <LuRuler className="inline-block mr-2 text-brand" />,
-        keys: {
-          lengthMm: "Length (mm)",
-          widthMm: "Width (mm)",
-          heightMm: "Height (mm)",
-          wheelbaseMm: "Wheelbase (mm)",
-        },
+    },
+    Dimensions: {
+      icon: <LuRuler className="inline-block mr-2 text-brand" />,
+      keys: {
+        lengthMm: "Length",
+        widthMm: "Width",
+        heightMm: "Height",
+        wheelbaseMm: "Wheelbase",
       },
-      Engine: {
-        icon: <PiEngine className="inline-block mr-2 text-brand" />,
-        keys: {
-          engineType: "Fuel Type",
-          capacityCm3: "Engine Size (cc)",
-          numberOfCylinders: "Cylinders",
-          injectionType: "Injection",
-          valvesPerCylinder: "Valves/Cyl",
-        },
+    },
+    Engine: {
+      icon: <PiEngine className="inline-block mr-2 text-brand" />,
+      keys: {
+        engineType: "Fuel Type",
+        capacityCm3: "Engine Size",
+        numberOfCylinders: "Cylinders",
+        injectionType: "Injection",
+        valvesPerCylinder: "Valves/Cyl",
       },
-      Wheels: {
-        icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
-        keys: {
-          turningCircleM: "Turning Circle",
-          frontTrackMm: "Front Track",
-          rearTrackMm: "Rear Track",
-        },
+    },
+    Wheels: {
+      icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
+      keys: {
+        turningCircleM: "Turning Circle",
+        frontTrackMm: "Front Track",
+        rearTrackMm: "Rear Track",
       },
-      Comfort: {
-        icon: <MdEventSeat className="inline-block mr-2 text-brand" />,
-        keys: {
-          numberOfSeats: "Seats",
-        },
+    },
+    Comfort: {
+      icon: <MdEventSeat className="inline-block mr-2 text-brand" />,
+      keys: {
+        numberOfSeats: "Seats",
       },
-    }),
-    []
-  );
+    },
+  }), []);
 
   useEffect(() => {
-    if (!car?.modelId) return;
+    if (!car || !car.modelId) return;
     resetState();
     loadGenerations(car.modelId);
     document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [car]);
 
   function resetState() {
@@ -125,29 +155,33 @@ export default function CarModal({ car, onClose }: Props) {
     setLoading(true);
     try {
       const gens = await fetchGenerations(modelId);
-      setGenerations(gens || []);
+      setGenerations(gens);
+    } catch (err) {
+      console.error("❌ Failed to fetch generations:", err);
     } finally {
       setLoading(false);
     }
   }
 
-  async function loadTrims(gen: Generation) {
+  async function loadTrims(generation: Generation) {
     setStep("trim");
-    setSelectedGeneration(gen);
+    setSelectedGeneration(generation);
     setLoading(true);
     try {
-      if (trimCache.has(gen.id)) {
-        setTrims(trimCache.get(gen.id)!);
+      if (trimCache.has(generation.id)) {
+        setTrims(trimCache.get(generation.id)!);
       } else {
-        const raw = await fetchTrims(gen.id);
-        const cleaned = raw.map(t => ({
+        const rawTrims = await fetchTrims(generation.id);
+        const cleaned = rawTrims.map((t) => ({
           id: t.id,
           trim: t.trim,
           bodyType: t.bodyType || "—",
         }));
-        trimCache.set(gen.id, cleaned);
+        trimCache.set(generation.id, cleaned);
         setTrims(cleaned);
       }
+    } catch (err) {
+      console.error("❌ Failed to fetch trims:", err);
     } finally {
       setLoading(false);
     }
@@ -161,20 +195,24 @@ export default function CarModal({ car, onClose }: Props) {
       if (specCache.has(trim.id)) {
         setSpecs(specCache.get(trim.id));
       } else {
-        const res = await fetchSpecs(trim.id);
-        specCache.set(trim.id, res);
-        setSpecs(res);
+        const data = await fetchSpecs(trim.id);
+        specCache.set(trim.id, data);
+        setSpecs(data);
       }
+    } catch (err) {
+      console.error("❌ Failed to fetch specs:", err);
     } finally {
       setLoading(false);
     }
   }
 
-  function formatGen(name: string): string {
+  function formatGenerationLabel(name: string): string {
     const match = name.trim().match(/^(\d+)\s*generation$/i);
     if (match) {
       const num = parseInt(match[1]);
-      const suffix = [, "st", "nd", "rd"][num % 10] && ![11, 12, 13].includes(num % 100) ? [, "st", "nd", "rd"][num % 10] : "th";
+      const suffix = [, "st", "nd", "rd"][num % 10] && ![11, 12, 13].includes(num % 100)
+        ? [, "st", "nd", "rd"][num % 10]
+        : "th";
       return `${num}${suffix} Generation`;
     }
     return name;
@@ -195,6 +233,7 @@ export default function CarModal({ car, onClose }: Props) {
         }}
       >
         <motion.div
+          ref={modalRef}
           onClick={(e) => e.stopPropagation()}
           className="bg-white dark:bg-textPrimary rounded-xl shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6"
           initial={{ scale: 0.9, opacity: 0 }}
@@ -202,7 +241,6 @@ export default function CarModal({ car, onClose }: Props) {
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Header */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl md:text-2xl font-bold text-textPrimary dark:text-white">
               {car.make} {car.model}
@@ -213,33 +251,30 @@ export default function CarModal({ car, onClose }: Props) {
                 onClose();
               }}
               className="text-textPrimary hover:text-textPrimary/50 dark:text-brand dark:hover:text-brand/50"
-              aria-label="Close"
             >
               <FaXmark className="w-6 h-6" />
             </button>
           </div>
 
-          {/* Back */}
           {!loading && step !== "generation" && (
             <div className="flex justify-center mb-6">
               <button
                 onClick={() => {
-                  setStep(step === "spec" ? "trim" : "generation");
                   if (step === "spec") {
+                    setStep("trim");
                     setSpecs(null);
-                  } else {
+                  } else if (step === "trim") {
+                    setStep("generation");
                     setTrims([]);
-                    setSelectedTrim(null);
                   }
                 }}
                 className="px-6 py-2 rounded-full text-textPrimary hover:text-textPrimary/50 dark:text-brand dark:hover:text-brand/50 font-semibold text-base transition"
               >
-                <FaLeftLong className="inline-block mr-2 text-3xl" />
+                <FaLeftLong className="inline-block mr-2 text-4xl" />
               </button>
             </div>
           )}
 
-          {/* Loading */}
           {loading && (
             <div className="flex justify-center py-10">
               <motion.div
@@ -251,7 +286,6 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Generation Picker */}
           {!loading && step === "generation" && (
             <div className="space-y-4">
               <p className="font-semibold text-textPrimary dark:text-white mb-2">
@@ -268,14 +302,14 @@ export default function CarModal({ car, onClose }: Props) {
                         : "bg-white text-textPrimary dark:bg-brand dark:text-textPrimary hover:bg-gray-100 dark:hover:bg-brand/50 dark:hover:text-white"
                     }`}
                   >
-                    {formatGen(gen.name)} ({gen.yearFrom}–{gen.yearTo ?? "present"})
+                    {formatGenerationLabel(gen.name)} ({gen.yearFrom}–
+                    {gen.yearTo ?? "present"})
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Trim Picker */}
           {!loading && step === "trim" && (
             <div className="space-y-4 mt-6">
               <p className="font-semibold text-textPrimary dark:text-white mb-2">
@@ -287,7 +321,9 @@ export default function CarModal({ car, onClose }: Props) {
                     key={trim.id}
                     onClick={() => loadSpecs(trim)}
                     onMouseEnter={() =>
-                      fetchSpecs(trim.id).then((res) => specCache.set(trim.id, res))
+                      fetchSpecs(trim.id).then((res) =>
+                        specCache.set(trim.id, res)
+                      )
                     }
                     className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
                       selectedTrim?.id === trim.id
@@ -302,7 +338,6 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Spec Display */}
           {!loading && step === "spec" && specs && (
             <div className="space-y-8 mt-6">
               {Object.entries(specSections).map(([section, { icon, keys }]) => (
@@ -316,7 +351,7 @@ export default function CarModal({ car, onClose }: Props) {
                         <p className="uppercase text-xs font-semibold text-gray-500 dark:text-gray-400">
                           {label}
                         </p>
-                        <p>{specs[key] ?? "—"}</p>
+                        <p>{formatSpecValue(key, specs[key])}</p>
                       </div>
                     ))}
                   </div>

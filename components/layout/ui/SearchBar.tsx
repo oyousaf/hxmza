@@ -67,13 +67,22 @@ export default function SearchBar({
       return;
     }
 
-    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
     debounceRef.current = setTimeout(() => {
-      cachedMakes.current ? filterSuggestions(inputValue) : fetchMakes();
+      if (cachedMakes.current) {
+        filterSuggestions(inputValue);
+      } else {
+        fetchMakes();
+      }
     }, DEBOUNCE_DELAY);
 
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
     };
   }, [inputValue, fetchMakes, filterSuggestions]);
 

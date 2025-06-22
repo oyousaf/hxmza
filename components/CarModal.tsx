@@ -16,6 +16,7 @@ import { fetchSpecs } from "@/lib/client/fetchSpecs";
 import { trimCache, specCache } from "@/lib/cache/carCache";
 import { Car } from "@/types/car";
 import { TrimSpec } from "@/lib/mappers/mapTrimToSpec";
+import Image from "next/image";
 
 type Props = {
   car: Car | null;
@@ -387,14 +388,12 @@ export default function CarModal({ car, onClose }: Props) {
                 </div>
               ))}
               <div className="rounded-lg overflow-hidden mt-6">
-                <img
+                <Image
                   src={car.image || "/cars/placeholder.webp"}
-                  alt={`${car.make} ${car.model}`}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src =
-                      "/cars/placeholder.webp";
-                  }}
-                  className="w-full h-auto object-cover rounded-md shadow"
+                  alt={car.model}
+                  width={640}
+                  height={360}
+                  className="rounded-md object-cover w-full h-auto"
                 />
               </div>
             </div>

@@ -15,7 +15,7 @@ type Props = {
   placeholder?: string;
 };
 
-const DEBOUNCE_DELAY = 400;
+const DEBOUNCE_DELAY = 300;
 
 export default function SearchBar({
   query,
@@ -23,6 +23,7 @@ export default function SearchBar({
   loading = false,
   onChange,
   onMakeSelect,
+  placeholder = "Search make…",
 }: Props) {
   const [inputValue, setInputValue] = useState(query);
   const [suggestions, setSuggestions] = useState<Make[]>([]);
@@ -30,53 +31,50 @@ export default function SearchBar({
   const cachedMakes = useRef<Make[] | null>(null);
 
   useEffect(() => {
-    // If cached, filter locally immediately
-    if (cachedMakes.current) {
-      filterSuggestions(inputValue);
+    if (!inputValue.trim()) {
+      setSuggestions([]);
       return;
     }
 
-    // Fetch makes once
-    const fetchMakes = async () => {
-      try {
-        const res = await fetch(
-          `https://car-specs.p.rapidapi.com/v2/cars/makes`,
-          {
-            headers: {
-              "X-RapidAPI-Key": process.env.NEXT_PUBLIC_RAPIDAPI_KEY!,
-              "X-RapidAPI-Host": "car-specs.p.rapidapi.com",
-            },
-          }
-        );
-        const makes: Make[] = await res.json();
-        cachedMakes.current = makes;
-        filterSuggestions(inputValue);
-      } catch (err) {
-        console.error("❌ Failed to fetch makes:", err);
-        setSuggestions([]);
-      }
-    };
-
-    // Debounced fetch/filter
     const timeout = setTimeout(() => {
-      if (inputValue.trim()) {
-        fetchMakes();
+      if (cachedMakes.current) {
+        filterSuggestions(inputValue);
       } else {
-        setSuggestions([]);
+        fetchMakes();
       }
     }, DEBOUNCE_DELAY);
 
     return () => clearTimeout(timeout);
   }, [inputValue]);
 
+  const fetchMakes = async () => {
+    try {
+      const res = await fetch(
+        `https://car-specs.p.rapidapi.com/v2/cars/makes`,
+        {
+          headers: {
+            "X-RapidAPI-Key": process.env.NEXT_PUBLIC_RAPIDAPI_KEY!,
+            "X-RapidAPI-Host": "car-specs.p.rapidapi.com",
+          },
+        }
+      );
+      const makes: Make[] = await res.json();
+      cachedMakes.current = makes;
+      filterSuggestions(inputValue);
+    } catch (err) {
+      console.error("❌ Failed to fetch makes:", err);
+      setSuggestions([]);
+    }
+  };
+
   function filterSuggestions(value: string) {
-    if (!cachedMakes.current) return;
-    const trimmed = value.trim().toLowerCase();
-    if (!trimmed) return setSuggestions([]);
+    const trimmed = value.toLowerCase().trim();
+    if (!cachedMakes.current || !trimmed) return setSuggestions([]);
+
     const filtered = cachedMakes.current.filter((make) =>
       make.name.toLowerCase().includes(trimmed)
     );
-    setSuggestions(filtered.slice(0, 10));
+    setSuggestions(filtered.slice(0, 8));
     setShowDropdown(true);
   }
 
@@ -85,17 +83,17 @@ export default function SearchBar({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="relative w-full max-w-5xl mx-auto bg-white dark:bg-brand text-textPrimary shadow-md rounded-xl px-4 py-4 flex flex-col sm:flex-row gap-3 flex-wrap justify-between"
+      className="relative w-full max-w-5xl mx-auto bg-white dark:bg-brand text-textPrimary shadow-md rounded-xl px-4 py-4 flex flex-col sm:flex-row gap-3"
     >
       <div className="relative w-full">
         <input
           type="text"
-          placeholder="Search…"
+          placeholder={placeholder}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onFocus={() => setShowDropdown(true)}
-          onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-          className="w-full border px-3 py-2 rounded-md text-sm"
+          onBlur={() => setTimeout(() => setShowDropdown(false), 100)}
+          className="w-full border px-3 py-2 rounded-md text-sm dark:bg-textPrimary dark:text-brand"
           autoCapitalize="off"
           autoCorrect="off"
         />
@@ -126,14 +124,13 @@ export default function SearchBar({
         </AnimatePresence>
         <button
           type="button"
-          className="flex items-center justify-center w-10 h-10 rounded-md bg-textPrimary text-white hover:bg-textPrimary/90 transition"
-          aria-label="Search"
+          className="absolute top-1 right-1.5 w-9 h-9 flex items-center justify-center bg-textPrimary rounded-md text-white"
           disabled
         >
           {loading ? (
             <div className="animate-spin h-4 w-4 border-2 border-t-transparent border-white rounded-full" />
           ) : (
-            <MagnifyingGlassIcon className="h-5 w-5 text-white" />
+            <MagnifyingGlassIcon className="h-5 w-5" />
           )}
         </button>
       </div>

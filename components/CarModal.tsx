@@ -2,15 +2,17 @@
 
 import { useEffect, useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { XMarkIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { SiAstonmartin } from "react-icons/si";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 import { fetchGenerations } from "@/lib/client/fetchGenerations";
 import { fetchTrims } from "@/lib/client/fetchTrims";
 import { fetchSpecs } from "@/lib/client/fetchSpecs";
+import { trimCache, specCache } from "@/lib/cache/carCache";
+import { Car } from "@/types/car";
 
 type Props = {
-  car: any;
+  car: Car | null;
   onClose: () => void;
 };
 
@@ -27,39 +29,46 @@ type Trim = {
   bodyType: string;
 };
 
-const trimCache = new Map<number, Trim[]>();
-const specCache = new Map<number, any>();
-
 export default function CarModal({ car, onClose }: Props) {
-  const [step, setStep] = useState<"generation" | "trim" | "spec">("generation");
+  const [step, setStep] = useState<"generation" | "trim" | "spec">(
+    "generation"
+  );
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [trims, setTrims] = useState<Trim[]>([]);
   const [specs, setSpecs] = useState<any>(null);
+  const [selectedGeneration, setSelectedGeneration] =
+    useState<Generation | null>(null);
   const [selectedTrim, setSelectedTrim] = useState<Trim | null>(null);
-  const [selectedGeneration, setSelectedGeneration] = useState<Generation | null>(null);
   const [loading, setLoading] = useState(false);
+
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const specSections = useMemo(() => ({
-    Performance: [
-      "engineHp",
-      "engineHpRpm",
-      "maximumTorqueNM",
-      "acceleration0To100KmPerHS",
-      "maxSpeedKmPerH",
-    ],
-    Chassis: [
-      "driveWheels",
-      "transmission",
-      "curbWeightKg",
-      "fuelTankCapacityL",
-    ],
-    Dimensions: ["lengthMm", "widthMm", "heightMm", "wheelbaseMm"],
-  }), []);
+  const specSections = useMemo(
+    () => ({
+      Performance: [
+        "engineHp",
+        "engineHpRpm",
+        "maximumTorqueNM",
+        "acceleration0To100KmPerHS",
+        "maxSpeedKmPerH",
+      ],
+      Chassis: [
+        "driveWheels",
+        "transmission",
+        "curbWeightKg",
+        "fuelTankCapacityL",
+      ],
+      Dimensions: ["lengthMm", "widthMm", "heightMm", "wheelbaseMm"],
+    }),
+    []
+  );
 
   useEffect(() => {
-    if (!car) return resetState();
-    loadGenerations();
+    if (!car || !car.modelId || typeof car.modelId !== "number") return;
+
+    resetState();
+    loadGenerations(car.modelId);
+
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
@@ -71,27 +80,28 @@ export default function CarModal({ car, onClose }: Props) {
     setGenerations([]);
     setTrims([]);
     setSpecs(null);
-    setSelectedTrim(null);
     setSelectedGeneration(null);
+    setSelectedTrim(null);
     setLoading(false);
   }
 
-  async function loadGenerations() {
+  async function loadGenerations(modelId: number) {
     setLoading(true);
     try {
-      const gens = await fetchGenerations(car.modelId);
+      const gens = await fetchGenerations(modelId);
       setGenerations(gens || []);
-      setStep("generation");
     } catch (err) {
       console.error("❌ Failed to fetch generations:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function loadTrims(generation: Generation) {
     setStep("trim");
-    setLoading(true);
     setSelectedGeneration(generation);
+    setLoading(true);
+
     try {
       if (trimCache.has(generation.id)) {
         setTrims(trimCache.get(generation.id)!);
@@ -102,14 +112,16 @@ export default function CarModal({ car, onClose }: Props) {
       }
     } catch (err) {
       console.error("❌ Failed to fetch trims:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function loadSpecs(trim: Trim) {
     setStep("spec");
-    setLoading(true);
     setSelectedTrim(trim);
+    setLoading(true);
+
     try {
       if (specCache.has(trim.id)) {
         setSpecs(specCache.get(trim.id));
@@ -120,8 +132,9 @@ export default function CarModal({ car, onClose }: Props) {
       }
     } catch (err) {
       console.error("❌ Failed to fetch specs:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   function formatSpecKey(key: string): string {
@@ -154,6 +167,7 @@ export default function CarModal({ car, onClose }: Props) {
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
+          {/* Header */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-textPrimary dark:text-white">
               {car.make} {car.model}
@@ -164,59 +178,102 @@ export default function CarModal({ car, onClose }: Props) {
                 onClose();
               }}
               className="text-gray-600 hover:text-gray-900 dark:hover:text-white"
-              aria-label="Close modal"
+              aria-label="Close"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
 
+          {/* Back Button */}
+          {!loading && step !== "generation" && (
+            <button
+              onClick={() => {
+                if (step === "spec") {
+                  setStep("trim");
+                  setSpecs(null);
+                  setSelectedTrim(null);
+                } else if (step === "trim") {
+                  setStep("generation");
+                  setTrims([]);
+                  setSelectedGeneration(null);
+                }
+              }}
+              className="flex items-center gap-2 mb-4 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              <ArrowLeftIcon className="w-4 h-4" />
+              Back
+            </button>
+          )}
+
+          {/* Loading Spinner */}
           {loading && (
             <div className="flex justify-center py-10">
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
               >
-                <SiAstonmartin className="w-24 h-24 text-textPrimary dark:text-brand animate-spin" />
+                <SiAstonmartin className="w-24 h-24 text-textPrimary dark:text-brand" />
               </motion.div>
             </div>
           )}
 
+          {/* Generation Picker */}
           {!loading && step === "generation" && (
-            <div className="space-y-2">
-              <p className="mb-2 font-semibold text-gray-700 dark:text-gray-300">
+            <div className="space-y-4">
+              <p className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Select a Generation:
               </p>
-              {generations.map((gen) => (
-                <button
-                  key={gen.id}
-                  className="w-full text-left px-4 py-2 rounded bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
-                  onClick={() => loadTrims(gen)}
-                >
-                  {gen.name} ({gen.yearFrom} – {gen.yearTo ?? "present"})
-                </button>
-              ))}
+              <div className="flex flex-wrap gap-3">
+                {generations.map((gen) => {
+                  const isSelected = selectedGeneration?.id === gen.id;
+                  return (
+                    <button
+                      key={gen.id}
+                      onClick={() => loadTrims(gen)}
+                      className={`px-4 py-2 rounded-full transition ${
+                        isSelected
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700"
+                      }`}
+                    >
+                      {gen.name} ({gen.yearFrom}–{gen.yearTo ?? "present"})
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
 
+          {/* Trim Picker */}
           {!loading && step === "trim" && (
-            <div className="space-y-2">
-              <p className="mb-2 font-semibold text-gray-700 dark:text-gray-300">
+            <div className="space-y-4">
+              <p className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Select a Trim:
               </p>
-              {trims.map((trim) => (
-                <button
-                  key={trim.id}
-                  className="w-full text-left px-4 py-2 rounded bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 transition"
-                  onClick={() => loadSpecs(trim)}
-                >
-                  {trim.trim} • {trim.bodyType}
-                </button>
-              ))}
+              <div className="flex flex-wrap gap-3">
+                {trims.map((trim) => {
+                  const isSelected = selectedTrim?.id === trim.id;
+                  return (
+                    <button
+                      key={trim.id}
+                      onClick={() => loadSpecs(trim)}
+                      className={`px-4 py-2 rounded-full transition ${
+                        isSelected
+                          ? "bg-green-600 text-white"
+                          : "bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700"
+                      }`}
+                    >
+                      {trim.trim} • {trim.bodyType}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
 
+          {/* Spec Display */}
           {!loading && step === "spec" && specs && (
-            <div className="space-y-6">
+            <div className="space-y-6 mt-4">
               {Object.entries(specSections).map(([section, keys]) => (
                 <div key={section}>
                   <h3 className="text-lg font-bold text-textPrimary dark:text-white mb-2">
@@ -234,12 +291,13 @@ export default function CarModal({ car, onClose }: Props) {
                   </div>
                 </div>
               ))}
-
               <div className="rounded-lg overflow-hidden mt-6">
                 <img
                   src={car.image || "/cars/placeholder.webp"}
                   alt={`${car.make} ${car.model}`}
-                  onError={(e) => (e.currentTarget.src = "/cars/placeholder.webp")}
+                  onError={(e) =>
+                    (e.currentTarget.src = "/cars/placeholder.webp")
+                  }
                   className="w-full h-auto object-cover rounded-md shadow"
                 />
               </div>

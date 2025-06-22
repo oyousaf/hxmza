@@ -2,46 +2,26 @@
 
 type Props = {
   fuel: string;
-  year: string;
   transmission: string;
-  onChange: (updates: {
-    fuel?: string;
-    year?: string;
-    transmission?: string;
-  }) => void;
+  onChange: (updates: { fuel?: string; transmission?: string }) => void;
 };
 
-const yearOptions = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015];
 const fuelOptions = ["Petrol", "Diesel", "Electric", "Hybrid"];
 const transmissionOptions = ["Automatic", "Manual"];
 
-export default function Filters({ fuel, year, transmission, onChange }: Props) {
+export default function Filters({ fuel, transmission, onChange }: Props) {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
       <select
         value={fuel}
         onChange={(e) => onChange({ fuel: e.target.value.toLowerCase() })}
         className="min-w-[140px] border px-3 py-2 rounded-md text-sm dark:bg-textPrimary dark:text-brand"
-        aria-label="Filter by fuel type"
+        aria-label="Filter by fuel"
       >
         <option value="">Fuel</option>
         {fuelOptions.map((f) => (
           <option key={f} value={f.toLowerCase()}>
             {f}
-          </option>
-        ))}
-      </select>
-
-      <select
-        value={year}
-        onChange={(e) => onChange({ year: e.target.value })}
-        className="min-w-[100px] border px-3 py-2 rounded-md text-sm dark:bg-textPrimary dark:text-brand"
-        aria-label="Filter by year"
-      >
-        <option value="">Year</option>
-        {yearOptions.map((y) => (
-          <option key={y} value={String(y)}>
-            {y}
           </option>
         ))}
       </select>

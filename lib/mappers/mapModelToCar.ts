@@ -1,44 +1,55 @@
 import { Car } from "@/types/car";
 
-function generateFakeMileage(year: number): number {
-  const age = Math.max(0, new Date().getFullYear() - year);
-  if (age === 0) return Math.floor(Math.random() * 10_000);
-  if (age <= 2) return Math.floor(Math.random() * 11_000) + 15_000;
-  return Math.floor(Math.random() * 25_000) + 25_000;
-}
-
-function generateFakeRating(): number {
-  return Math.min(5, parseFloat((4.2 + Math.random() * 0.6).toFixed(1)));
-}
-
-function generateFakePricePerDay(engine: number, year: number): number {
-  const age = Math.max(0, new Date().getFullYear() - year);
-  const engineMultiplier = engine / 100;
-  const base = age === 0 ? 2200 : age <= 2 ? 1500 : 800;
-  return Math.floor(base + Math.random() * 400 * engineMultiplier);
-}
+const placeholderImage = "/cars/placeholder.webp";
 
 /**
- * Maps raw Car Specs API model to internal Car object
+ * Maps raw model data (from /models endpoint) to a Car object for grid/list display.
+ * Does NOT include trim/spec data.
  */
 export function mapModelToCar(apiModel: any, index: number): Car {
+  const {
+    id,
+    make,
+    name,
+    numberOfSeats,
+    imageUrl,
+    bodyType,
+    engineType,
+    transmission,
+    capacityCm3,
+  } = apiModel;
+
+  const engine = String(capacityCm3) || "1500";
+  const fuelType = String(engineType ?? "").toLowerCase();
+  const transmissionType = String(transmission ?? "").toLowerCase();
+
+  const getFuelCategory = (): Car["fuel"] => {
+    if (fuelType.includes("electric")) return "electric";
+    if (fuelType.includes("hybrid")) return "hybrid";
+    if (fuelType.includes("diesel")) return "diesel";
+    if (fuelType.includes("gasoline") || fuelType.includes("petrol"))
+      return "petrol";
+    return "unknown";
+  };
+
   return {
-    id: `model-${apiModel.id}-${index}`,
-    make: "Aston Martin",
-    model: apiModel.name,
-    modelId: parseInt(apiModel.id, 10),
-    year: 2020, // placeholder
-    image: "/cars/placeholder.webp",
-    color: "grey",
-    fuel: "unknown",
-    type: "coupe",
-    transmission: "auto",
-    engine: 2000,
-    mileage: 15000,
-    pricePerDay: 120,
-    rating: 4.4,
-    numberOfSeats: 2,
+    id: Number(id),
+    make: String(make ?? "Unknown"),
+    model: name || "Unknown Model",
+    modelId: Number(id),
+    image: imageUrl || placeholderImage,
+    fuel: getFuelCategory(),
+    type: (bodyType || "coupe").toLowerCase(),
+    transmission:
+      transmissionType.includes("auto") || transmissionType.includes("cvt")
+        ? "Automatic"
+        : "Manual",
+    engine,
+    mileage: 0,
+    pricePerDay: 0,
+    rating: 0,
+    numberOfSeats: String(numberOfSeats) || "2",
     status: "available",
-    isFeatured: index % 5 === 0,
+    isFeatured: false,
   };
 }

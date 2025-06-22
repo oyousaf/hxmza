@@ -21,26 +21,24 @@ export default function HomePage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [filteredCars, setFilteredCars] = useState<Car[]>([]);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const [sortBy, setSortBy] = useState("year-desc");
+  const [sortBy, setSortBy] = useState("price-low");
   const [fuel, setFuel] = useState("");
-  const [year, setYear] = useState("");
   const [transmission, setTransmission] = useState("");
   const [featured, setFeatured] = useState(false);
   const [available, setAvailable] = useState(false);
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  // Fetch data based on current page (limit = page * MODELS_PER_PAGE)
+  // Fetch cars from API
   useEffect(() => {
     const loadCars = async () => {
       setLoading(true);
       try {
         const newCars = await fetchCarsFromAPI(makeId, page * MODELS_PER_PAGE);
-        setCars(newCars);
+        setCars((prev) => [...prev, ...newCars]);
       } catch (err) {
         console.error("❌ Failed to fetch cars:", err);
       } finally {
@@ -50,11 +48,11 @@ export default function HomePage() {
     loadCars();
   }, [makeId, page]);
 
-  // Apply filters to cars
+  // Apply filters + sorting
   useEffect(() => {
     let result = [...cars];
+
     if (fuel) result = result.filter((c) => c.fuel === fuel);
-    if (year) result = result.filter((c) => String(c.year) === year);
     if (transmission)
       result = result.filter(
         (c) => c.transmission.toLowerCase() === transmission
@@ -62,20 +60,39 @@ export default function HomePage() {
     if (featured) result = result.filter((c) => c.isFeatured);
     if (available) result = result.filter((c) => c.status === "available");
 
+    switch (sortBy) {
+      case "price-low":
+        result.sort((a, b) => (a.pricePerDay ?? 0) - (b.pricePerDay ?? 0));
+        break;
+      case "price-high":
+        result.sort((a, b) => (b.pricePerDay ?? 0) - (a.pricePerDay ?? 0));
+        break;
+      default:
+        break;
+    }
+
     setFilteredCars(result);
-  }, [cars, fuel, year, transmission, featured, available]);
+  }, [cars, fuel, transmission, featured, available, sortBy]);
 
   // Infinite scroll
   useEffect(() => {
     if (!sentinelRef.current) return;
+
+    let ticking = false;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !loading) {
-          setPage((prev) => prev + 1);
+        if (entries[0].isIntersecting && !loading && !ticking) {
+          ticking = true;
+          setTimeout(() => {
+            setPage((prev) => prev + 1);
+            ticking = false;
+          }, 300);
         }
       },
       { rootMargin: "300px" }
     );
+
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [loading]);
@@ -103,6 +120,11 @@ export default function HomePage() {
               setCars([]);
               setPage(1);
               setMakeId(id);
+              setFuel("");
+              setTransmission("");
+              setFeatured(false);
+              setAvailable(false);
+              setSelectedCar(null);
             }}
           />
           <SortDropdown value={sortBy} onChange={setSortBy} />
@@ -111,11 +133,9 @@ export default function HomePage() {
         <div className="mt-4 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <Filters
             fuel={fuel}
-            year={year}
             transmission={transmission}
-            onChange={({ fuel, year, transmission }) => {
+            onChange={({ fuel, transmission }) => {
               if (fuel !== undefined) setFuel(fuel);
-              if (year !== undefined) setYear(year);
               if (transmission !== undefined) setTransmission(transmission);
             }}
           />
@@ -139,12 +159,18 @@ export default function HomePage() {
         <CarList
           cars={filteredCars}
           loading={loading && page === 1}
-          onCardClick={setSelectedCar}
+          onCardClick={(car) => {
+            if (typeof car.modelId === "string") {
+              car.modelId = Number(car.modelId);
+            }
+            setSelectedCar(car);
+          }}
         />
       </motion.div>
 
       <div ref={sentinelRef} className="h-12" />
 
+      {/* Modal */}
       <CarModal car={selectedCar} onClose={() => setSelectedCar(null)} />
     </main>
   );

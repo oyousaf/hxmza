@@ -1,22 +1,21 @@
 export type Car = {
-  id: string;
+  id: number;
   make: string;
   model: string;
   modelId: number;
-  year: number;
-  fuel: "petrol" | "diesel" | "electric" | "hybrid" | "unknown";
+  fuel: string;
   type: string;
+  engine: string;
   transmission: string;
-  pricePerDay: number;
   image: string;
   mileage: number;
-  color: string;
-  engine: number;
+  pricePerDay: number;
   rating: number;
   isFeatured: boolean;
   status: "available" | "sold" | "reserved";
+  numberOfSeats: string;
 
-  // Optional / API Spec Fields
+  // Optional / API spec fields
   trim?: string;
   series?: string;
   bodyType?: string;
@@ -41,6 +40,9 @@ export type Car = {
   mixedFuelConsumptionPer100KmL?: string;
   highwayFuelPer100KmL?: string;
   rangeKm?: string;
+  capacityCm3?: string;
+  engineType?: string;
+
   fuelTankCapacityL?: string;
   acceleration0To100KmPerHS?: string;
   maxSpeedKmPerH?: string;
@@ -49,7 +51,6 @@ export type Car = {
   rearBrakes?: string;
   frontBrakes?: string;
   frontSuspension?: string;
-  numberOfSeats: number;
 
   // Optional metadata
   features?: string[];

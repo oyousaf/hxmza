@@ -35,6 +35,40 @@ type Trim = {
   bodyType: string;
 };
 
+const isValid = (val: unknown) =>
+  typeof val === "string"
+    ? val.trim() !== "" && val !== "0"
+    : typeof val === "number"
+    ? val > 0
+    : false;
+
+const formatValue = (val: any, label: string): string => {
+  if (!isValid(val)) return "—";
+
+  if (label.includes("BHP")) return `${val} hp`;
+  if (label.includes("Torque")) return `${val} Nm`;
+  if (label.includes("RPM")) return `${val} rpm`;
+  if (label.includes("Acceleration")) return `${parseFloat(val).toFixed(1)} s`;
+  if (label.includes("Top Speed")) return `${val} km/h`;
+  if (label.includes("Tank")) return `${val} L`;
+  if (label.includes("Weight")) return `${val} kg`;
+  if (label.includes("Size")) return `${val} cc`;
+  if (
+    label.includes("Length") ||
+    label.includes("Width") ||
+    label.includes("Height") ||
+    label.includes("Wheelbase")
+  )
+    return `${val} mm`;
+  if (label.includes("Turning")) return `${val} m`;
+
+  return String(val);
+};
+
+const resolvePath = (obj: any, path: string): any => {
+  return path.split(".").reduce((acc, key) => acc?.[key], obj);
+};
+
 export default function CarModal({ car, onClose }: Props) {
   const [step, setStep] = useState<"generation" | "trim" | "spec">(
     "generation"
@@ -105,7 +139,7 @@ export default function CarModal({ car, onClose }: Props) {
   );
 
   useEffect(() => {
-    if (!car || !car.modelId) return;
+    if (!car?.modelId) return;
     resetState();
     loadGenerations(car.modelId);
     document.body.style.overflow = "hidden";
@@ -127,8 +161,7 @@ export default function CarModal({ car, onClose }: Props) {
   async function loadGenerations(modelId: number) {
     setLoading(true);
     try {
-      const gens = await fetchGenerations(modelId);
-      setGenerations(gens);
+      setGenerations(await fetchGenerations(modelId));
     } finally {
       setLoading(false);
     }
@@ -162,56 +195,27 @@ export default function CarModal({ car, onClose }: Props) {
     setLoading(true);
     try {
       if (specCache.has(trim.id)) {
-        setSpecs(specCache.get(trim.id));
+        setSpecs(specCache.get(trim.id)!);
       } else {
-        const data = await fetchSpecs(trim.id);
-        specCache.set(trim.id, data);
-        setSpecs(data);
+        const res = await fetchSpecs(trim.id);
+        specCache.set(trim.id, res);
+        setSpecs(res);
       }
     } finally {
       setLoading(false);
     }
   }
 
-  function formatValue(value: any, label: string): string {
-    if (value === null || value === undefined || value === "") return "—";
-    if (typeof value === "number" && Number.isNaN(value)) return "—";
-
-    if (label.includes("BHP")) return value + " hp";
-    if (label.includes("Torque")) return value + " Nm";
-    if (label.includes("RPM")) return value + " rpm";
-    if (label.includes("Acceleration")) return value.toFixed(1) + " s";
-    if (label.includes("Top Speed")) return value + " km/h";
-    if (label.includes("Tank")) return value + " L";
-    if (label.includes("Weight")) return value + " kg";
-    if (label.includes("Size")) return value + " cc";
-    if (
-      label.includes("Length") ||
-      label.includes("Width") ||
-      label.includes("Height") ||
-      label.includes("Wheelbase")
-    )
-      return value + " mm";
-    if (label.includes("Turning")) return value + " m";
-    return String(value);
-  }
-
-  function resolvePath(obj: any, path: string): any {
-    return path.split(".").reduce((acc, key) => acc?.[key], obj);
-  }
-
-  function formatGenerationLabel(name: string): string {
+  const formatGenerationLabel = (name: string) => {
     const match = name.trim().match(/^(\d+)\s*generation$/i);
-    if (match) {
-      const num = parseInt(match[1]);
-      const suffix =
-        [, "st", "nd", "rd"][num % 10] && ![11, 12, 13].includes(num % 100)
-          ? [, "st", "nd", "rd"][num % 10]
-          : "th";
-      return `${num}${suffix} Generation`;
-    }
-    return name;
-  }
+    if (!match) return name;
+    const num = parseInt(match[1]);
+    const suffix =
+      [, "st", "nd", "rd"][num % 10] && ![11, 12, 13].includes(num % 100)
+        ? [, "st", "nd", "rd"][num % 10]
+        : "th";
+    return `${num}${suffix} Generation`;
+  };
 
   if (!car) return null;
 
@@ -261,7 +265,7 @@ export default function CarModal({ car, onClose }: Props) {
                   if (step === "spec") {
                     setStep("trim");
                     setSpecs(null);
-                  } else if (step === "trim") {
+                  } else {
                     setStep("generation");
                     setTrims([]);
                   }
@@ -285,7 +289,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Generation Picker */}
+          {/* Generation View */}
           {!loading && step === "generation" && (
             <div className="space-y-4">
               <p className="font-semibold text-textPrimary dark:text-white mb-2">
@@ -310,7 +314,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Trim Picker */}
+          {/* Trim View */}
           {!loading && step === "trim" && (
             <div className="space-y-4 mt-6">
               <p className="font-semibold text-textPrimary dark:text-white mb-2">
@@ -321,11 +325,13 @@ export default function CarModal({ car, onClose }: Props) {
                   <button
                     key={trim.id}
                     onClick={() => loadSpecs(trim)}
-                    onMouseEnter={() =>
-                      fetchSpecs(trim.id).then((res) =>
-                        specCache.set(trim.id, res)
-                      )
-                    }
+                    onMouseEnter={() => {
+                      if (!specCache.has(trim.id)) {
+                        fetchSpecs(trim.id).then((res) =>
+                          specCache.set(trim.id, res)
+                        );
+                      }
+                    }}
                     className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
                       selectedTrim?.id === trim.id
                         ? "bg-brand text-white"
@@ -339,7 +345,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Spec Display */}
+          {/* Spec View */}
           {!loading && step === "spec" && specs && (
             <div className="space-y-8 mt-6">
               {Object.entries(specSections).map(([section, { icon, keys }]) => (
@@ -359,7 +365,6 @@ export default function CarModal({ car, onClose }: Props) {
                   </div>
                 </div>
               ))}
-
               <div className="rounded-lg overflow-hidden mt-6">
                 <img
                   src={car.image || "/cars/placeholder.webp"}

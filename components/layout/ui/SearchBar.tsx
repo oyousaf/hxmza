@@ -8,9 +8,8 @@ type Make = { id: number; name: string };
 
 type Props = {
   query: string;
-  type: string;
   loading?: boolean;
-  onChange: (updates: { query?: string; type?: string }) => void;
+  onChange: (updates: { query?: string; }) => void;
   onMakeSelect?: (make: Make) => void;
   placeholder?: string;
 };
@@ -19,7 +18,6 @@ const DEBOUNCE_DELAY = 300;
 
 export default function SearchBar({
   query,
-  type,
   loading = false,
   onChange,
   onMakeSelect,

@@ -3,11 +3,23 @@ import { Car } from "@/types/car";
 const placeholderImage = "/cars/placeholder.webp";
 
 /**
- * Maps /models response into a lightweight Car object with defaults.
- * This only uses fields available from the /models endpoint.
+ * Represents a simplified model object returned from /models endpoint
  */
-export function mapModelToCar(apiModel: any, globalIndex: number): Car {
+export interface ModelInput {
+  id?: number | string;
+  name?: string;
+  yearFrom?: number | string;
+  yearTo?: number | string | null;
+}
+
+export function mapModelToCar(apiModel: ModelInput, globalIndex: number): Car {
   const id = Number(apiModel.id ?? globalIndex);
+  const yearFrom =
+    apiModel.yearFrom !== undefined ? Number(apiModel.yearFrom) : undefined;
+  const yearTo =
+    apiModel.yearTo !== undefined && apiModel.yearTo !== null
+      ? Number(apiModel.yearTo)
+      : null;
 
   return {
     id,

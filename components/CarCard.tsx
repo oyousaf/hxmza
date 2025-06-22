@@ -3,14 +3,6 @@
 import { Car } from "@/types/car";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import {
-  FaGasPump,
-  FaCogs,
-  FaTachometerAlt,
-  FaUserFriends,
-  FaHorseHead,
-} from "react-icons/fa";
-import { GiSteeringWheel } from "react-icons/gi";
 import { useState } from "react";
 import { fetchGenerations } from "@/lib/client/fetchGenerations";
 import { fetchTrims } from "@/lib/client/fetchTrims";
@@ -40,30 +32,6 @@ function prefetchOnHover(modelId: number) {
 export default function CarCard({ car, onClick }: Props) {
   const [imgSrc, setImgSrc] = useState(car.image || "/cars/placeholder.webp");
 
-  const format = (val: string | undefined): string =>
-    val ? val.charAt(0).toUpperCase() + val.slice(1).toLowerCase() : "—";
-
-  const formatFuel = (val: string): string => {
-    const v = val.toLowerCase();
-    if (v.includes("gasoline") || v.includes("petrol")) return "Petrol";
-    if (v.includes("diesel")) return "Diesel";
-    if (v.includes("hybrid")) return "Hybrid";
-    if (v.includes("electric")) return "Electric";
-    return format(val);
-  };
-
-  const formatEngineSize = (cc: string): string => {
-    const parsed = parseInt(cc, 10);
-    return isNaN(parsed) ? "—" : `${(parsed / 1000).toFixed(1)}L`;
-  };
-
-  const formatTransmission = (trans: string): string => {
-    const t = trans.toLowerCase();
-    if (t.includes("auto") || t.includes("cvt")) return "Automatic";
-    if (t.includes("manual")) return "Manual";
-    return format(trans);
-  };
-
   return (
     <motion.div
       onMouseEnter={() => prefetchOnHover(car.modelId)}
@@ -76,7 +44,7 @@ export default function CarCard({ car, onClick }: Props) {
       <div className="relative w-full h-48">
         <Image
           src={imgSrc}
-          alt={`${car.make} ${car.model}`}
+          alt={car.model}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 33vw"
@@ -87,41 +55,15 @@ export default function CarCard({ car, onClick }: Props) {
       {/* Info */}
       <div className="p-4 text-gray-700 dark:text-gray-200 space-y-3 text-sm">
         <h3 className="text-xl font-semibold text-textPrimary dark:text-white leading-tight">
-          {format(car.make)} {format(car.model)}
+          {car.model}
         </h3>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm pt-2">
-          <div className="flex items-center gap-2">
-            <FaGasPump className="text-lg text-textPrimary dark:text-brand" />
-            {formatFuel(car.fuel)}
-          </div>
-          <div className="flex items-center gap-2">
-            <FaCogs className="text-lg text-textPrimary dark:text-brand" />
-            {formatTransmission(car.transmission)}
-          </div>
-          <div className="flex items-center gap-2">
-            <GiSteeringWheel className="text-lg text-textPrimary dark:text-brand" />
-            {format(car.bodyType)}
-          </div>
-          <div className="flex items-center gap-2">
-            <FaUserFriends className="text-lg text-textPrimary dark:text-brand" />
-            {car.numberOfSeats ? `${car.numberOfSeats} seats` : "—"}
-          </div>
-          <div className="flex items-center gap-2">
-            <FaTachometerAlt className="text-lg text-textPrimary dark:text-brand" />
-            {car.engine ? formatEngineSize(car.engine) : "—"}
-          </div>
-          <div className="flex items-center gap-2">
-            <FaHorseHead className="text-lg text-textPrimary dark:text-brand" />
-            {car.engineHp ? `${car.engineHp} BHP` : "—"}
-          </div>
-        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+          {car.year}
+        </p>
 
-        <p className="mt-2 font-bold text-base sm:text-lg text-textPrimary dark:text-white">
-          {car.pricePerDay
-            ? `£${new Intl.NumberFormat("en-UK").format(car.pricePerDay)}`
-            : "—"}{" "}
-          <span className="text-sm text-gray-500">/ day</span>
+        <p className="text-sm mt-1 italic text-gray-400">
+          Tap to view trims & specs →
         </p>
       </div>
     </motion.div>

@@ -3,53 +3,69 @@ import { Car } from "@/types/car";
 const placeholderImage = "/cars/placeholder.webp";
 
 /**
- * Maps raw model data (from /models endpoint) to a Car object for grid/list display.
- * Does NOT include trim/spec data.
+ * Maps /models response into a full Car object with default values
+ * where data is not available (e.g., fuel, engine, etc.)
  */
-export function mapModelToCar(apiModel: any, index: number): Car {
-  const {
-    id,
-    make,
-    name,
-    numberOfSeats,
-    imageUrl,
-    bodyType,
-    engineType,
-    transmission,
-    capacityCm3,
-  } = apiModel;
-
-  const engine = String(capacityCm3) || "1500";
-  const fuelType = String(engineType ?? "").toLowerCase();
-  const transmissionType = String(transmission ?? "").toLowerCase();
-
-  const getFuelCategory = (): Car["fuel"] => {
-    if (fuelType.includes("electric")) return "electric";
-    if (fuelType.includes("hybrid")) return "hybrid";
-    if (fuelType.includes("diesel")) return "diesel";
-    if (fuelType.includes("gasoline") || fuelType.includes("petrol"))
-      return "petrol";
-    return "unknown";
-  };
+export function mapModelToCar(apiModel: any, globalIndex: number): Car {
+  const yearFrom = apiModel.yearFrom || 0;
+  const yearTo = apiModel.yearTo ?? null;
 
   return {
-    id: Number(id),
-    make: String(make ?? "Unknown"),
-    model: name || "Unknown Model",
-    modelId: Number(id),
-    image: imageUrl || placeholderImage,
-    fuel: getFuelCategory(),
-    type: (bodyType || "coupe").toLowerCase(),
-    transmission:
-      transmissionType.includes("auto") || transmissionType.includes("cvt")
-        ? "Automatic"
-        : "Manual",
-    engine,
+    id: Number(apiModel.id ?? globalIndex),
+    modelId: Number(apiModel.id ?? globalIndex),
+    model: apiModel.name || "Unknown Model",
+    year: `${yearFrom}${yearTo ? `–${yearTo}` : "–"}`,
+    image: placeholderImage,
+
+    // Preserved custom/default fields
+    make: "",
+    fuel: "unknown",
+    type: "—",
+    engine: "—",
+    transmission: "—",
     mileage: 0,
     pricePerDay: 0,
     rating: 0,
-    numberOfSeats: String(numberOfSeats) || "2",
-    status: "available",
     isFeatured: false,
+    status: "available",
+    numberOfSeats: "—",
+
+    // Placeholder for trim/spec fields
+    trim: "",
+    series: "",
+    bodyType: "",
+    lengthMm: "",
+    widthMm: "",
+    heightMm: "",
+    wheelbaseMm: "",
+    frontTrackMm: "",
+    rearTrackMm: "",
+    curbWeightKg: "",
+    maximumTorqueNM: "",
+    injectionType: "",
+    cylinderLayout: "",
+    numberOfCylinders: "",
+    valvesPerCylinder: "",
+    turnoverOfMaximumTorqueRpm: "",
+    engineHp: "",
+    engineHpRpm: "",
+    driveWheels: "",
+    turningCircleM: "",
+    cityFuelPer100KmL: "",
+    mixedFuelConsumptionPer100KmL: "",
+    highwayFuelPer100KmL: "",
+    rangeKm: "",
+    capacityCm3: "",
+    engineType: "",
+    fuelTankCapacityL: "",
+    acceleration0To100KmPerHS: "",
+    maxSpeedKmPerH: "",
+    fuelGrade: "",
+    backSuspension: "",
+    rearBrakes: "",
+    frontBrakes: "",
+    frontSuspension: "",
+    features: [],
+    location: "",
   };
 }

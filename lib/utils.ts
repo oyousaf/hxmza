@@ -7,12 +7,14 @@ const placeholderImage = "/cars/placeholder.webp";
  */
 export function mapApiCarToInternalCar(
   apiCar: Record<string, unknown>,
-  index: number,
+  index: number
 ): Car {
   const engine = String(apiCar.capacityCm3) || "1200";
   const fuelType = String(apiCar.engineType ?? "").toLowerCase();
   const transmission = String(apiCar.transmission ?? "").toLowerCase();
   const body = String(apiCar.bodyType ?? apiCar.series ?? "hatchback");
+  const yearFrom = apiCar.yearFrom || 0;
+  const yearTo = apiCar.yearTo ?? null;
 
   const getFuelCategory = (): Car["fuel"] => {
     if (fuelType.includes("electric")) return "electric";
@@ -28,6 +30,7 @@ export function mapApiCarToInternalCar(
     make: String(apiCar.make ?? "Unknown"),
     model: String(apiCar.model ?? "Model"),
     modelId: Number(apiCar.modelId),
+    year: `${yearFrom}${yearTo ? `–${yearTo}` : "–"}`,
     image: placeholderImage,
     fuel: getFuelCategory(),
     type: body.toLowerCase(),

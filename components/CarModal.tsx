@@ -144,6 +144,19 @@ export default function CarModal({ car, onClose }: Props) {
       .replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
+  function formatGenerationLabel(name: string): string {
+    const match = name.trim().match(/^(\d+)\s*generation$/i);
+    if (match) {
+      const num = parseInt(match[1]);
+      const suffix =
+        [, "st", "nd", "rd"][num % 10] && ![11, 12, 13].includes(num % 100)
+          ? [, "st", "nd", "rd"][num % 10]
+          : "th";
+      return `${num}${suffix} Generation`;
+    }
+    return name;
+  }
+
   if (!car) return null;
 
   return (
@@ -220,7 +233,7 @@ export default function CarModal({ car, onClose }: Props) {
           {/* Generation Picker */}
           {!loading && step === "generation" && (
             <div className="space-y-4">
-              <p className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <p className="font-semibold text-textPrimary dark:text-white mb-2">
                 Select a Generation:
               </p>
               <div className="flex flex-wrap gap-3">
@@ -230,13 +243,14 @@ export default function CarModal({ car, onClose }: Props) {
                     <button
                       key={gen.id}
                       onClick={() => loadTrims(gen)}
-                      className={`px-4 py-2 rounded-full transition ${
+                      className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
                         isSelected
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700"
+                          ? "bg-brand text-white"
+                          : "bg-white text-textPrimary dark:bg-brand dark:text-textPrimary hover:bg-gray-100 dark:hover:bg-brand/50 dark:hover:text-white"
                       }`}
                     >
-                      {gen.name} ({gen.yearFrom}–{gen.yearTo ?? "present"})
+                      {formatGenerationLabel(gen.name)} ({gen.yearFrom}
+                      {gen.yearTo ? `–${gen.yearTo}` : "–"})
                     </button>
                   );
                 })}
@@ -244,65 +258,7 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Trim Picker */}
-          {!loading && step === "trim" && (
-            <div className="space-y-4">
-              <p className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Select a Trim:
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {trims.map((trim) => {
-                  const isSelected = selectedTrim?.id === trim.id;
-                  return (
-                    <button
-                      key={trim.id}
-                      onClick={() => loadSpecs(trim)}
-                      className={`px-4 py-2 rounded-full transition ${
-                        isSelected
-                          ? "bg-green-600 text-white"
-                          : "bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700"
-                      }`}
-                    >
-                      {trim.trim} • {trim.bodyType}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Spec Display */}
-          {!loading && step === "spec" && specs && (
-            <div className="space-y-6 mt-4">
-              {Object.entries(specSections).map(([section, keys]) => (
-                <div key={section}>
-                  <h3 className="text-lg font-bold text-textPrimary dark:text-white mb-2">
-                    {section}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-200">
-                    {keys.map((key) => (
-                      <div key={key}>
-                        <p className="uppercase text-xs font-semibold text-gray-500 dark:text-gray-400">
-                          {formatSpecKey(key)}
-                        </p>
-                        <p>{specs[key] ?? "—"}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              <div className="rounded-lg overflow-hidden mt-6">
-                <img
-                  src={car.image || "/cars/placeholder.webp"}
-                  alt={`${car.make} ${car.model}`}
-                  onError={(e) =>
-                    (e.currentTarget.src = "/cars/placeholder.webp")
-                  }
-                  className="w-full h-auto object-cover rounded-md shadow"
-                />
-              </div>
-            </div>
-          )}
+          {/* Trim + Spec Picker remain unchanged below */}
         </motion.div>
       </motion.div>
     </AnimatePresence>

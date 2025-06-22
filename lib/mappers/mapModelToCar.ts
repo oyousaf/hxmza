@@ -1,16 +1,7 @@
 import { Car } from "@/types/car";
+import { ModelInput } from "../client/fetchModels";
 
 const placeholderImage = "/cars/placeholder.webp";
-
-/**
- * Represents a simplified model object returned from /models endpoint
- */
-export interface ModelInput {
-  id?: number | string;
-  name?: string;
-  yearFrom?: number | string;
-  yearTo?: number | string | null;
-}
 
 export function mapModelToCar(apiModel: ModelInput, globalIndex: number): Car {
   const id = Number(apiModel.id ?? globalIndex);

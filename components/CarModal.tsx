@@ -216,7 +216,7 @@ export default function CarModal({ car, onClose }: Props) {
                     setTrims([]);
                   }
                 }}
-                className="px-6 py-2 rounded-full text-textPrimary hover:text-textPrimary/50 dark:text-brand dark:hover:text-brand/50 font-semibold text-base shadow transition"
+                className="px-6 py-2 rounded-full text-textPrimary hover:text-textPrimary/50 dark:text-brand dark:hover:text-brand/50 font-semibold text-base transition"
               >
                 <FaLeftLong className="inline-block mr-2 text-4xl" />
               </button>

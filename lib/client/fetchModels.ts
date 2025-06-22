@@ -6,6 +6,7 @@ const HEADERS = {
   "X-RapidAPI-Host": API_HOST,
 };
 
+// Define the expected shape of each model object from the API
 export type CarModel = {
   id: number;
   make: string;
@@ -16,18 +17,9 @@ export type CarModel = {
   [key: string]: unknown;
 };
 
-type RawModel = {
-  id?: number | string;
-  make?: string;
-  model?: string;
-  modelId?: number | string;
-  yearFrom?: number | string;
-  yearTo?: number | string | null;
-  [key: string]: unknown;
-};
-
 const modelCache: Record<number, CarModel[]> = {};
 
+// Generic fetcher with retries for rate limiting (429)
 async function fetchWithRetry<T>(
   url: string,
   options: RequestInit,
@@ -47,21 +39,21 @@ async function fetchWithRetry<T>(
   throw new Error("Unexpected failure in fetchWithRetry");
 }
 
+// Fetch car models for a given make ID
 export async function fetchModels(makeId: number): Promise<CarModel[]> {
   if (modelCache[makeId]) return modelCache[makeId];
 
   const url = `https://${API_HOST}/v2/cars/makes/${makeId}/models`;
-  const res = await fetchWithRetry<RawModel[]>(url, { headers: HEADERS });
+  const res = await fetchWithRetry<unknown[]>(url, { headers: HEADERS });
 
+  // Validate and transform only if the response is an array of objects
   const models: CarModel[] = Array.isArray(res)
     ? res.map((m, idx) => ({
-        id: Number(m.id ?? idx),
-        make: String(m.make ?? "Unknown"),
-        model: String(m.model ?? "Model"),
-        modelId: Number(m.modelId ?? idx),
-        yearFrom: m.yearFrom !== undefined ? Number(m.yearFrom) : undefined,
-        yearTo:
-          m.yearTo !== undefined && m.yearTo !== null ? Number(m.yearTo) : null,
+        id: Number((m as any).id ?? idx),
+        make: String((m as any).make ?? "Unknown"),
+        model: String((m as any).model ?? "Model"),
+        modelId: Number((m as any).modelId ?? idx),
+        ...(typeof m === "object" && m !== null ? m : {}),
       }))
     : [];
 

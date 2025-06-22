@@ -7,8 +7,7 @@ import Image from "next/image";
 import { Car } from "@/types/car";
 import { fetchGenerations } from "@/lib/client/fetchGenerations";
 import { fetchTrims } from "@/lib/client/fetchTrims";
-import { fetchSpecs } from "@/lib/client/fetchSpecs";
-import { trimCache, specCache } from "@/lib/cache/carCache";
+import { trimCache } from "@/lib/cache/carCache";
 
 type Props = {
   car: Car;
@@ -16,31 +15,24 @@ type Props = {
 };
 
 const prefetched = new Set<number>();
+let hoverTimeout: NodeJS.Timeout | null = null;
 
-async function prefetchOnHover(modelId: number) {
-  if (prefetched.has(modelId)) return;
-  prefetched.add(modelId);
+function prefetchOnHoverDebounced(modelId: number) {
+  if (hoverTimeout) clearTimeout(hoverTimeout);
 
-  try {
-    const generations = await fetchGenerations(modelId);
-    const firstGen = generations?.[0];
-    if (!firstGen) return;
+  hoverTimeout = setTimeout(() => {
+    if (prefetched.has(modelId)) return;
+    prefetched.add(modelId);
 
-    if (!trimCache.has(firstGen.id)) {
-      const trims = await fetchTrims(firstGen.id);
-      trimCache.set(firstGen.id, trims || []);
-
-      const firstTrim = trims?.[0];
-      if (firstTrim && !specCache.has(firstTrim.id)) {
-        const spec = await fetchSpecs(firstTrim.id);
-        if (spec) {
-          specCache.set(firstTrim.id, spec);
-        }
+    fetchGenerations(modelId).then((generations) => {
+      const firstGen = generations?.[0];
+      if (firstGen && !trimCache.has(firstGen.id)) {
+        fetchTrims(firstGen.id).then((trims) => {
+          trimCache.set(firstGen.id, trims || []);
+        });
       }
-    }
-  } catch (err) {
-    console.error("❌ Prefetch failed:", err);
-  }
+    });
+  }, 700); // 700ms debounce to respect API rate limits
 }
 
 export default function CarCard({ car, onClick }: Props) {
@@ -48,7 +40,7 @@ export default function CarCard({ car, onClick }: Props) {
 
   return (
     <motion.div
-      onMouseEnter={() => prefetchOnHover(car.modelId)}
+      onMouseEnter={() => prefetchOnHoverDebounced(car.modelId)}
       whileHover={{ scale: 1.03 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
       onClick={() => onClick(car)}

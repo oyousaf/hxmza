@@ -21,7 +21,10 @@ export async function fetchSpecs(trimId: number): Promise<any | null> {
       return data;
     }
 
-    console.warn(`⚠️ Unexpected format in specs response for trim ${trimId}`, data);
+    console.warn(
+      `⚠️ Unexpected format in specs response for trim ${trimId}`,
+      data
+    );
     return null;
   } catch (error) {
     console.error("❌ Failed to fetch specs:", error);

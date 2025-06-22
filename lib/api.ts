@@ -18,21 +18,37 @@ export async function fetchCarsFromAPI(
   const models = await fetchModels(makeId);
   let cars = models.map((model, i) => mapModelToCar(model, i));
 
-  // Apply filters
+  // Smart filtering
   if (filters) {
-    if (filters.fuel) {
+    const { fuel, transmission, featured } = filters;
+
+    // Fuel filter with alias support
+    if (fuel) {
+      const userFuel = fuel.toLowerCase();
+      const fuelAliases: Record<string, string[]> = {
+        petrol: ["petrol", "gasoline"],
+        diesel: ["diesel"],
+        electric: ["electric", "ev", "electricity", "battery"],
+        hybrid: ["hybrid", "plug-in hybrid", "mild hybrid", "phev"],
+      };
+      const acceptedFuelTerms = fuelAliases[userFuel] ?? [userFuel];
+
+      cars = cars.filter((car) => {
+        const carFuel = car.fuel?.toLowerCase() || "";
+        return acceptedFuelTerms.some((alias) => carFuel.includes(alias));
+      });
+    }
+
+    // Transmission filter (simple case-insensitive match)
+    if (transmission) {
+      const transmissionValue = transmission.toLowerCase();
       cars = cars.filter((car) =>
-        car.fuel?.toLowerCase().includes(filters.fuel!)
+        car.transmission?.toLowerCase().includes(transmissionValue)
       );
     }
 
-    if (filters.transmission) {
-      cars = cars.filter((car) =>
-        car.transmission?.toLowerCase().includes(filters.transmission!)
-      );
-    }
-
-    if (filters.featured) {
+    // Featured flag filter
+    if (featured) {
       cars = cars.filter((car) => car.featured);
     }
   }

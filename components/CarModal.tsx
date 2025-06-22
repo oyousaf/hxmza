@@ -42,28 +42,31 @@ const isValid = (val: unknown) =>
     ? val > 0
     : false;
 
-const formatValue = (val: any, label: string): string => {
+const formatValue = (val: any, label: string, path?: string): string => {
   if (!isValid(val)) return "—";
 
-  if (label.includes("BHP")) return `${val} hp`;
-  if (label.includes("Torque")) return `${val} Nm`;
-  if (label.includes("RPM")) return `${val} rpm`;
-  if (label.includes("Acceleration")) return `${parseFloat(val).toFixed(1)} s`;
-  if (label.includes("Top Speed")) return `${val} km/h`;
-  if (label.includes("Tank")) return `${val} L`;
-  if (label.includes("Weight")) return `${val} kg`;
-  if (label.includes("Size")) return `${val} cc`;
+  const num = parseFloat(val);
+
+  if (path?.includes("acceleration")) return `${num.toFixed(1)} s`;
+  if (path?.includes("torque")) return `${num} Nm`;
+  if (path?.includes("horsepower")) return `${num} bhp`;
+  if (path?.includes("rpm")) return `${num} rpm`;
+  if (path?.includes("topSpeed")) return `${num} km/h`;
+  if (path?.includes("tank")) return `${num} L`;
+  if (path?.includes("weight")) return `${num} kg`;
+  if (path?.includes("displacement")) return `${num} cc`;
   if (
-    label.includes("Length") ||
-    label.includes("Width") ||
-    label.includes("Height") ||
-    label.includes("Wheelbase")
+    path?.includes("length") ||
+    path?.includes("width") ||
+    path?.includes("height") ||
+    path?.includes("wheelbase")
   )
-    return `${val} mm`;
-  if (label.includes("Turning")) return `${val} m`;
+    return `${num} mm`;
+  if (path?.includes("turningCircle")) return `${num} m`;
 
   return String(val);
 };
+
 
 const resolvePath = (obj: any, path: string): any => {
   return path.split(".").reduce((acc, key) => acc?.[key], obj);
@@ -359,7 +362,7 @@ export default function CarModal({ car, onClose }: Props) {
                         <p className="uppercase text-xs font-semibold text-gray-500 dark:text-gray-400">
                           {label}
                         </p>
-                        <p>{formatValue(resolvePath(specs, path), label)}</p>
+                        <p>{formatValue(resolvePath(specs, path), label, path)}</p>
                       </div>
                     ))}
                   </div>

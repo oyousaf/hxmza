@@ -211,7 +211,7 @@ export default function CarModal({ car, onClose }: Props) {
                   setSelectedGeneration(null);
                 }
               }}
-              className="flex items-center gap-2 mb-4 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+              className="flex items-center gap-2 mb-4 text-sm font-medium text-textPrimary dark:text-brand hover:underline"
             >
               <ArrowLeftIcon className="w-4 h-4" />
               Back
@@ -258,7 +258,71 @@ export default function CarModal({ car, onClose }: Props) {
             </div>
           )}
 
-          {/* Trim + Spec Picker remain unchanged below */}
+          {/* Trim Picker */}
+          {!loading && step === "trim" && (
+            <div className="space-y-4 mt-6">
+              <p className="font-semibold text-textPrimary dark:text-white mb-2">
+                Select a Trim:
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {trims.length === 0 ? (
+                  <p className="text-sm text-gray-500 italic">
+                    No trims found for this generation.
+                  </p>
+                ) : (
+                  trims.map((trim) => {
+                    const isSelected = selectedTrim?.id === trim.id;
+                    return (
+                      <button
+                        key={trim.id}
+                        onClick={() => loadSpecs(trim)}
+                        className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
+                          isSelected
+                            ? "bg-brand text-white"
+                            : "bg-white text-textPrimary dark:bg-brand dark:text-textPrimary hover:bg-gray-100 dark:hover:bg-brand/50 dark:hover:text-white"
+                        }`}
+                      >
+                        {trim.trim} • {trim.bodyType}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Spec Display */}
+          {!loading && step === "spec" && specs && (
+            <div className="space-y-6 mt-4">
+              {Object.entries(specSections).map(([section, keys]) => (
+                <div key={section}>
+                  <h3 className="text-lg font-bold text-textPrimary dark:text-white mb-2">
+                    {section}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-200">
+                    {keys.map((key) => (
+                      <div key={key}>
+                        <p className="uppercase text-xs font-semibold text-gray-500 dark:text-gray-400">
+                          {formatSpecKey(key)}
+                        </p>
+                        <p>{specs[key] ?? "—"}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <div className="rounded-lg overflow-hidden mt-6">
+                <img
+                  src={car.image || "/cars/placeholder.webp"}
+                  alt={`${car.make} ${car.model}`}
+                  onError={(e) =>
+                    (e.currentTarget.src = "/cars/placeholder.webp")
+                  }
+                  className="w-full h-auto object-cover rounded-md shadow"
+                />
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>

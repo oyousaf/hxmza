@@ -93,7 +93,7 @@ export default function SearchBar({
           onChange={(e) => setInputValue(e.target.value)}
           onFocus={() => setShowDropdown(true)}
           onBlur={() => setTimeout(() => setShowDropdown(false), 100)}
-          className="w-full border px-3 py-2 rounded-md text-sm dark:bg-textPrimary dark:text-brand"
+          className="w-full border px-3 py-2 rounded-md text-sm"
           autoCapitalize="off"
           autoCorrect="off"
         />

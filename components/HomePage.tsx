@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 import SearchBar from "@/components/layout/ui/SearchBar";
-import Filters from "@/components/Filters";
-import Toggles from "@/components/Toggles";
+// import Filters from "@/components/Filters";
+// import Toggles from "@/components/Toggles";
 import CarList from "@/components/CarList";
 import CarModal from "@/components/CarModal";
 
@@ -21,9 +21,12 @@ export default function HomePage() {
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-  const [fuel, setFuel] = useState<string>("");
-  const [transmission, setTransmission] = useState<string>("");
-  const [featured, setFeatured] = useState<boolean>(false);
+
+  // Commented out filters for now
+  // const [fuel, setFuel] = useState<string>("");
+  // const [transmission, setTransmission] = useState<string>("");
+  // const [featured, setFeatured] = useState<boolean>(false);
+
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const loadCars = useCallback(
@@ -33,8 +36,9 @@ export default function HomePage() {
         const newCars = await fetchCarsFromAPI(
           makeId,
           targetPage,
-          MODELS_PER_PAGE,
-          { fuel, transmission, featured }
+          MODELS_PER_PAGE
+          // Comment out filters for now
+          // { fuel, transmission, featured }
         );
 
         setCars((prev) =>
@@ -51,22 +55,19 @@ export default function HomePage() {
         setLoading(false);
       }
     },
-    [makeId, fuel, transmission, featured]
+    [makeId] // Removed filters from dependency list
   );
 
-  // Reset on filter or make change
   useEffect(() => {
     setCars([]);
     setPage(1);
     loadCars(1, true);
   }, [loadCars]);
 
-  // Load more cars when page increases (after first page)
   useEffect(() => {
     if (page > 1) loadCars(page);
   }, [page, loadCars]);
 
-  // Infinite scroll
   useEffect(() => {
     if (!sentinelRef.current) return;
 
@@ -105,6 +106,8 @@ export default function HomePage() {
           }}
         />
 
+        {/* Commented for now */}
+        {/*
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <Filters
             fuel={fuel}
@@ -123,6 +126,7 @@ export default function HomePage() {
             }}
           />
         </div>
+        */}
       </div>
 
       <motion.div

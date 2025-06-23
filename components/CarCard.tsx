@@ -8,6 +8,9 @@ import { Car } from "@/types/car";
 import { fetchGenerations } from "@/lib/client/fetchGenerations";
 import { fetchTrims } from "@/lib/client/fetchTrims";
 import { trimCache } from "@/lib/cache/carCache";
+import { FaRoad, FaStar } from "react-icons/fa";
+import { BsCheckCircleFill } from "react-icons/bs";
+import { PiCurrencyGbpBold } from "react-icons/pi";
 
 type Props = {
   car: Car;
@@ -63,6 +66,32 @@ export default function CarCard({ car, onClick }: Props) {
         <h3 className="text-xl font-semibold text-textPrimary dark:text-white leading-tight">
           {car.model}
         </h3>
+
+        <div className="flex items-center justify-between gap-2 text-xs font-medium">
+          {/* Status */}
+          <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+            <BsCheckCircleFill className="text-sm" />
+            <span>Available</span>
+          </div>
+
+          {/* Price */}
+          <div className="flex items-center gap-1">
+            <PiCurrencyGbpBold className="text-sm" />
+            <span>{car.pricePerDay}/day</span>
+          </div>
+
+          {/* Mileage */}
+          <div className="flex items-center gap-1">
+            <FaRoad className="text-sm" />
+            <span>{car.mileage.toLocaleString()} mi</span>
+          </div>
+
+          {/* Rating */}
+          <div className="flex items-center gap-1">
+            <FaStar className="text-yellow-500 dark:text-yellow-400 text-sm" />
+            <span>{car.rating.toFixed(1)}</span>
+          </div>
+        </div>
       </div>
     </motion.div>
   );

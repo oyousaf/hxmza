@@ -3,7 +3,7 @@ import { mapModelToCar } from "./mappers/mapModelToCar";
 import { Car } from "@/types/car";
 
 /**
- * Fetch models by makeId with local pagination and optional filtering.
+ * Fetch models by makeId with pagination and filtering.
  */
 export async function fetchCarsFromAPI(
   makeId: number,
@@ -16,13 +16,22 @@ export async function fetchCarsFromAPI(
   }
 ): Promise<Car[]> {
   const models = await fetchModels(makeId);
-  let cars = models.map((model, i) => mapModelToCar(model, i));
 
-  // Smart filtering
+  // Get only models for current page
+  const start = (page - 1) * limit;
+  const end = start + limit;
+  const modelsPage = models.slice(start, end);
+
+  // Map all models to full Car objects in parallel
+  const carPromises = modelsPage.map((model, i) =>
+    mapModelToCar(model, start + i)
+  );
+  let cars = await Promise.all(carPromises);
+
+  // Apply filters if provided
   if (filters) {
     const { fuel, transmission, featured } = filters;
 
-    // Fuel filter with alias support
     if (fuel) {
       const userFuel = fuel.toLowerCase();
       const fuelAliases: Record<string, string[]> = {
@@ -39,7 +48,6 @@ export async function fetchCarsFromAPI(
       });
     }
 
-    // Transmission filter (simple case-insensitive match)
     if (transmission) {
       const transmissionValue = transmission.toLowerCase();
       cars = cars.filter((car) =>
@@ -47,15 +55,10 @@ export async function fetchCarsFromAPI(
       );
     }
 
-    // Featured flag filter
     if (featured) {
       cars = cars.filter((car) => car.featured);
     }
   }
 
-  // Paginate after filtering
-  const start = (page - 1) * limit;
-  const end = start + limit;
-
-  return cars.slice(start, end);
+  return cars;
 }

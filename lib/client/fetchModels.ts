@@ -10,20 +10,20 @@ const HEADERS = {
 type RawModel = {
   id?: number | string;
   modelId?: number | string;
-  name?: string; // <- this is what the API returns (not "model")
+  name?: string;
   make?: string;
-  yearFrom?: number | string;
-  yearTo?: number | string | null;
+  yearFrom?: number;
+  yearTo?: number;
 };
 
 // ✅ Clean, internal model type used in app
 export type CarModel = {
   id: number;
   modelId: number;
-  model: string; // <- for display
+  model: string;
   make: string;
   yearFrom?: number;
-  yearTo?: number | null;
+  yearTo?: number;
 };
 
 // ✅ In-memory cache

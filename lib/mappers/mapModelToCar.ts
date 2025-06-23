@@ -38,7 +38,7 @@ export function mapModelToCar(apiModel: CarModel, globalIndex: number): Car {
     type: "—",
     engine: "—",
     transmission: "—",
-    mileage: formatMileage(rawMileage),
+    mileage: rawMileage,
     pricePerDay: getRandomInRange(
       isNewer ? 1000 : 500,
       isNewer ? 1800 : 800

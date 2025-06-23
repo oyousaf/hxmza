@@ -83,7 +83,7 @@ export default function CarCard({ car, onClick }: Props) {
           {/* Mileage */}
           <div className="flex items-center gap-1">
             <FaRoad className="text-sm" />
-            <span>{car.mileage.toLocaleString()} mi</span>
+            <span>{car.mileage.toLocaleString("en-UK")} mi</span>
           </div>
 
           {/* Rating */}

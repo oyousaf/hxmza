@@ -8,10 +8,6 @@ function getRandomInRange(min: number, max: number, decimal = false) {
   return decimal ? Number(val.toFixed(1)) : Math.floor(val);
 }
 
-function formatMileage(val: number) {
-  return val.toLocaleString("en-UK");
-}
-
 /**
  * Maps CarModel to Car object with defaults + randomized UI fields.
  */

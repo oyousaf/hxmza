@@ -25,7 +25,7 @@ export default function Footer() {
         </motion.span>{" "}
         by{" "}
         <a
-          href="https://t.me/+ypTYelRWWm1iNmY0"
+          href="https://legxcysol.dev"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:underline"

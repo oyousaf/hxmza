@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Manrope } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -100,7 +101,10 @@ export default function RootLayout({
         className={`${manrope.className} pt-[60px] text-textPrimary bg-brand dark:bg-textPrimary dark:text-brand`}
       >
         <Navbar />
-        <main>{children}</main>
+        <main>
+          {children}
+          <Analytics />
+        </main>
         <Footer />
       </body>
     </html>

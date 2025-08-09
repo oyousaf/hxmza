@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     "Modern, responsive car rental platform to rent supercars, EVs, and more.",
   metadataBase: new URL("https://hxmza.uk"),
   openGraph: {
-    title: "Hxmza's Hub – Car Rentals UK",
+    title: "Hxmza's Hub – Car Rentals",
     description:
       "Modern, responsive car rental platform to rent supercars, EVs, and more.",
     url: "https://hxmza.uk",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hxmza's Hub – Car Rentals UK",
+    title: "Hxmza's Hub – Car Rentals",
     description:
       "Modern, responsive car rental platform to rent supercars, EVs, and more.",
     images: ["/og-image.png"],
@@ -58,43 +58,53 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "CarRental",
-              name: "Hxmza's Hub",
-              url: "https://hxmza.uk",
-              logo: "https://hxmza.uk/logoLight.png",
-              image: "https://hxmza.uk/og-image.png",
-              description:
-                "Find and rent premium cars across the UK including electric and luxury vehicles.",
-              address: {
-                "@type": "PostalAddress",
-                addressCountry: "GB",
-              },
-              openingHoursSpecification: [
+              "@graph": [
                 {
-                  "@type": "OpeningHoursSpecification",
-                  dayOfWeek: [
-                    "Monday",
-                    "Tuesday",
-                    "Wednesday",
-                    "Thursday",
-                    "Friday",
-                    "Saturday",
-                  ],
-                  opens: "10:00",
-                  closes: "18:00",
+                  "@type": "WebSite",
+                  name: "Hxmza's Hub",
+                  url: "https://hxmza.uk/",
                 },
-              ],
-              sameAs: [
-                "https://facebook.com/hxmzashub",
-                "https://instagram.com/hxmzashub",
-                "https://tiktok.com/@hxmzashub",
+                {
+                  "@type": "CarRental",
+                  name: "Hxmza's Hub",
+                  url: "https://hxmza.uk",
+                  logo: "https://hxmza.uk/logoLight.png",
+                  image: "https://hxmza.uk/og-image.png",
+                  description:
+                    "Find and rent premium cars across the UK including electric and luxury vehicles.",
+                  address: {
+                    "@type": "PostalAddress",
+                    addressCountry: "GB",
+                  },
+                  openingHoursSpecification: [
+                    {
+                      "@type": "OpeningHoursSpecification",
+                      dayOfWeek: [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                      ],
+                      opens: "10:00",
+                      closes: "18:00",
+                    },
+                  ],
+                  sameAs: [
+                    "https://facebook.com/hxmzashub",
+                    "https://instagram.com/hxmzashub",
+                    "https://tiktok.com/@hxmzashub",
+                  ],
+                },
               ],
             }),
           }}
         />
+
         <meta
           name="keywords"
-          content="Car rentals UK, Luxury car hire, Electric car rental, Affordable car hire, Supercar rental UK, Hxmza's Hub, Rent a car online UK, Vehicle hire service, Car rental app"
+          content="Hxmza's Hub, Car rentals UK, Luxury car hire, Electric car rental, Affordable car hire, Supercar rental UK, Rent a car online UK, Vehicle hire service, Car rental app"
         />
       </head>
       <body

@@ -55,7 +55,7 @@ export default function HomePage() {
         setLoading(false);
       }
     },
-    [makeId] // Removed filters from dependency list
+    [makeId]
   );
 
   useEffect(() => {
@@ -86,6 +86,7 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen flex flex-col gap-8 px-4 py-12 max-w-6xl mx-auto">
+      <h1 className="sr-only">Hxmza's Hub – Car Rentals</h1>
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -1,0 +1,93 @@
+name: beds4u
+services:
+  postgres:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: beds4u
+      POSTGRES_USER: beds4u
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U beds4u -d beds4u"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: redis:7.4-bookworm
+    restart: unless-stopped
+    command: [redis-server, --appendonly, 'yes', --maxmemory-policy, noeviction]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      args:
+        MEDUSA_PUBLIC_URL: https://${MEDUSA_DOMAIN}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://beds4u:${POSTGRES_PASSWORD}@postgres:5432/beds4u
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      COOKIE_SECRET: ${COOKIE_SECRET:?Set COOKIE_SECRET}
+      STORE_CORS: https://${STOREFRONT_DOMAIN:?Set STOREFRONT_DOMAIN}
+      ADMIN_CORS: https://${MEDUSA_DOMAIN:?Set MEDUSA_DOMAIN}
+      AUTH_CORS: https://${STOREFRONT_DOMAIN},https://${MEDUSA_DOMAIN}
+      MEDUSA_PUBLIC_URL: https://${MEDUSA_DOMAIN}
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      ALLOW_LIVE_PAYMENTS: 'false'
+      MEDUSA_DISABLE_TELEMETRY: 'true'
+    volumes:
+      - product_media:/app/apps/backend/.medusa/server/static
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://localhost:9000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      start_period: 120s
+      retries: 10
+  storefront:
+    build:
+      context: .
+      dockerfile: apps/storefront/Dockerfile
+      args:
+        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:?Set publishable API key}
+        NEXT_PUBLIC_MEDUSA_BACKEND_URL: https://${MEDUSA_DOMAIN}
+        NEXT_PUBLIC_BASE_URL: https://${STOREFRONT_DOMAIN}
+        NEXT_PUBLIC_STRIPE_KEY: ${NEXT_PUBLIC_STRIPE_KEY:-}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      MEDUSA_BACKEND_URL: http://backend:9000
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ['80:80', '443:443', '443:443/udp']
+    environment:
+      STOREFRONT_DOMAIN: ${STOREFRONT_DOMAIN}
+      MEDUSA_DOMAIN: ${MEDUSA_DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [backend, storefront]
+volumes:
+  postgres_data:
+  redis_data:
+  product_media:
+  caddy_data:
+  caddy_config:

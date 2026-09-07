@@ -1,0 +1,12 @@
+**/node_modules
+**/.next
+**/.medusa
+**/.turbo
+**/.env
+**/.env.local
+.env
+.local
+.scaffold
+.git
+scripts/customize.cjs
+**/*.tsbuildinfo

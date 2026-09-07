@@ -1,0 +1,8 @@
+{$STOREFRONT_DOMAIN} {
+  encode zstd gzip
+  reverse_proxy storefront:8000
+}
+{$MEDUSA_DOMAIN} {
+  encode zstd gzip
+  reverse_proxy backend:9000
+}

@@ -1,4 +1,0 @@
-{$MEDUSA_DOMAIN} {
-  encode zstd gzip
-  reverse_proxy backend:9000
-}

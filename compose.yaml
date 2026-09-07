@@ -50,6 +50,8 @@ services:
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       ALLOW_LIVE_PAYMENTS: 'false'
       MEDUSA_DISABLE_TELEMETRY: 'true'
+    ports:
+      - '127.0.0.1:9000:9000'
     volumes:
       - product_media:/app/apps/backend/.medusa/server/static
     healthcheck:
@@ -58,22 +60,7 @@ services:
       timeout: 5s
       start_period: 120s
       retries: 10
-  proxy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    ports: ['80:80', '443:443', '443:443/udp']
-    environment:
-      MEDUSA_DOMAIN: ${MEDUSA_DOMAIN}
-    volumes:
-      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      backend:
-        condition: service_healthy
 volumes:
   postgres_data:
   redis_data:
   product_media:
-  caddy_data:
-  caddy_config:

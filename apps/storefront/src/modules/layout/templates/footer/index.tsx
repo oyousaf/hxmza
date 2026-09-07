@@ -33,6 +33,10 @@ export default function Footer() {
               </a>
             ))}
           </div>
+          {/* TODO: replace with Beds4u's real registered address once available. */}
+          <address className="not-italic mt-6 text-sm text-stone-400">
+            Unit 1, Factory Road, Leeds, LS1 1AA, United Kingdom
+          </address>
         </div>
         <nav
           aria-label="Footer"
@@ -58,6 +62,7 @@ export default function Footer() {
             Your Account
           </LocalizedClientLink>
           <LocalizedClientLink href="/cart">Basket</LocalizedClientLink>
+          <LocalizedClientLink href="/contact">Contact</LocalizedClientLink>
         </nav>
         <p className="text-xs text-stone-400">
           © {new Date().getFullYear()} Beds4u

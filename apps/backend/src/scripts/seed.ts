@@ -22,31 +22,31 @@ import {
 
 const collectionDefs = [
   {
-    title: "Ottoman beds",
+    title: "Ottoman Beds",
     handle: "ottoman-beds",
     description:
       "Upholstered ottoman beds raised on a gas-lift base, trading the usual valance for a full storage void beneath the mattress — a considerable convenience in a small room, or a welcome one in a large family.",
   },
   {
-    title: "Traditional oak",
+    title: "Traditional Oak",
     handle: "traditional-oak",
     description:
       "Solid oak frames built along traditional lines, with chamfered posts and a slatted base that give a little with use rather than against it. Oak is a wood that repays patience: the grain only deepens with age.",
   },
   {
-    title: "Upholstered sleigh beds",
+    title: "Upholstered Sleigh Beds",
     handle: "upholstered-sleigh",
     description:
       "Sleigh-shaped frames with a curved head and footboard, upholstered in fabrics chosen as much for their stamina as their softness. A quietly formal shape for a bedroom that wants a little ceremony.",
   },
   {
-    title: "Divan beds",
+    title: "Divan Beds",
     handle: "divan-beds",
     description:
       "The divan remains Britain's most dependable bed: a sprung or storage base beneath a matching headboard, built low, built simply, and built to outlast most fashions in the room around it.",
   },
   {
-    title: "Metal frame beds",
+    title: "Metal Frame Beds",
     handle: "metal-frames",
     description:
       "Slimmer frames in finished steel, for bedrooms where a heavier silhouette would crowd the room. Less mass, the same rest.",

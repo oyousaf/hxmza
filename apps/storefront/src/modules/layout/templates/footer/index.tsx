@@ -19,9 +19,7 @@ export default function Footer() {
             Beds4u
           </LocalizedClientLink>
           <p className="mt-4 max-w-sm text-stone-300">
-            A bed factory&apos;s range, built plainly and well: ottoman storage,
-            upholstered sleigh frames, solid oak and slender steel — chosen for
-            the long run, not the showroom floor.
+            Quality bedroom furniture, built for the long run, not the showroom floor.
           </p>
           <div className="flex gap-4 mt-6">
             {socials.map(({ name, href, icon: Icon }) => (

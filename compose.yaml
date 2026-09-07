@@ -1,4 +1,4 @@
-name: beds4u
+name: b4u
 services:
   postgres:
     image: postgres:17-bookworm
@@ -58,33 +58,19 @@ services:
       timeout: 5s
       start_period: 120s
       retries: 10
-  storefront:
-    build:
-      context: .
-      dockerfile: apps/storefront/Dockerfile
-      args:
-        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:?Set publishable API key}
-        NEXT_PUBLIC_MEDUSA_BACKEND_URL: https://${MEDUSA_DOMAIN}
-        NEXT_PUBLIC_BASE_URL: https://${STOREFRONT_DOMAIN}
-        NEXT_PUBLIC_STRIPE_KEY: ${NEXT_PUBLIC_STRIPE_KEY:-}
-    restart: unless-stopped
-    depends_on:
-      backend:
-        condition: service_healthy
-    environment:
-      MEDUSA_BACKEND_URL: http://backend:9000
   proxy:
     image: caddy:2-alpine
     restart: unless-stopped
     ports: ['80:80', '443:443', '443:443/udp']
     environment:
-      STOREFRONT_DOMAIN: ${STOREFRONT_DOMAIN}
       MEDUSA_DOMAIN: ${MEDUSA_DOMAIN}
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    depends_on: [backend, storefront]
+    depends_on:
+      backend:
+        condition: service_healthy
 volumes:
   postgres_data:
   redis_data:

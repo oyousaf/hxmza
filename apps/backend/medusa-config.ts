@@ -11,6 +11,7 @@ module.exports = defineConfig({
   http: { storeCors: process.env.STORE_CORS!, adminCors: process.env.ADMIN_CORS!, authCors: process.env.AUTH_CORS!, jwtSecret: process.env.JWT_SECRET!, cookieSecret: process.env.COOKIE_SECRET! }
  },
  modules: [
+  { resolve: "./src/modules/wishlist" },
   { resolve: "@medusajs/medusa/file", options: { providers: [{ resolve: "@medusajs/medusa/file-local", id: "local", options: { upload_dir: "static", backend_url: (process.env.MEDUSA_PUBLIC_URL || "http://localhost:9000") + "/static" } }] } },
   ...(process.env.STRIPE_API_KEY ? [{ resolve: "@medusajs/medusa/payment", options: { providers: [{ resolve: "@medusajs/medusa/payment-stripe", id: "stripe", options: { apiKey: process.env.STRIPE_API_KEY, webhookSecret: process.env.STRIPE_WEBHOOK_SECRET, capture: true } }] } }] : []),
   ...(redisUrl ? [

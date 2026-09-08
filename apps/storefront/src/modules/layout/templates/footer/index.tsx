@@ -35,7 +35,7 @@ export default function Footer() {
           </div>
           {/* TODO: replace with Beds4u's real registered address once available. */}
           <address className="not-italic mt-6 text-sm text-stone-400">
-            Unit 1, Factory Road, Leeds, LS1 1AA, United Kingdom
+            Unit 1, Factory Road, Bradford, BD1 1AA, United Kingdom
           </address>
         </div>
         <nav

@@ -18,7 +18,7 @@ export default function ContactPage() {
           {/* TODO: replace with Beds4u's real registered address once available. */}
           <p className="txt-compact-medium-plus text-ui-fg-base mb-1">Beds4u</p>
           <p>Unit 1, Factory Road</p>
-          <p>Leeds, LS1 1AA</p>
+          <p>Bradford, BD1 1AA</p>
           <p>United Kingdom</p>
         </div>
       </div>

@@ -57,7 +57,6 @@ export default function Hero() {
             alt="A calm, softly lit bedroom furnished with an upholstered bed"
             className="w-full rounded-t-[120px] object-cover aspect-[9/7]"
           />
-          <p className="text-xs text-stone-600 dark:text-stone-400 mt-3">Beds4u — fresh from the factory floor</p>
         </motion.div>
       </div>
       <div className="content-container grid sm:grid-cols-3 gap-5 py-6 border-t border-stone-300 dark:border-stone-700 text-sm text-stone-700 dark:text-stone-300">

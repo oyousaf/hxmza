@@ -15,7 +15,7 @@ const CheckoutSummary = ({ cart }: { cart: HttpTypes.StoreCart }) => {
           level="h2"
           className="flex flex-row text-3xl-regular items-baseline"
         >
-          In your Cart
+          In your Basket
         </Heading>
         <Divider className="my-6" />
         <CartTotals totals={cart} />

@@ -7,6 +7,7 @@ import {
   Transition,
 } from "@headlessui/react"
 import { convertToLocale } from "@lib/util/money"
+import { CART_UPDATED_EVENT } from "@lib/util/cart-events"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@modules/common/components/ui"
 import DeleteButton from "@modules/common/components/delete-button"
@@ -17,26 +18,43 @@ import Thumbnail from "@modules/products/components/thumbnail"
 import { usePathname } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
 
-const CartDropdown = ({
-  cart: cartState,
-}: {
-  cart?: HttpTypes.StoreCart | null
-}) => {
+const CartDropdown = () => {
+  const [cart, setCart] = useState<HttpTypes.StoreCart | null>(null)
+  const [count, setCount] = useState(0)
   const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
     undefined
   )
   const [cartDropdownOpen, setCartDropdownOpen] = useState(false)
 
-  const open = () => setCartDropdownOpen(true)
+  const fetchCount = async () => {
+    const res = await fetch("/api/cart-count")
+    const data = await res.json()
+    setCount(data.count ?? 0)
+  }
+
+  const fetchFullCart = async () => {
+    const res = await fetch("/api/cart")
+    const data = await res.json()
+    setCart(data.cart ?? null)
+  }
+
+  useEffect(() => {
+    fetchCount()
+    window.addEventListener(CART_UPDATED_EVENT, fetchCount)
+    return () => window.removeEventListener(CART_UPDATED_EVENT, fetchCount)
+  }, [])
+
+  const open = () => {
+    setCartDropdownOpen(true)
+    fetchFullCart()
+  }
   const close = () => setCartDropdownOpen(false)
 
   const totalItems =
-    cartState?.items?.reduce((acc, item) => {
-      return acc + item.quantity
-    }, 0) || 0
+    cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || count
 
-  const subtotal = cartState?.subtotal ?? 0
-  const itemRef = useRef<number>(totalItems || 0)
+  const subtotal = cart?.subtotal ?? 0
+  const itemRef = useRef<number>(count)
 
   const timedOpen = () => {
     open()
@@ -65,13 +83,14 @@ const CartDropdown = ({
 
   const pathname = usePathname()
 
-  // open cart dropdown when modifying the cart items, but only if we're not on the cart page
+  // open basket dropdown when modifying the basket items, but only if we're not on the basket page
   useEffect(() => {
-    if (itemRef.current !== totalItems && !pathname.includes("/cart")) {
+    if (itemRef.current !== count && !pathname.includes("/cart")) {
       timedOpen()
     }
+    itemRef.current = count
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalItems, itemRef.current])
+  }, [count])
 
   return (
     <div
@@ -85,7 +104,7 @@ const CartDropdown = ({
             className="hover:text-ui-fg-base"
             href="/cart"
             data-testid="nav-cart-link"
-          >{`Cart (${totalItems})`}</LocalizedClientLink>
+          >{`Basket (${totalItems})`}</LocalizedClientLink>
         </PopoverButton>
         <Transition
           show={cartDropdownOpen}
@@ -103,12 +122,12 @@ const CartDropdown = ({
             data-testid="nav-cart-dropdown"
           >
             <div className="p-4 flex items-center justify-center">
-              <h3 className="text-large-semi">Cart</h3>
+              <h3 className="text-large-semi">Basket</h3>
             </div>
-            {cartState && cartState.items?.length ? (
+            {cart && cart.items?.length ? (
               <>
                 <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
-                  {cartState.items
+                  {cart.items
                     .sort((a, b) => {
                       return (a.created_at ?? "") > (b.created_at ?? "")
                         ? -1
@@ -158,7 +177,7 @@ const CartDropdown = ({
                                 <LineItemPrice
                                   item={item}
                                   style="tight"
-                                  currencyCode={cartState.currency_code}
+                                  currencyCode={cart.currency_code}
                                 />
                               </div>
                             </div>
@@ -187,7 +206,7 @@ const CartDropdown = ({
                     >
                       {convertToLocale({
                         amount: subtotal,
-                        currency_code: cartState.currency_code,
+                        currency_code: cart.currency_code,
                       })}
                     </span>
                   </div>
@@ -197,7 +216,7 @@ const CartDropdown = ({
                       size="large"
                       data-testid="go-to-cart-button"
                     >
-                      Go to cart
+                      Go to basket
                     </Button>
                   </LocalizedClientLink>
                 </div>
@@ -208,7 +227,7 @@ const CartDropdown = ({
                   <div className="bg-gray-900 text-small-regular flex items-center justify-center w-6 h-6 rounded-full text-white">
                     <span>0</span>
                   </div>
-                  <span>Your shopping bag is empty.</span>
+                  <span>Your basket is empty.</span>
                   <div>
                     <LocalizedClientLink href="/store">
                       <>

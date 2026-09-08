@@ -268,7 +268,7 @@ function FreeShippingPopup({
             className="rounded-2xl bg-transparent shadow-none outline-none border-[1px] border-white text-[15px] py-2.5 px-4"
             href="/cart"
           >
-            View cart
+            View basket
           </LocalizedClientLink>
 
           <LocalizedClientLink

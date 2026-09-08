@@ -1,6 +1,7 @@
 "use client"
 
 import { addToCart } from "@lib/data/cart"
+import { notifyCartUpdated } from "@lib/util/cart-events"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@modules/common/components/ui"
@@ -132,6 +133,7 @@ export default function ProductActions({
       countryCode,
     })
 
+    notifyCartUpdated()
     setIsAdding(false)
   }
 
@@ -180,7 +182,7 @@ export default function ProductActions({
             ? "Select variant"
             : !inStock || !isValidVariant
             ? "Out of stock"
-            : "Add to cart"}
+            : "Add to basket"}
         </Button>
         <MobileActions
           product={product}

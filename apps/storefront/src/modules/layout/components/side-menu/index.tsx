@@ -2,30 +2,20 @@
 
 import { Popover, PopoverPanel, Transition } from "@headlessui/react"
 import { motion } from "motion/react"
-import useToggleState from "@lib/hooks/use-toggle-state"
-import { ArrowRightMini, XMark } from "@medusajs/icons"
+import { XMark } from "@medusajs/icons"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { Text, clx } from "@modules/common/components/ui"
+import { Text } from "@modules/common/components/ui"
 import { Fragment } from "react"
-import LanguageSelect from "../language-select"
-import { Locale } from "@lib/data/locales"
 
 
 const SideMenuItems = {
   Home: "/",
   Store: "/store",
   Account: "/account",
-  Cart: "/cart",
+  Basket: "/cart",
 }
 
-type SideMenuProps = {
-  locales: Locale[] | null
-  currentLocale: string | null
-}
-
-const SideMenu = ({ locales, currentLocale }: SideMenuProps) => {
-  const languageToggleState = useToggleState()
-
+const SideMenu = () => {
   return (
     <div className="h-full">
       <div className="flex items-center h-full">
@@ -103,25 +93,6 @@ const SideMenu = ({ locales, currentLocale }: SideMenuProps) => {
                       })}
                     </ul>
                     <div className="flex flex-col gap-y-6">
-                      {!!locales?.length && (
-                        <div
-                          className="flex justify-between"
-                          onMouseEnter={languageToggleState.open}
-                          onMouseLeave={languageToggleState.close}
-                        >
-                          <LanguageSelect
-                            toggleState={languageToggleState}
-                            locales={locales}
-                            currentLocale={currentLocale}
-                          />
-                          <ArrowRightMini
-                            className={clx(
-                              "transition-transform duration-150",
-                              languageToggleState.state ? "-rotate-90" : ""
-                            )}
-                          />
-                        </div>
-                      )}
                       <Text className="flex justify-between txt-compact-small">
                         © {new Date().getFullYear()} Beds4u. All rights
                         reserved.

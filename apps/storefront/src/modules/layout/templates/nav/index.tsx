@@ -1,25 +1,16 @@
-import { Suspense } from "react"
-
-import { listLocales } from "@lib/data/locales"
-import { getLocale } from "@lib/data/locale-actions"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import CartButton from "@modules/layout/components/cart-button"
+import CartDropdown from "@modules/layout/components/cart-dropdown"
 import SideMenu from "@modules/layout/components/side-menu"
 import ThemeToggle from "@modules/layout/components/theme-toggle"
 
-export default async function Nav() {
-  const [locales, currentLocale] = await Promise.all([
-    listLocales(),
-    getLocale(),
-  ])
-
+export default function Nav() {
   return (
     <div className="sticky top-0 inset-x-0 z-50 group">
       <header className="relative h-16 mx-auto border-b duration-200 bg-ui-bg-base border-ui-border-base">
         <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
           <div className="flex-1 basis-0 h-full flex items-center">
             <div className="h-full">
-              <SideMenu locales={locales} currentLocale={currentLocale} />
+              <SideMenu />
             </div>
           </div>
 
@@ -47,19 +38,7 @@ export default async function Nav() {
               </LocalizedClientLink>
             </div>
             <ThemeToggle />
-            <Suspense
-              fallback={
-                <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex gap-2"
-                  href="/cart"
-                  data-testid="nav-cart-link"
-                >
-                  Cart (0)
-                </LocalizedClientLink>
-              }
-            >
-              <CartButton />
-            </Suspense>
+            <CartDropdown />
           </div>
         </nav>
       </header>

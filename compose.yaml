@@ -51,7 +51,7 @@ services:
       ALLOW_LIVE_PAYMENTS: 'false'
       MEDUSA_DISABLE_TELEMETRY: 'true'
     ports:
-      - '127.0.0.1:9010:9000'
+      - '127.0.0.1:9000:9000'
     volumes:
       - product_media:/app/apps/backend/.medusa/server/static
     healthcheck:

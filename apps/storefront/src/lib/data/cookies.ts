@@ -35,18 +35,24 @@ export const getCacheTag = async (tag: string): Promise<string> => {
 
 export const getCacheOptions = async (
   tag: string
-): Promise<{ tags: string[] } | Record<string, never>> => {
+): Promise<{ tags: string[]; revalidate: number } | { revalidate: number }> => {
+  // A bounded revalidate window alongside the tag means catalogue changes
+  // (new products, price/description edits) surface on their own within a
+  // minute, instead of a `force-cache` fetch serving the same response
+  // indefinitely until something remembers to call revalidateTag.
+  const revalidate = 60
+
   if (typeof window !== "undefined") {
-    return {}
+    return { revalidate }
   }
 
   const cacheTag = await getCacheTag(tag)
 
   if (!cacheTag) {
-    return {}
+    return { revalidate }
   }
 
-  return { tags: [`${cacheTag}`] }
+  return { tags: [`${cacheTag}`], revalidate }
 }
 
 // `sameSite: "lax"` rather than `"strict"`: the customer returns from a

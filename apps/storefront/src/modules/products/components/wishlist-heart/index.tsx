@@ -15,7 +15,7 @@ export default function WishlistHeart({ productId }: { productId: string }) {
         e.stopPropagation()
         toggle(productId)
       }}
-      className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ui-bg-base/80 backdrop-blur text-stone-700 dark:text-stone-200 hover:text-clay-600 transition-colors duration-300"
+      className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-stone-800 shadow-md ring-1 ring-black/5 dark:ring-white/10 text-stone-700 dark:text-stone-200 hover:text-clay-600 transition-colors duration-300"
     >
       <svg
         width="18"

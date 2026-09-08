@@ -20,7 +20,25 @@ import {
   linkSalesChannelsToStockLocationWorkflow,
 } from "@medusajs/medusa/core-flows";
 
-const collectionDefs = [
+type CollectionDef = {
+  title: string;
+  handle: string;
+  description: string;
+  disclaimer?: string;
+};
+
+type BedDef = {
+  title: string;
+  handle: string;
+  finish: string;
+  price: number;
+  collection: string;
+  sizes: string[];
+  optionName?: string;
+  priceStep?: number;
+};
+
+const collectionDefs: CollectionDef[] = [
   {
     title: "Ottoman Beds",
     handle: "ottoman-beds",
@@ -51,12 +69,40 @@ const collectionDefs = [
     description:
       "Slimmer frames in finished steel, for bedrooms where a heavier silhouette would crowd the room. Less mass, the same rest.",
   },
+  {
+    title: "Kids Beds",
+    handle: "kids-beds",
+    description:
+      "Single beds sized and finished for a child's room — sturdy enough for years of use, plain enough to outlast a passing favourite colour.",
+  },
+  {
+    title: "Bunk Beds",
+    handle: "bunk-beds",
+    description:
+      "Single-over-single bunks in solid pine, built to the sort of tolerances that matter more when there are two mattresses and a ladder involved.",
+  },
+  {
+    title: "Guest Beds",
+    handle: "guest-beds",
+    description:
+      "Fold-away and trundle frames that live small until they're needed, for a spare room that spends most of its life being something else.",
+  },
+  {
+    title: "Mattresses",
+    handle: "mattresses",
+    description:
+      "Mattresses built to suit the frame, not just the size: a range of firmness for a range of sleepers.",
+    disclaimer:
+      "Delivered rolled and compressed; allow up to 48 hours to fully expand. Photography shown for illustration; the piece pictured is drawn from the sample catalogue specification.",
+  },
 ];
 
 const largeSizes = ["Double", "King", "Super King"];
 const modestSizes = ["Single", "Small Double", "Double"];
+const allSizes = ["Single", "Small Double", "Double", "King", "Super King"];
+const singleOnly = ["Single"];
 
-const bedDefs = [
+const bedDefs: BedDef[] = [
   { title: "Silver Ottoman", handle: "silver-ottoman", finish: "Silver woven upholstery", price: 499, collection: "ottoman-beds", sizes: largeSizes },
   { title: "Charcoal Ottoman", handle: "grey-ottoman", finish: "Charcoal woven upholstery", price: 529, collection: "ottoman-beds", sizes: largeSizes },
   { title: "Navy Ottoman", handle: "navy-ottoman", finish: "Navy woven upholstery", price: 549, collection: "ottoman-beds", sizes: largeSizes },
@@ -70,6 +116,14 @@ const bedDefs = [
   { title: "Oatmeal Storage Divan", handle: "oatmeal-divan-storage", finish: "Oatmeal fabric, two-drawer storage", price: 429, collection: "divan-beds", sizes: modestSizes },
   { title: "Black Metal Frame", handle: "black-metal-frame", finish: "Matt black powder coat", price: 279, collection: "metal-frames", sizes: modestSizes },
   { title: "Brushed Brass Frame", handle: "brushed-brass-frame", finish: "Brushed brass finish", price: 329, collection: "metal-frames", sizes: modestSizes },
+  { title: "Rocket Single", handle: "rocket-single", finish: "Blue printed fabric", price: 199, collection: "kids-beds", sizes: singleOnly },
+  { title: "Meadow Single", handle: "meadow-single", finish: "Pink printed fabric", price: 199, collection: "kids-beds", sizes: singleOnly },
+  { title: "Classic Pine Bunk", handle: "classic-pine-bunk", finish: "Natural pine", price: 349, collection: "bunk-beds", sizes: singleOnly },
+  { title: "Charcoal Pine Bunk", handle: "charcoal-pine-bunk", finish: "Charcoal-painted pine", price: 379, collection: "bunk-beds", sizes: singleOnly },
+  { title: "Fold-Away Guest Bed", handle: "fold-away-guest-bed", finish: "Grey fabric", price: 179, collection: "guest-beds", sizes: modestSizes.slice(0, 2) },
+  { title: "Trundle Guest Bed", handle: "trundle-guest-bed", finish: "Oatmeal fabric", price: 219, collection: "guest-beds", sizes: modestSizes.slice(0, 2) },
+  { title: "Classic Support Mattress", handle: "classic-support-mattress", finish: "Medium", price: 249, collection: "mattresses", sizes: allSizes, optionName: "Firmness", priceStep: 50 },
+  { title: "Cool Touch Memory Mattress", handle: "cool-touch-memory-mattress", finish: "Firm", price: 329, collection: "mattresses", sizes: allSizes, optionName: "Firmness", priceStep: 60 },
 ];
 
 export default async function initial_data_seed({
@@ -329,25 +383,29 @@ export default async function initial_data_seed({
   await createProductsWorkflow(container).run({
     input: {
       products: newBeds.map((bed) => {
-        const collectionDescription =
-          collectionDefs.find((c) => c.handle === bed.collection)?.description ?? "";
+        const collectionDef = collectionDefs.find((c) => c.handle === bed.collection);
+        const disclaimer =
+          collectionDef?.disclaimer ??
+          "Mattress sold separately. Photography shown for illustration; the piece pictured is drawn from the sample catalogue specification.";
+        const optionName = bed.optionName ?? "Finish";
+        const priceStep = bed.priceStep ?? 100;
         return {
           title: bed.title,
           handle: bed.handle,
-          description: `${collectionDescription} Mattress sold separately. Photography shown for illustration; the piece pictured is drawn from the sample catalogue specification.`,
+          description: `${collectionDef?.description ?? ""} ${disclaimer}`,
           status: ProductStatus.PUBLISHED,
           collection_id: collectionIdByHandle.get(bed.collection),
           shipping_profile_id: shippingProfile.id,
           thumbnail: imageBase + "/" + bed.handle + ".jpg",
           images: [{ url: imageBase + "/" + bed.handle + ".jpg" }],
           metadata: { lead_time_min_days: 15, lead_time_max_days: 25, lead_time_unit: "working days", configuration_version: 1, sample_catalogue: true },
-          options: [{ title: "Size", values: bed.sizes }, { title: "Finish", values: [bed.finish] }],
+          options: [{ title: "Size", values: bed.sizes }, { title: optionName, values: [bed.finish] }],
           variants: bed.sizes.map((size, i) => ({
             title: size + " / " + bed.finish,
             sku: bed.handle.toUpperCase() + "-" + i,
-            options: { Size: size, Finish: bed.finish },
+            options: { Size: size, [optionName]: bed.finish },
             manage_inventory: true,
-            prices: [{ currency_code: "gbp", amount: bed.price + i * 100 }],
+            prices: [{ currency_code: "gbp", amount: bed.price + i * priceStep }],
           })),
           sales_channels: [{ id: defaultSalesChannel.id }],
         };

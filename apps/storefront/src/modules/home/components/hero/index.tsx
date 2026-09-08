@@ -32,7 +32,7 @@ export default function Hero() {
             Well built.<br /><span className="text-stone-500 dark:text-stone-400">Well rested.</span>
           </motion.h1>
           <motion.p variants={item} className="mt-6 mb-8 text-lg leading-relaxed text-stone-600 dark:text-stone-300 max-w-md">
-            &ldquo;Sleep,&rdquo; wrote Shakespeare, &ldquo;knits up the ravell&rsquo;d sleeve of care.&rdquo; Ours gives it somewhere comfortable to happen: generous ottoman storage, upholstery built to wear well, and oak that only grows more handsome with age.
+            &ldquo;Sleep,&rdquo; wrote Shakespeare, &ldquo;knits up the ravell&rsquo;d sleeve of care.&rdquo; Ours gives it somewhere comfortable to happen: generous Ottoman storage, upholstery built to wear well, and oak that only grows more handsome with age.
           </motion.p>
           <motion.div variants={item} className="flex flex-wrap gap-3">
             <Button asChild>

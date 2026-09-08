@@ -58,6 +58,18 @@ export default function Footer() {
           <LocalizedClientLink href="/collections/metal-frames">
             Metal Frames
           </LocalizedClientLink>
+          <LocalizedClientLink href="/collections/kids-beds">
+            Kids Beds
+          </LocalizedClientLink>
+          <LocalizedClientLink href="/collections/bunk-beds">
+            Bunk Beds
+          </LocalizedClientLink>
+          <LocalizedClientLink href="/collections/guest-beds">
+            Guest Beds
+          </LocalizedClientLink>
+          <LocalizedClientLink href="/collections/mattresses">
+            Mattresses
+          </LocalizedClientLink>
           <LocalizedClientLink href="/account">
             Your Account
           </LocalizedClientLink>

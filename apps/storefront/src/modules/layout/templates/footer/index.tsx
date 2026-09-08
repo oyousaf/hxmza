@@ -19,7 +19,8 @@ export default function Footer() {
             Beds4u
           </LocalizedClientLink>
           <p className="mt-4 max-w-sm text-stone-300">
-            Quality bedroom furniture, built for the long run, not the showroom floor.
+            Quality bedroom furniture, built for the long run, not the showroom
+            floor.
           </p>
           <div className="flex gap-4 mt-6">
             {socials.map(({ name, href, icon: Icon }) => (

@@ -2,6 +2,7 @@ import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
 import { Fraunces, Inter } from "next/font/google"
 import { ThemeProvider } from "next-themes"
+import { WishlistProvider } from "@lib/context/wishlist-context"
 import "styles/globals.css"
 
 const fraunces = Fraunces({
@@ -29,7 +30,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     >
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <main className="relative">{props.children}</main>
+          <WishlistProvider>
+            <main className="relative">{props.children}</main>
+          </WishlistProvider>
         </ThemeProvider>
       </body>
     </html>

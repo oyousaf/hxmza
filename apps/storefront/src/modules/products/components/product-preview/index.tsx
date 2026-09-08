@@ -5,6 +5,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import MotionCard from "./motion-card"
+import WishlistHeart from "../wishlist-heart"
 
 export default async function ProductPreview({
   product,
@@ -32,12 +33,15 @@ export default async function ProductPreview({
     <LocalizedClientLink href={`/products/${product.handle}`} className="group">
       <MotionCard>
         <div data-testid="product-wrapper">
-          <Thumbnail
-            thumbnail={product.thumbnail}
-            images={product.images}
-            size="full"
-            isFeatured={isFeatured}
-          />
+          <div className="relative">
+            <Thumbnail
+              thumbnail={product.thumbnail}
+              images={product.images}
+              size="full"
+              isFeatured={isFeatured}
+            />
+            {product.id && <WishlistHeart productId={product.id} />}
+          </div>
           <div className="flex txt-compact-large-plus mt-4 justify-between">
             <Text className="text-ui-fg-subtle" data-testid="product-title">
               {product.title}

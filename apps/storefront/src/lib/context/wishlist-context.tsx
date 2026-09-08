@@ -11,8 +11,31 @@ type WishlistContextValue = {
 
 const WishlistContext = createContext<WishlistContextValue | null>(null)
 
+const WISHLIST_STORAGE_KEY = "b4u_wishlist_ids"
+
+function readCachedIds(): Set<string> {
+  if (typeof window === "undefined") {
+    return new Set()
+  }
+
+  try {
+    const raw = window.localStorage.getItem(WISHLIST_STORAGE_KEY)
+    return raw ? new Set(JSON.parse(raw)) : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+function writeCachedIds(ids: Set<string>) {
+  try {
+    window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify([...ids]))
+  } catch {
+    // localStorage may be unavailable (private browsing) — hearts still work, just unhydrated on next load.
+  }
+}
+
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
-  const [productIds, setProductIds] = useState<Set<string>>(new Set())
+  const [productIds, setProductIds] = useState<Set<string>>(readCachedIds)
   const [loggedIn, setLoggedIn] = useState(false)
   const [loaded, setLoaded] = useState(false)
 
@@ -20,7 +43,11 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     fetch("/api/wishlist")
       .then((res) => res.json())
       .then((data) => {
-        setProductIds(new Set(data.items.map((item: { product_id: string }) => item.product_id)))
+        const ids = new Set<string>(
+          data.items.map((item: { product_id: string }) => item.product_id)
+        )
+        setProductIds(ids)
+        writeCachedIds(ids)
         setLoggedIn(data.loggedIn)
         setLoaded(true)
       })
@@ -42,6 +69,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       next.add(productId)
     }
     setProductIds(next)
+    writeCachedIds(next)
 
     if (isSaved) {
       await fetch(`/api/wishlist/${productId}`, { method: "DELETE" })

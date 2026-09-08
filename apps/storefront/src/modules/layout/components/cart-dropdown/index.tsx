@@ -18,9 +18,24 @@ import Thumbnail from "@modules/products/components/thumbnail"
 import { usePathname } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
 
+const CART_COUNT_STORAGE_KEY = "b4u_cart_count"
+
+function readCachedCount() {
+  if (typeof window === "undefined") {
+    return 0
+  }
+
+  try {
+    return Number(window.localStorage.getItem(CART_COUNT_STORAGE_KEY)) || 0
+  } catch {
+    return 0
+  }
+}
+
 const CartDropdown = () => {
   const [cart, setCart] = useState<HttpTypes.StoreCart | null>(null)
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(readCachedCount)
+  const [isCartLoading, setIsCartLoading] = useState(false)
   const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
     undefined
   )
@@ -29,13 +44,24 @@ const CartDropdown = () => {
   const fetchCount = async () => {
     const res = await fetch("/api/cart-count")
     const data = await res.json()
-    setCount(data.count ?? 0)
+    const nextCount = data.count ?? 0
+    setCount(nextCount)
+    try {
+      window.localStorage.setItem(CART_COUNT_STORAGE_KEY, String(nextCount))
+    } catch {
+      // localStorage may be unavailable (private browsing) — badge still works, just unhydrated on next load.
+    }
   }
 
   const fetchFullCart = async () => {
-    const res = await fetch("/api/cart")
-    const data = await res.json()
-    setCart(data.cart ?? null)
+    setIsCartLoading(true)
+    try {
+      const res = await fetch("/api/cart")
+      const data = await res.json()
+      setCart(data.cart ?? null)
+    } finally {
+      setIsCartLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -124,7 +150,20 @@ const CartDropdown = () => {
             <div className="p-4 flex items-center justify-center">
               <h3 className="text-large-semi">Basket</h3>
             </div>
-            {cart && cart.items?.length ? (
+            {isCartLoading ? (
+              <div className="px-4 pb-4 grid grid-cols-1 gap-y-8 animate-pulse">
+                {[0, 1].map((i) => (
+                  <div className="grid grid-cols-[122px_1fr] gap-x-4" key={i}>
+                    <div className="w-24 aspect-square rounded-large bg-ui-bg-subtle" />
+                    <div className="flex flex-col gap-y-2 py-1">
+                      <div className="h-3 w-3/4 rounded bg-ui-bg-subtle" />
+                      <div className="h-3 w-1/2 rounded bg-ui-bg-subtle" />
+                      <div className="h-3 w-1/3 rounded bg-ui-bg-subtle" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : cart && cart.items?.length ? (
               <>
                 <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
                   {cart.items

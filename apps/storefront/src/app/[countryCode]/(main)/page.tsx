@@ -31,13 +31,17 @@ export default async function Home(props: {
     return null
   }
 
+  const sortedCollections = [...collections].sort((a, b) =>
+    a.title.localeCompare(b.title)
+  )
+
   return (
     <>
       <Hero />
       <OrnamentalDivider />
       <div className="py-12">
         <ul className="flex flex-col gap-x-6">
-          <FeaturedProducts collections={collections} region={region} />
+          <FeaturedProducts collections={sortedCollections} region={region} />
         </ul>
       </div>
     </>

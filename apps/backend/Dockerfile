@@ -15,8 +15,12 @@ WORKDIR /app
 COPY --from=build --chown=node:node /app /app
 WORKDIR /app/apps/backend/.medusa/server
 RUN mkdir -p static && chown node:node static
-COPY --from=build --chown=node:node /app/apps/backend/static ./static
+# Seed-committed images live in a separate, never-volume-mounted path so they
+# survive rebuilds; the persistent volume at ./static is for admin uploads.
+# The startup command below copies any new seed images in on every boot
+# without ever overwriting a file an admin has already uploaded.
+COPY --from=build --chown=node:node /app/apps/backend/static /app/seed-static
 ENV NODE_ENV=production
 USER node
 EXPOSE 9000
-CMD ["sh", "-c", "node /app/apps/backend/node_modules/@medusajs/cli/cli.js db:migrate && node /app/apps/backend/node_modules/@medusajs/cli/cli.js start"]
+CMD ["sh", "-c", "cp -rn /app/seed-static/. /app/apps/backend/.medusa/server/static/ && node /app/apps/backend/node_modules/@medusajs/cli/cli.js db:migrate && node /app/apps/backend/node_modules/@medusajs/cli/cli.js start"]

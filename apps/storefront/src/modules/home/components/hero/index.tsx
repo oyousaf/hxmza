@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button"
 
 const stagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
+  show: { transition: { staggerChildren: 0.16 } },
 }
 
 export default function Hero() {
   const reduceMotion = useReducedMotion()
   const item = reduceMotion
     ? { hidden: { opacity: 1, y: 0 }, show: { opacity: 1, y: 0 } }
-    : { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } } }
+    : { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: "easeOut" as const } } }
 
   return (
     <section className="bg-[#e9e6e1] dark:bg-stone-900 border-b border-stone-300 dark:border-stone-700">
@@ -47,7 +47,7 @@ export default function Hero() {
           className="relative"
           initial={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" as const }}
+          transition={{ duration: 1.1, ease: "easeOut" as const }}
         >
           <Image
             width={900}

@@ -15,7 +15,7 @@ export default function WishlistHeart({ productId }: { productId: string }) {
         e.stopPropagation()
         toggle(productId)
       }}
-      className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ui-bg-base/80 backdrop-blur text-stone-700 dark:text-stone-200 hover:text-rose-500 transition-colors"
+      className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ui-bg-base/80 backdrop-blur text-stone-700 dark:text-stone-200 hover:text-clay-600 transition-colors duration-300"
     >
       <svg
         width="18"
@@ -24,7 +24,7 @@ export default function WishlistHeart({ productId }: { productId: string }) {
         fill={isSaved ? "currentColor" : "none"}
         stroke="currentColor"
         strokeWidth="1.8"
-        className={isSaved ? "text-rose-500" : ""}
+        className={isSaved ? "text-clay-600" : ""}
       >
         <path d="M12 21s-6.7-4.35-9.3-8.1C1 10.1 1.4 6.6 4.2 5A5.4 5.4 0 0 1 12 6.5 5.4 5.4 0 0 1 19.8 5c2.8 1.6 3.2 5.1 1.5 7.9C18.7 16.65 12 21 12 21Z" />
       </svg>

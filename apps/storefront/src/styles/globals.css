@@ -112,7 +112,23 @@
 }
 
 body {
-  @apply bg-ui-bg-base text-ui-fg-base font-sans;
+  @apply bg-ui-bg-base text-ui-fg-base font-sans relative;
+}
+
+/* A faint paper-grain texture for a warmer, more considered feel than a flat
+   colour field — kept subtle enough to read as material, not noise. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.dark body::before {
+  opacity: 0.06;
 }
 
 h1, h2, h3, h4 {
@@ -120,5 +136,5 @@ h1, h2, h3, h4 {
 }
 
 ::selection {
-  @apply bg-ui-bg-highlight;
+  @apply bg-clay-100 text-clay-900;
 }

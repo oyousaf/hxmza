@@ -28,7 +28,7 @@ export default function Footer() {
                 key={name}
                 href={href}
                 aria-label={name}
-                className="text-stone-400 hover:text-white transition-colors"
+                className="text-stone-400 hover:text-clay-300 transition-colors duration-300"
               >
                 <Icon />
               </a>

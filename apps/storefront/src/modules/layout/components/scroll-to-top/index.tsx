@@ -1,5 +1,6 @@
 "use client"
 
+import { scrollToTop } from "@lib/util/scroll-to-top"
 import { ArrowUpMini } from "@medusajs/icons"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useState } from "react"
@@ -26,16 +27,12 @@ const ScrollToTop = () => {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
-
   return (
     <AnimatePresence>
       {visible && (
         <motion.button
           type="button"
-          onClick={scrollToTop}
+          onClick={() => scrollToTop()}
           aria-label="Scroll to top"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}

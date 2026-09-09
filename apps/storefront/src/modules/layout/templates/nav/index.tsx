@@ -1,13 +1,22 @@
 "use client"
 
+import { scrollToTop } from "@lib/util/scroll-to-top"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartDropdown from "@modules/layout/components/cart-dropdown"
 import SideMenu from "@modules/layout/components/side-menu"
 import ThemeToggle from "@modules/layout/components/theme-toggle"
+import { usePathname } from "next/navigation"
 
 export default function Nav() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" })
+  const pathname = usePathname()
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // Already home: there's no route change for Link to navigate, so it
+    // wouldn't otherwise do anything — just scroll smoothly to the top.
+    if (pathname === "/") {
+      e.preventDefault()
+    }
+    scrollToTop()
   }
 
   return (
@@ -25,7 +34,7 @@ export default function Nav() {
               href="/"
               className="flex items-center gap-2.5 hover:text-ui-fg-base"
               data-testid="nav-store-link"
-              onClick={scrollToTop}
+              onClick={handleLogoClick}
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-md bg-stone-800 dark:bg-stone-100 font-serif text-sm font-semibold text-stone-100 dark:text-stone-900">
                 B

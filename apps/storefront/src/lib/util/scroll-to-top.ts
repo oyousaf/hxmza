@@ -6,7 +6,7 @@ function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3)
 }
 
-export function scrollToTop(duration = 300) {
+export function scrollToTop(duration = 500) {
   if (typeof window === "undefined") return
 
   const start = window.scrollY

@@ -17,7 +17,16 @@ export function scrollToTop(duration = 500) {
   const step = (now: number) => {
     const elapsed = now - startTime
     const progress = Math.min(elapsed / duration, 1)
-    window.scrollTo(0, start * (1 - easeOutCubic(progress)))
+    // behavior: "auto" is required here — the site sets CSS
+    // `scroll-behavior: smooth` globally, which would otherwise make the
+    // browser layer its own smooth animation on top of every frame's jump,
+    // causing a visible snap once this loop stops but the browser's
+    // animation hasn't caught up.
+    window.scrollTo({
+      top: start * (1 - easeOutCubic(progress)),
+      left: 0,
+      behavior: "auto",
+    })
 
     if (progress < 1) {
       window.requestAnimationFrame(step)

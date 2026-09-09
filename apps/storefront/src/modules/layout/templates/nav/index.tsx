@@ -11,12 +11,15 @@ export default function Nav() {
   const pathname = usePathname()
 
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // Already home: there's no route change for Link to navigate, so it
-    // wouldn't otherwise do anything — just scroll smoothly to the top.
+    // Already home: there's no route change for Link to act on, so scroll
+    // manually instead. Anywhere else, let Link navigate normally — the new
+    // page mounts at the top on its own, and running our scroll animation
+    // on the page being left behind would just race the navigation and
+    // look like two animations fighting each other.
     if (pathname === "/") {
       e.preventDefault()
+      scrollToTop()
     }
-    scrollToTop()
   }
 
   return (

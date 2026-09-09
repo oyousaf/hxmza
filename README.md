@@ -14,9 +14,9 @@ Bed-factory ecommerce monorepo: Next.js/Tailwind/shadcn storefront and Medusa v2
 
 Requires Node 22, pnpm 10 (`corepack enable` or `npx pnpm`), and a local PostgreSQL instance.
 
-1. Copy env files and fill in values:
-   - `apps/backend/.env` from `apps/backend/.env.example`
-   - `apps/storefront/.env.local` from `apps/storefront/.env.example`
+1. Set up env files:
+   - `apps/backend/.env` — copy from `apps/backend/.env.example` and fill in values.
+   - `apps/storefront/.env.local` — required variables are checked at startup by `check-env-variables.js`.
 2. Install dependencies: `pnpm install`
 3. Run backend migrations and seed the bed catalogue:
    ```

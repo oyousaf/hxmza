@@ -16,7 +16,7 @@ import LineItemPrice from "@modules/common/components/line-item-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
 import { usePathname } from "next/navigation"
-import { Fragment, useEffect, useRef, useState } from "react"
+import { Fragment, useCallback, useEffect, useRef, useState } from "react"
 
 const CART_COUNT_STORAGE_KEY = "b4u_cart_count"
 
@@ -42,7 +42,7 @@ const CartDropdown = () => {
   )
   const [cartDropdownOpen, setCartDropdownOpen] = useState(false)
 
-  const fetchCount = async () => {
+  const fetchCount = useCallback(async () => {
     const res = await fetch("/api/cart-count")
     const data = await res.json()
     const nextCount = data.count ?? 0
@@ -52,7 +52,7 @@ const CartDropdown = () => {
     } catch {
       // localStorage may be unavailable (private browsing) — badge still works, just unhydrated on next load.
     }
-  }
+  }, [])
 
   const fetchFullCart = async () => {
     setIsCartLoading(true)
@@ -66,36 +66,39 @@ const CartDropdown = () => {
     }
   }
 
-  const handleCartUpdated = (e: Event) => {
-    const delta = (e as CustomEvent<{ delta?: number }>).detail?.delta
+  const handleCartUpdated = useCallback(
+    (e: Event) => {
+      const delta = (e as CustomEvent<{ delta?: number }>).detail?.delta
 
-    if (typeof delta === "number") {
-      // Apply instantly so the badge never waits on a round trip. If the
-      // dropdown's own item list is currently loaded, totalItems is derived
-      // from it (see below) and already reflects optimistic add/remove
-      // locally — this just keeps the badge correct for changes made
-      // elsewhere on the page (e.g. "Add to basket" on a product card).
-      setCount((current) => {
-        const next = Math.max(0, current + delta)
-        try {
-          window.localStorage.setItem(CART_COUNT_STORAGE_KEY, String(next))
-        } catch {
-          // localStorage may be unavailable (private browsing).
-        }
-        return next
-      })
-    }
+      if (typeof delta === "number") {
+        // Apply instantly so the badge never waits on a round trip. If the
+        // dropdown's own item list is currently loaded, totalItems is derived
+        // from it (see below) and already reflects optimistic add/remove
+        // locally — this just keeps the badge correct for changes made
+        // elsewhere on the page (e.g. "Add to basket" on a product card).
+        setCount((current) => {
+          const next = Math.max(0, current + delta)
+          try {
+            window.localStorage.setItem(CART_COUNT_STORAGE_KEY, String(next))
+          } catch {
+            // localStorage may be unavailable (private browsing).
+          }
+          return next
+        })
+      }
 
-    // Reconcile with the server shortly after, in case the optimistic
-    // delta didn't match what actually happened (e.g. a failed request).
-    fetchCount()
-  }
+      // Reconcile with the server shortly after, in case the optimistic
+      // delta didn't match what actually happened (e.g. a failed request).
+      fetchCount()
+    },
+    [fetchCount]
+  )
 
   useEffect(() => {
     fetchCount()
     window.addEventListener(CART_UPDATED_EVENT, handleCartUpdated)
     return () => window.removeEventListener(CART_UPDATED_EVENT, handleCartUpdated)
-  }, [])
+  }, [fetchCount, handleCartUpdated])
 
   const open = () => {
     setCartDropdownOpen(true)

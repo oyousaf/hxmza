@@ -45,4 +45,4 @@ Stripe is not covered by the smoke test; verify it manually in the Medusa admin 
 
 ## Dependency updates
 
-Audit and fix with the workspace's own package manager, not npm — `npx pnpm audit`, and `npx pnpm audit --fix` to add targeted `pnpm.overrides` entries in the root `package.json` for vulnerable transitive dependencies without bumping the parent packages that pin them. Pushing to Vercel does not fix vulnerabilities on its own; it just builds and deploys whatever is committed to `pnpm-lock.yaml`. After any override change, reinstall (`pnpm install`) and re-run the verification steps above before committing.
+Audit and fix with `npx pnpm audit`, and `npx pnpm audit --fix` to add targeted `pnpm.overrides` entries in the root `package.json` for vulnerable transitive dependencies without bumping the parent packages that pin them. Pushing to Vercel does not fix vulnerabilities on its own; it just builds and deploys whatever is committed to `pnpm-lock.yaml`. After any override change, reinstall (`pnpm install`) and re-run the verification steps above before committing.

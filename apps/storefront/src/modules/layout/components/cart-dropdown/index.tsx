@@ -35,6 +35,7 @@ function readCachedCount() {
 const CartDropdown = () => {
   const [cart, setCart] = useState<HttpTypes.StoreCart | null>(null)
   const [count, setCount] = useState(readCachedCount)
+  const [hiddenItemIds, setHiddenItemIds] = useState<Set<string>>(new Set())
   const [isCartLoading, setIsCartLoading] = useState(false)
   const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
     undefined
@@ -59,15 +60,41 @@ const CartDropdown = () => {
       const res = await fetch("/api/cart")
       const data = await res.json()
       setCart(data.cart ?? null)
+      setHiddenItemIds(new Set())
     } finally {
       setIsCartLoading(false)
     }
   }
 
+  const handleCartUpdated = (e: Event) => {
+    const delta = (e as CustomEvent<{ delta?: number }>).detail?.delta
+
+    if (typeof delta === "number") {
+      // Apply instantly so the badge never waits on a round trip. If the
+      // dropdown's own item list is currently loaded, totalItems is derived
+      // from it (see below) and already reflects optimistic add/remove
+      // locally — this just keeps the badge correct for changes made
+      // elsewhere on the page (e.g. "Add to basket" on a product card).
+      setCount((current) => {
+        const next = Math.max(0, current + delta)
+        try {
+          window.localStorage.setItem(CART_COUNT_STORAGE_KEY, String(next))
+        } catch {
+          // localStorage may be unavailable (private browsing).
+        }
+        return next
+      })
+    }
+
+    // Reconcile with the server shortly after, in case the optimistic
+    // delta didn't match what actually happened (e.g. a failed request).
+    fetchCount()
+  }
+
   useEffect(() => {
     fetchCount()
-    window.addEventListener(CART_UPDATED_EVENT, fetchCount)
-    return () => window.removeEventListener(CART_UPDATED_EVENT, fetchCount)
+    window.addEventListener(CART_UPDATED_EVENT, handleCartUpdated)
+    return () => window.removeEventListener(CART_UPDATED_EVENT, handleCartUpdated)
   }, [])
 
   const open = () => {
@@ -76,8 +103,11 @@ const CartDropdown = () => {
   }
   const close = () => setCartDropdownOpen(false)
 
-  const totalItems =
-    cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || count
+  const visibleItems = cart?.items?.filter((item) => !hiddenItemIds.has(item.id))
+
+  const totalItems = visibleItems
+    ? visibleItems.reduce((acc, item) => acc + item.quantity, 0)
+    : count
 
   const subtotal = cart?.subtotal ?? 0
   const itemRef = useRef<number>(count)
@@ -163,10 +193,10 @@ const CartDropdown = () => {
                   </div>
                 ))}
               </div>
-            ) : cart && cart.items?.length ? (
+            ) : cart && visibleItems?.length ? (
               <>
                 <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
-                  {cart.items
+                  {visibleItems
                     .sort((a, b) => {
                       return (a.created_at ?? "") > (b.created_at ?? "")
                         ? -1
@@ -223,6 +253,17 @@ const CartDropdown = () => {
                           </div>
                           <DeleteButton
                             id={item.id}
+                            quantity={item.quantity}
+                            onRemoved={() =>
+                              setHiddenItemIds((prev) => new Set(prev).add(item.id))
+                            }
+                            onRestore={() =>
+                              setHiddenItemIds((prev) => {
+                                const next = new Set(prev)
+                                next.delete(item.id)
+                                return next
+                              })
+                            }
                             className="mt-1"
                             data-testid="cart-item-remove-button"
                           >

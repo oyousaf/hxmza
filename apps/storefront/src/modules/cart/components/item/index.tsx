@@ -11,7 +11,6 @@ import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
 import { useState } from "react"
 
@@ -22,24 +21,34 @@ type ItemProps = {
 }
 
 const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
-  const [updating, setUpdating] = useState(false)
+  const [isRemoved, setIsRemoved] = useState(false)
+  const [quantity, setQuantity] = useState(item.quantity)
   const [error, setError] = useState<string | null>(null)
 
-  const changeQuantity = async (quantity: number) => {
+  // Optimistic: the displayed quantity and basket badge update instantly;
+  // the request finishes quietly in the background and rolls both back on failure.
+  const changeQuantity = async (newQuantity: number) => {
     setError(null)
-    setUpdating(true)
+    const delta = newQuantity - quantity
+    const previousQuantity = quantity
 
-    await updateLineItem({
-      lineId: item.id,
-      quantity,
-    })
-      .then(() => notifyCartUpdated())
-      .catch((err) => {
-        setError(err.message)
+    setQuantity(newQuantity)
+    notifyCartUpdated(delta)
+
+    try {
+      await updateLineItem({
+        lineId: item.id,
+        quantity: newQuantity,
       })
-      .finally(() => {
-        setUpdating(false)
-      })
+    } catch (err) {
+      setQuantity(previousQuantity)
+      notifyCartUpdated(-delta)
+      setError(err instanceof Error ? err.message : "Something went wrong")
+    }
+  }
+
+  if (isRemoved) {
+    return null
   }
 
   // TODO: Update this to grab the actual max inventory
@@ -77,9 +86,15 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       {type === "full" && (
         <Table.Cell>
           <div className="flex gap-2 items-center w-28">
-            <DeleteButton id={item.id} data-testid="product-delete-button" />
+            <DeleteButton
+              id={item.id}
+              quantity={item.quantity}
+              onRemoved={() => setIsRemoved(true)}
+              onRestore={() => setIsRemoved(false)}
+              data-testid="product-delete-button"
+            />
             <CartItemSelect
-              value={item.quantity}
+              value={quantity}
               onChange={(value) => changeQuantity(parseInt(value.target.value))}
               className="w-14 h-10 p-4"
               data-testid="product-select-button"
@@ -100,7 +115,6 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
                 1
               </option>
             </CartItemSelect>
-            {updating && <Spinner />}
           </div>
           <ErrorMessage error={error} data-testid="product-error-message" />
         </Table.Cell>
@@ -124,7 +138,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
         >
           {type === "preview" && (
             <span className="flex gap-x-1 ">
-              <Text className="text-ui-fg-muted">{item.quantity}x </Text>
+              <Text className="text-ui-fg-muted">{quantity}x </Text>
               <LineItemUnitPrice
                 item={item}
                 style="tight"

@@ -38,7 +38,8 @@ export default function ProductActions({
   const searchParams = useSearchParams()
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
-  const [isAdding, setIsAdding] = useState(false)
+  const [justAdded, setJustAdded] = useState(false)
+  const [addError, setAddError] = useState(false)
   const countryCode = useParams().countryCode as string
 
   // If there is only 1 variant, preselect the options
@@ -121,20 +122,29 @@ export default function ProductActions({
 
   const inView = useIntersection(actionsRef, "0px")
 
-  // add the selected variant to the cart
+  // add the selected variant to the cart, optimistically — the button and
+  // basket badge update instantly, the network request finishes quietly
+  // in the background and rolls back on failure.
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) return null
 
-    setIsAdding(true)
+    setAddError(false)
+    setJustAdded(true)
+    notifyCartUpdated(1)
+    window.setTimeout(() => setJustAdded(false), 1500)
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity: 1,
-      countryCode,
-    })
-
-    notifyCartUpdated()
-    setIsAdding(false)
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode,
+      })
+    } catch {
+      notifyCartUpdated(-1)
+      setJustAdded(false)
+      setAddError(true)
+      window.setTimeout(() => setAddError(false), 2500)
+    }
   }
 
   return (
@@ -152,7 +162,7 @@ export default function ProductActions({
                       updateOption={setOptionValue}
                       title={option.title ?? ""}
                       data-testid="product-options"
-                      disabled={!!disabled || isAdding}
+                      disabled={!!disabled}
                     />
                   </div>
                 )
@@ -170,18 +180,20 @@ export default function ProductActions({
             !inStock ||
             !selectedVariant ||
             !!disabled ||
-            isAdding ||
             !isValidVariant
           }
           variant="primary"
           className="w-full h-10"
-          isLoading={isAdding}
           data-testid="add-product-button"
         >
           {!selectedVariant
             ? "Select variant"
             : !inStock || !isValidVariant
             ? "Out of stock"
+            : addError
+            ? "Couldn't add — try again"
+            : justAdded
+            ? "Added ✓"
             : "Add to basket"}
         </Button>
         <MobileActions
@@ -191,9 +203,10 @@ export default function ProductActions({
           updateOptions={setOptionValue}
           inStock={inStock}
           handleAddToCart={handleAddToCart}
-          isAdding={isAdding}
+          justAdded={justAdded}
+          addError={addError}
           show={!inView}
-          optionsDisabled={!!disabled || isAdding}
+          optionsDisabled={!!disabled}
         />
       </div>
     </>

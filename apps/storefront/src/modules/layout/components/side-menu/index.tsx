@@ -77,9 +77,14 @@ const SideMenu = () => {
                       </button>
                     </div>
                     <ul className="flex flex-col gap-6 items-start justify-start">
-                      {Object.entries(SideMenuItems).map(([name, href]) => {
+                      {Object.entries(SideMenuItems).map(([name, href], i) => {
                         return (
-                          <li key={name}>
+                          <motion.li
+                            key={name}
+                            initial={{ opacity: 0, x: -12 }}
+                            animate={open ? { opacity: 1, x: 0 } : {}}
+                            transition={{ duration: 0.2, delay: i * 0.04 }}
+                          >
                             <LocalizedClientLink
                               href={href}
                               className="text-3xl leading-10 hover:text-ui-fg-disabled"
@@ -88,7 +93,7 @@ const SideMenu = () => {
                             >
                               {name}
                             </LocalizedClientLink>
-                          </li>
+                          </motion.li>
                         )
                       })}
                     </ul>

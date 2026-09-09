@@ -110,10 +110,6 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
                   </option>
                 )
               )}
-
-              <option value={1} key={1}>
-                1
-              </option>
             </CartItemSelect>
           </div>
           <ErrorMessage error={error} data-testid="product-error-message" />

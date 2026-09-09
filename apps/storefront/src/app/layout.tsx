@@ -3,6 +3,7 @@ import { Metadata } from "next"
 import { Fraunces, Inter } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { WishlistProvider } from "@lib/context/wishlist-context"
+import ScrollToTop from "@modules/layout/components/scroll-to-top"
 import "styles/globals.css"
 
 const fraunces = Fraunces({
@@ -32,6 +33,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <WishlistProvider>
             <main className="relative">{props.children}</main>
+            <ScrollToTop />
           </WishlistProvider>
         </ThemeProvider>
       </body>

@@ -1,9 +1,15 @@
+"use client"
+
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartDropdown from "@modules/layout/components/cart-dropdown"
 import SideMenu from "@modules/layout/components/side-menu"
 import ThemeToggle from "@modules/layout/components/theme-toggle"
 
 export default function Nav() {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   return (
     <div className="sticky top-0 inset-x-0 z-50 group">
       <header className="relative h-16 mx-auto border-b duration-200 bg-ui-bg-base border-ui-border-base">
@@ -19,6 +25,7 @@ export default function Nav() {
               href="/"
               className="flex items-center gap-2.5 hover:text-ui-fg-base"
               data-testid="nav-store-link"
+              onClick={scrollToTop}
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-md bg-stone-800 dark:bg-stone-100 font-serif text-sm font-semibold text-stone-100 dark:text-stone-900">
                 B

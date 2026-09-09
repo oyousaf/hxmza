@@ -5,7 +5,7 @@ Bed-factory ecommerce monorepo: Next.js/Tailwind/shadcn storefront and Medusa v2
 ## Structure
 
 - `apps/storefront` — Next.js App Router storefront.
-- `apps/backend` — Medusa v2 backend/admin, seed data (`src/scripts/seed.ts`).
+- `apps/backend` — Medusa v2 backend/admin, seed data (`src/scripts/seed.ts`), custom `wishlist` module.
 - `compose.yaml` / `compose.dev.yaml` — VPS and local Docker service definitions.
 - `deploy/Caddyfile` — reverse proxy/TLS for the VPS.
 - `scripts/smoke-commerce.mjs` — end-to-end local-only commerce smoke test.
@@ -13,6 +13,8 @@ Bed-factory ecommerce monorepo: Next.js/Tailwind/shadcn storefront and Medusa v2
 ## Local development
 
 Requires Node 22, pnpm 10 (`corepack enable` or `npx pnpm`), and a local PostgreSQL instance.
+
+This is a pnpm workspace — always install from the repo root with `pnpm install`, never `npm install` inside `apps/backend` or `apps/storefront`. Running npm in a subfolder creates a competing `package-lock.json` and its own `node_modules`, corrupting the pnpm-managed tree; if that happens, delete the stray lockfile and `node_modules` in that folder and reinstall from the root.
 
 1. Copy env files and fill in values:
    - `apps/backend/.env` from `apps/backend/.env.example`
@@ -41,4 +43,8 @@ Redis is optional locally — leaving `REDIS_URL` unset in `apps/backend/.env` m
   This only targets `localhost`/`127.0.0.1`, registers a throwaway test customer and leaves a test order in the local database.
 - Compose validation (no deployment): `docker compose -f compose.yaml config` and `docker compose -f compose.dev.yaml config`.
 
-Stripe is not covered by the smoke test; verify it manually in the Medusa admin with Stripe test keys.
+Stripe is not covered by the smoke test; verify it manually in the Medusa admin with Stripe test keys. Wishlist add/remove is also not covered by the smoke test; verify manually as a logged-in customer.
+
+## Dependency updates
+
+Audit and fix with the workspace's own package manager, not npm — `npx pnpm audit`, and `npx pnpm audit --fix` to add targeted `pnpm.overrides` entries in the root `package.json` for vulnerable transitive dependencies without bumping the parent packages that pin them. Pushing to Vercel does not fix vulnerabilities on its own; it just builds and deploys whatever is committed to `pnpm-lock.yaml`. After any override change, reinstall (`pnpm install`) and re-run the verification steps above before committing.

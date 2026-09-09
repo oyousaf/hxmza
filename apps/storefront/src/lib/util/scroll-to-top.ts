@@ -17,15 +17,16 @@ export function scrollToTop(duration = 300) {
   const step = (now: number) => {
     const elapsed = now - startTime
     const progress = Math.min(elapsed / duration, 1)
-    // behavior: "auto" is required here — the site sets CSS
-    // `scroll-behavior: smooth` globally, which would otherwise make the
-    // browser layer its own smooth animation on top of every frame's jump,
-    // causing a visible snap once this loop stops but the browser's
-    // animation hasn't caught up.
+    // behavior: "instant" is required here, not "auto" — per spec, "auto"
+    // means "defer to the CSS scroll-behavior property", which is "smooth"
+    // globally on this site. That was silently re-smoothing every frame's
+    // jump on top of this loop's own easing, making the whole thing feel
+    // laggy instead of snappy. "instant" is the only value that actually
+    // bypasses CSS scroll-behavior.
     window.scrollTo({
       top: start * (1 - easeOutCubic(progress)),
       left: 0,
-      behavior: "auto",
+      behavior: "instant",
     })
 
     if (progress < 1) {

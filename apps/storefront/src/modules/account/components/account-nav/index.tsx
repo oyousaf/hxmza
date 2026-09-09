@@ -1,12 +1,15 @@
 "use client"
 
 import { ArrowRightOnRectangle } from "@medusajs/icons"
-import { clx } from "@modules/common/components/ui"
+import { Button, clx } from "@modules/common/components/ui"
 import { useParams, usePathname } from "next/navigation"
+import { useState } from "react"
 
 import { signout } from "@lib/data/customer"
+import useToggleState from "@lib/hooks/use-toggle-state"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Modal from "@modules/common/components/modal"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import Heart from "@modules/common/icons/heart"
 import MapPin from "@modules/common/icons/map-pin"
@@ -20,8 +23,12 @@ const AccountNav = ({
 }) => {
   const route = usePathname()
   const { countryCode } = useParams() as { countryCode: string }
+  const { state: logoutOpen, open: openLogout, close: closeLogout } =
+    useToggleState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
 
   const handleLogout = async () => {
+    setLoggingOut(true)
     await signout()
   }
 
@@ -106,7 +113,7 @@ const AccountNav = ({
                   <button
                     type="button"
                     className="flex items-center justify-between py-4 border-b border-gray-200 px-8 w-full"
-                    onClick={handleLogout}
+                    onClick={openLogout}
                     data-testid="logout-button"
                   >
                     <div className="flex items-center gap-x-2">
@@ -176,7 +183,7 @@ const AccountNav = ({
               <li className="text-grey-700">
                 <button
                   type="button"
-                  onClick={handleLogout}
+                  onClick={openLogout}
                   data-testid="logout-button"
                 >
                   Log out
@@ -186,6 +193,22 @@ const AccountNav = ({
           </div>
         </div>
       </div>
+
+      <Modal isOpen={logoutOpen} close={closeLogout} size="small">
+        <Modal.Title>Log out?</Modal.Title>
+        <Modal.Description>
+          You&apos;ll need to sign back in to view your orders, addresses and
+          wishlist.
+        </Modal.Description>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeLogout}>
+            Cancel
+          </Button>
+          <Button onClick={handleLogout} isLoading={loggingOut}>
+            Log out
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   )
 }

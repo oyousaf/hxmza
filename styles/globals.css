@@ -1,12 +1,64 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-body {
-  @apply bg-brand text-textPrimary font-sans;
+@theme {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand: #d1cbc1;
+  --color-brand-50: #faf9f7;
+  --color-brand-100: #f3f1ed;
+  --color-textPrimary: #330066;
+  --color-textPrimary-light: #4d1a99;
+
+  /* Warm accent used sparingly for highlights against the purple/beige brand */
+  --color-accent: #b8863c;
+  --color-accent-light: #dcb877;
+
+  --animate-spin-slow: spin 4s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
 }
 
-html {
-  transition: background-color 0.3s ease, color 0.3s ease;
-  scroll-behavior: smooth;
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    @apply bg-brand text-textPrimary font-sans antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background-color: var(--color-textPrimary);
+    color: var(--color-brand);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-textPrimary);
+    outline-offset: 2px;
+  }
+
+  .dark :focus-visible {
+    outline-color: var(--color-brand);
+  }
+}
+
+@layer utilities {
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-100 focus:rounded-md focus:bg-textPrimary focus:px-4 focus:py-2 focus:text-white focus:shadow-lg;
+  }
+
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl dark:bg-textPrimary/70;
+  }
 }

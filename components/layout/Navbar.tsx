@@ -1,15 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { getInitialTheme, toggleTheme } from "@/lib/theme";
 
+const socialLinks = [
+  {
+    href: "https://facebook.com/hxmzashub",
+    label: "Facebook",
+    icon: <FaFacebook className="h-6 w-6 sm:h-7 sm:w-7" />,
+  },
+  {
+    href: "https://instagram.com/hxmzashub",
+    label: "Instagram",
+    icon: <FaInstagram className="h-6 w-6 sm:h-7 sm:w-7" />,
+  },
+  {
+    href: "https://tiktok.com/@hxmzashub",
+    label: "TikTok",
+    icon: <FaTiktok className="h-6 w-6 sm:h-7 sm:w-7" />,
+  },
+];
+
 export default function Navbar() {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState<boolean | null>(null);
 
   useEffect(() => {
     const initial = getInitialTheme();
@@ -22,34 +40,39 @@ export default function Navbar() {
     setIsDark(next === "dark");
   };
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // The site is a single route, so Link's own navigation is a no-op when
+    // already on "/" — scroll to top explicitly so the logo still acts as
+    // a "back to top" control.
+    if (window.location.pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <motion.nav
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="fixed top-0 z-50 w-full px-4 py-3 border-b border-gray-200 dark:border-textPrimary bg-brand dark:bg-textPrimary shadow-sm"
+      className="glass-panel fixed top-0 z-50 w-full border-b border-textPrimary/10 px-3 py-2.5 dark:border-brand/10 sm:px-4"
     >
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-6xl mx-auto">
+      <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="block dark:hidden">
+        <Link
+          href="/"
+          onClick={handleLogoClick}
+          className="flex shrink-0 items-center justify-self-start"
+          aria-label="Hxmza's Hub home"
+        >
+          <div className="w-27.5 sm:w-42">
             <Image
-              src="/logoLight.png"
-              alt="Logo Light"
-              width={180}
-              height={24}
+              src={isDark ? "/logoDark.png" : "/logoLight.png"}
+              alt="Hxmza's Hub"
+              width={168}
+              height={22}
               priority
-              style={{ width: "auto", height: "auto" }}
-            />
-          </div>
-          <div className="hidden dark:block">
-            <Image
-              src="/logoDark.png"
-              alt="Logo Dark"
-              width={180}
-              height={24}
-              priority
-              style={{ width: "auto", height: "auto" }}
+              className="h-auto w-full"
             />
           </div>
         </Link>
@@ -57,52 +80,32 @@ export default function Navbar() {
         {/* Center: Theme Toggle */}
         <button
           onClick={handleToggle}
-          className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-violet-950 transition"
-          aria-label="Toggle Dark Mode"
+          className="shrink-0 justify-self-center rounded-full p-1.5 transition-colors hover:bg-textPrimary/10 dark:hover:bg-brand/10 sm:p-2"
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
           {isDark ? (
-            <SunIcon className="w-6 h-6 text-yellow-400" />
+            <SunIcon className="h-6 w-6 text-accent-light" />
           ) : (
-            <MoonIcon className="w-6 h-6 text-textPrimary dark:text-brand" />
+            <MoonIcon className="h-6 w-6 text-textPrimary dark:text-brand" />
           )}
         </button>
 
-        {/* Right: Social Icons with bouncy motion.div */}
-        <div className="flex items-center gap-4">
-          {[
-            {
-              href: "https://facebook.com/hxmzashub",
-              label: "Facebook",
-              icon: <FaFacebook className="w-7 h-7" />,
-            },
-            {
-              href: "https://instagram.com/hxmzashub",
-              label: "Instagram",
-              icon: <FaInstagram className="w-7 h-7" />,
-            },
-            {
-              href: "https://tiktok.com/hxmzashub",
-              label: "TikTok",
-              icon: <FaTiktok className="w-7 h-7" />,
-            },
-          ].map(({ href, label, icon }) => (
-            <motion.div
+        {/* Right: Social Icons */}
+        <div className="flex shrink-0 items-center justify-self-end gap-0.5 sm:gap-1">
+          {socialLinks.map(({ href, label, icon }) => (
+            <motion.a
               key={label}
-              whileHover={{ scale: 1.3 }}
-              whileTap={{ scale: 0.85 }}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.9 }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="text-textPrimary dark:text-brand cursor-pointer"
+              className="flex items-center justify-center rounded-full p-2 text-textPrimary transition-colors hover:bg-textPrimary/10 dark:text-brand dark:hover:bg-brand/10"
             >
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="hover:opacity-90 transition"
-              >
-                {icon}
-              </a>
-            </motion.div>
+              {icon}
+            </motion.a>
           ))}
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { FaTachometerAlt } from "react-icons/fa";
 import { FaLeftLong, FaXmark } from "react-icons/fa6";
 import { SiAstonmartin } from "react-icons/si";
@@ -46,7 +46,7 @@ const isValid = (val: unknown) =>
 const capitalise = (val: string) =>
   val.replace(/\b\w/g, (char) => char.toUpperCase());
 
-const formatValue = (val: unknown, label: string, path?: string): string => {
+const formatValue = (val: unknown, path?: string): string => {
   if (!isValid(val)) return "—";
 
   const num = parseFloat(String(val));
@@ -82,10 +82,17 @@ function resolvePath<T extends object>(obj: T | null, path: string): unknown {
   }, obj);
 }
 
+const STEPS = ["generation", "trim", "spec"] as const;
+type Step = (typeof STEPS)[number];
+
+const STEP_LABELS: Record<Step, string> = {
+  generation: "Generation",
+  trim: "Trim",
+  spec: "Specs",
+};
+
 export default function CarModal({ car, onClose }: Props) {
-  const [step, setStep] = useState<"generation" | "trim" | "spec">(
-    "generation"
-  );
+  const [step, setStep] = useState<Step>("generation");
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [trims, setTrims] = useState<Trim[]>([]);
   const [specs, setSpecs] = useState<TrimSpec | null>(null);
@@ -94,11 +101,15 @@ export default function CarModal({ car, onClose }: Props) {
   const [selectedTrim, setSelectedTrim] = useState<Trim | null>(null);
   const [loading, setLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
+
+  const isOpen = Boolean(car);
 
   const specSections = useMemo(
     () => ({
       Performance: {
-        icon: <FaTachometerAlt className="inline-block mr-2 text-brand" />,
+        icon: <FaTachometerAlt aria-hidden="true" />,
         keys: {
           "engine.horsepower": "BHP",
           "engine.rpm": "RPM",
@@ -108,7 +119,7 @@ export default function CarModal({ car, onClose }: Props) {
         },
       },
       Chassis: {
-        icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
+        icon: <GiCarWheel aria-hidden="true" />,
         keys: {
           drive: "Drive",
           transmission: "Transmission",
@@ -117,7 +128,7 @@ export default function CarModal({ car, onClose }: Props) {
         },
       },
       Dimensions: {
-        icon: <LuRuler className="inline-block mr-2 text-brand" />,
+        icon: <LuRuler aria-hidden="true" />,
         keys: {
           "dimensions.length": "Length",
           "dimensions.width": "Width",
@@ -126,7 +137,7 @@ export default function CarModal({ car, onClose }: Props) {
         },
       },
       Engine: {
-        icon: <PiEngine className="inline-block mr-2 text-brand" />,
+        icon: <PiEngine aria-hidden="true" />,
         keys: {
           "engine.fuelType": "Fuel Type",
           "engine.displacement": "Engine Size",
@@ -136,13 +147,13 @@ export default function CarModal({ car, onClose }: Props) {
         },
       },
       Wheels: {
-        icon: <GiCarWheel className="inline-block mr-2 text-brand" />,
+        icon: <GiCarWheel aria-hidden="true" />,
         keys: {
           turningCircle: "Turning Circle",
         },
       },
       Comfort: {
-        icon: <MdEventSeat className="inline-block mr-2 text-brand" />,
+        icon: <MdEventSeat aria-hidden="true" />,
         keys: {
           seats: "Seats",
         },
@@ -151,17 +162,23 @@ export default function CarModal({ car, onClose }: Props) {
     []
   );
 
-  useEffect(() => {
-    if (!car?.modelId) return;
-    resetState();
-    loadGenerations(car.modelId);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [car]);
+  // Only keep sections that have at least one real value, and within each
+  // section only the fields that actually have data — the underlying API
+  // returns a lot of empty fields per trim, so a section full of dashes
+  // isn't useful to show.
+  const visibleSections = useMemo(() => {
+    if (!specs) return [];
+    return Object.entries(specSections)
+      .map(([section, { icon, keys }]) => {
+        const entries = Object.entries(keys).filter(([path]) =>
+          isValid(resolvePath(specs, path))
+        );
+        return { section, icon, entries };
+      })
+      .filter(({ entries }) => entries.length > 0);
+  }, [specs, specSections]);
 
-  function resetState() {
+  const resetState = useCallback(() => {
     setStep("generation");
     setGenerations([]);
     setTrims([]);
@@ -169,9 +186,14 @@ export default function CarModal({ car, onClose }: Props) {
     setSelectedGeneration(null);
     setSelectedTrim(null);
     setLoading(false);
-  }
+  }, []);
 
-  async function loadGenerations(modelId: number) {
+  const handleClose = useCallback(() => {
+    onClose();
+    setTimeout(resetState, 300);
+  }, [onClose, resetState]);
+
+  const loadGenerations = useCallback(async (modelId: number) => {
     setLoading(true);
     try {
       const res = await fetchGenerations(modelId);
@@ -179,7 +201,56 @@ export default function CarModal({ car, onClose }: Props) {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    if (!car?.modelId) return;
+    resetState();
+    loadGenerations(car.modelId);
+
+    previouslyFocused.current = document.activeElement as HTMLElement;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "";
+      previouslyFocused.current?.focus?.();
+    };
+  }, [car, resetState, loadGenerations]);
+
+  // Escape-to-close + focus trap
+  useEffect(() => {
+    if (!isOpen) return;
+
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+        return;
+      }
+
+      if (e.key === "Tab" && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, handleClose]);
 
   async function loadTrims(generation: Generation) {
     setStep("trim");
@@ -235,171 +306,213 @@ export default function CarModal({ car, onClose }: Props) {
     return `${num}${suffix} Generation`;
   };
 
-  if (!car) return null;
+  const currentStepIndex = STEPS.indexOf(step);
 
   return (
     <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => {
-          setTimeout(resetState, 300);
-          onClose();
-        }}
-      >
+      {car && (
         <motion.div
-          ref={modalRef}
-          onClick={(e) => e.stopPropagation()}
-          className="bg-white dark:bg-textPrimary rounded-xl shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={handleClose}
         >
-          {/* Header */}
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-textPrimary dark:text-white">
-              {car.make} {car.model}
-            </h2>
-            <button
-              onClick={() => {
-                setTimeout(resetState, 300);
-                onClose();
-              }}
-              className="text-textPrimary hover:text-textPrimary/50 dark:text-brand dark:hover:text-brand/50"
-              aria-label="Close"
-            >
-              <FaXmark className="w-6 h-6" />
-            </button>
-          </div>
+          <motion.div
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="car-modal-title"
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white shadow-2xl dark:bg-textPrimary"
+            initial={{ scale: 0.94, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.94, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            {/* Image banner */}
+            <div className="relative h-40 w-full overflow-hidden sm:h-52">
+              <Image
+                src={car.image || "/cars/placeholder.webp"}
+                alt={car.model}
+                fill
+                className="object-cover"
+                sizes="768px"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-textPrimary/90 via-textPrimary/10 to-transparent dark:from-black/80" />
 
-          {/* Back button */}
-          {!loading && step !== "generation" && (
-            <div className="flex justify-center mb-6">
               <button
-                onClick={() => {
-                  if (step === "spec") {
-                    setStep("trim");
-                    setSpecs(null);
-                  } else {
-                    setStep("generation");
-                    setTrims([]);
-                  }
-                }}
-                className="px-6 py-2 rounded-full text-textPrimary hover:text-textPrimary/50 dark:text-brand dark:hover:text-brand/50 font-semibold text-base transition"
+                ref={closeButtonRef}
+                onClick={handleClose}
+                className="absolute right-3 top-3 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm transition hover:bg-black/60"
+                aria-label="Close dialog"
               >
-                <FaLeftLong className="inline-block mr-2 text-4xl" />
+                <FaXmark className="h-5 w-5" />
               </button>
-            </div>
-          )}
 
-          {/* Spinner */}
-          {loading && (
-            <div className="flex justify-center py-10">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              <h2
+                id="car-modal-title"
+                className="absolute bottom-3 left-4 text-2xl font-bold text-white drop-shadow-sm md:text-3xl"
               >
-                <SiAstonmartin className="w-24 h-24 text-textPrimary dark:text-brand" />
-              </motion.div>
+                {car.make} {car.model}
+              </h2>
             </div>
-          )}
 
-          {/* Generation Step */}
-          {!loading && step === "generation" && (
-            <div className="space-y-4">
-              <p className="font-semibold text-textPrimary dark:text-white mb-2">
-                Select a Generation:
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {generations.map((gen) => (
-                  <button
-                    key={gen.id}
-                    onClick={() => loadTrims(gen)}
-                    className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
-                      selectedGeneration?.id === gen.id
-                        ? "bg-brand text-white"
-                        : "bg-white text-textPrimary dark:bg-brand dark:text-textPrimary hover:bg-gray-100 dark:hover:bg-brand/50 dark:hover:text-white"
+            <div className="p-5 sm:p-6">
+              {/* Segmented step control */}
+              <div className="mb-6 grid grid-cols-3 gap-1 rounded-full bg-textPrimary/5 p-1 dark:bg-brand/10">
+                {STEPS.map((s, i) => (
+                  <div
+                    key={s}
+                    aria-current={s === step ? "step" : undefined}
+                    className={`rounded-full py-2 text-center text-xs font-semibold transition sm:text-sm ${
+                      i <= currentStepIndex
+                        ? "bg-textPrimary text-white dark:bg-brand dark:text-textPrimary"
+                        : "text-textPrimary/40 dark:text-brand/40"
                     }`}
                   >
-                    {formatGenerationLabel(gen.name)} ({gen.yearFrom}–
-                    {gen.yearTo ?? "present"})
-                  </button>
+                    {STEP_LABELS[s]}
+                  </div>
                 ))}
               </div>
-            </div>
-          )}
 
-          {/* Trim Step */}
-          {!loading && step === "trim" && (
-            <div className="space-y-4 mt-6">
-              <p className="font-semibold text-textPrimary dark:text-white mb-2">
-                Select a Trim:
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {trims.map((trim) => (
-                  <button
-                    key={trim.id}
-                    onClick={() => loadSpecs(trim)}
-                    onMouseEnter={() => {
-                      if (!specCache.has(trim.id)) {
-                        fetchSpecs(trim.id).then((res) => {
-                          if (res) {
-                            specCache.set(trim.id, res);
+              {/* Back button */}
+              {!loading && step !== "generation" && (
+                <button
+                  onClick={() => {
+                    if (step === "spec") {
+                      setStep("trim");
+                      setSpecs(null);
+                    } else {
+                      setStep("generation");
+                      setTrims([]);
+                    }
+                  }}
+                  className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-textPrimary transition hover:text-textPrimary/60 dark:text-brand dark:hover:text-brand/60"
+                >
+                  <FaLeftLong aria-hidden="true" />
+                  Back
+                </button>
+              )}
+
+              {/* Spinner */}
+              {loading && (
+                <div
+                  className="flex justify-center py-10"
+                  role="status"
+                  aria-label="Loading"
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                  >
+                    <SiAstonmartin className="h-16 w-16 text-textPrimary dark:text-brand" />
+                  </motion.div>
+                </div>
+              )}
+
+              {/* Generation Step */}
+              {!loading && step === "generation" && (
+                <div className="space-y-4">
+                  <p className="font-semibold text-textPrimary dark:text-white">
+                    Select a Generation
+                  </p>
+                  {generations.length === 0 ? (
+                    <p className="text-sm text-gray-500 dark:text-gray-300">
+                      No generation data available for this model.
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-3">
+                      {generations.map((gen) => (
+                        <button
+                          key={gen.id}
+                          onClick={() => loadTrims(gen)}
+                          className={`rounded-full border px-4 py-2 text-sm font-medium shadow-sm transition ${
+                            selectedGeneration?.id === gen.id
+                              ? "bg-textPrimary text-white dark:bg-brand dark:text-textPrimary"
+                              : "bg-white text-textPrimary hover:bg-gray-100 dark:bg-textPrimary dark:text-brand dark:hover:bg-brand/20"
+                          }`}
+                        >
+                          {formatGenerationLabel(gen.name)} ({gen.yearFrom}–
+                          {gen.yearTo ?? "present"})
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Trim Step */}
+              {!loading && step === "trim" && (
+                <div className="space-y-4">
+                  <p className="font-semibold text-textPrimary dark:text-white">
+                    Select a Trim
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    {trims.map((trim) => (
+                      <button
+                        key={trim.id}
+                        onClick={() => loadSpecs(trim)}
+                        onMouseEnter={() => {
+                          if (!specCache.has(trim.id)) {
+                            fetchSpecs(trim.id).then((res) => {
+                              if (res) {
+                                specCache.set(trim.id, res);
+                              }
+                            });
                           }
-                        });
-                      }
-                    }}
-                    className={`px-4 py-2 rounded-full font-medium border transition text-sm shadow-sm ${
-                      selectedTrim?.id === trim.id
-                        ? "bg-brand text-white"
-                        : "bg-white text-textPrimary dark:bg-brand dark:text-textPrimary hover:bg-gray-100 dark:hover:bg-brand/50 dark:hover:text-white"
-                    }`}
-                  >
-                    {trim.trim} • {trim.bodyType}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Specs Step */}
-          {!loading && step === "spec" && specs && (
-            <div className="space-y-8 mt-6">
-              {Object.entries(specSections).map(([section, { icon, keys }]) => (
-                <div key={section}>
-                  <h3 className="text-lg md:text-xl font-bold text-textPrimary dark:text-white mb-2 flex items-center">
-                    {icon} {section}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4 text-base text-gray-700 dark:text-gray-200">
-                    {Object.entries(keys).map(([path, label]) => (
-                      <div key={path}>
-                        <p className="uppercase text-xs font-semibold text-gray-500 dark:text-gray-400">
-                          {label}
-                        </p>
-                        <p>
-                          {formatValue(resolvePath(specs, path), label, path)}
-                        </p>
-                      </div>
+                        }}
+                        className={`rounded-full border px-4 py-2 text-sm font-medium shadow-sm transition ${
+                          selectedTrim?.id === trim.id
+                            ? "bg-textPrimary text-white dark:bg-brand dark:text-textPrimary"
+                            : "bg-white text-textPrimary hover:bg-gray-100 dark:bg-textPrimary dark:text-brand dark:hover:bg-brand/20"
+                        }`}
+                      >
+                        {trim.trim} • {trim.bodyType}
+                      </button>
                     ))}
                   </div>
                 </div>
-              ))}
-              <div className="rounded-lg overflow-hidden mt-6">
-                <Image
-                  src={car.image || "/cars/placeholder.webp"}
-                  alt={car.model}
-                  width={640}
-                  height={360}
-                  className="rounded-md object-cover w-full h-auto"
-                />
-              </div>
+              )}
+
+              {/* Specs Step */}
+              {!loading && step === "spec" && specs && (
+                <div className="space-y-8">
+                  {visibleSections.length === 0 ? (
+                    <p className="text-sm text-gray-500 dark:text-gray-300">
+                      Full specifications aren&apos;t available for this trim.
+                    </p>
+                  ) : (
+                    visibleSections.map(({ section, icon, entries }) => (
+                      <div key={section}>
+                        <h3 className="mb-3 flex items-center gap-2 text-lg font-bold text-textPrimary dark:text-white">
+                          <span className="text-accent">{icon}</span>
+                          {section}
+                        </h3>
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                          {entries.map(([path, label]) => (
+                            <div
+                              key={path}
+                              className="rounded-xl bg-textPrimary/5 p-3 dark:bg-brand/10"
+                            >
+                              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                {label}
+                              </p>
+                              <p className="mt-0.5 font-semibold text-textPrimary dark:text-white">
+                                {formatValue(resolvePath(specs, path), path)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
-          )}
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </AnimatePresence>
   );
 }

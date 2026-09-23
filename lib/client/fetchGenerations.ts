@@ -13,15 +13,8 @@ type Generation = {
 };
 
 export async function fetchGenerations(modelId: number): Promise<Generation[]> {
-  const res = await fetch(
-    `https://car-specs.p.rapidapi.com/v2/cars/models/${modelId}/generations`,
-    {
-      headers: {
-        "X-RapidAPI-Key": process.env.NEXT_PUBLIC_RAPIDAPI_KEY!,
-        "X-RapidAPI-Host": "car-specs.p.rapidapi.com",
-      },
-    }
-  );
+  const res = await fetch(`/api/generations/${modelId}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status} fetching generations`);
 
   const data: ApiGeneration[] = await res.json();
 

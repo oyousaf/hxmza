@@ -1,28 +1,42 @@
 "use client";
 
+export type SortValue =
+  | "default"
+  | "pricePerDay-asc"
+  | "pricePerDay-desc"
+  | "mileage-asc"
+  | "mileage-desc"
+  | "rating-desc"
+  | "rating-asc";
+
 type Props = {
-  value: string;
-  onChange: (value: string) => void;
+  value: SortValue;
+  onChange: (value: SortValue) => void;
 };
+
+const options: { value: SortValue; label: string }[] = [
+  { value: "default", label: "Recommended" },
+  { value: "pricePerDay-asc", label: "Price: Low to High" },
+  { value: "pricePerDay-desc", label: "Price: High to Low" },
+  { value: "rating-desc", label: "Best Rated" },
+  { value: "rating-asc", label: "Lowest Rated" },
+  { value: "mileage-asc", label: "Least Driven" },
+  { value: "mileage-desc", label: "Most Driven" },
+];
 
 export default function SortDropdown({ value, onChange }: Props) {
   return (
     <select
       value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="border px-3 py-2 rounded-md text-sm dark:bg-textPrimary dark:text-white"
+      onChange={(e) => onChange(e.target.value as SortValue)}
+      className="min-w-40 rounded-full border border-textPrimary/15 bg-white px-4 py-2 text-sm font-medium text-textPrimary shadow-sm transition hover:border-textPrimary/30 dark:border-brand/20 dark:bg-textPrimary dark:text-brand dark:hover:border-brand/40"
       aria-label="Sort cars"
     >
-      <option value="pricePerDay-asc">Cheapest</option>
-      <option value="pricePerDay-desc">Most Expensive</option>
-      <option value="year-desc">Newest</option>
-      <option value="year-asc">Oldest</option>
-      <option value="displacement-desc">Biggest Engine</option>
-      <option value="displacement-asc">Smallest Engine</option>
-      <option value="mileage-desc">Most Driven</option>
-      <option value="mileage-asc">Least Driven</option>
-      <option value="rating-desc">Best Rated</option>
-      <option value="rating-asc">Lowest Rated</option>
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
     </select>
   );
 }

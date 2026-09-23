@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -20,6 +20,7 @@ export default function Footer() {
             ease: "linear",
           }}
           className="inline-block"
+          aria-hidden="true"
         >
           💚
         </motion.span>{" "}

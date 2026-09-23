@@ -13,15 +13,7 @@ type ApiTrim = {
 };
 
 export async function fetchTrims(generationId: number): Promise<Trim[]> {
-  const res = await fetch(
-    `https://car-specs.p.rapidapi.com/v2/cars/generations/${generationId}/trims`,
-    {
-      headers: {
-        "X-RapidAPI-Key": process.env.NEXT_PUBLIC_RAPIDAPI_KEY!,
-        "X-RapidAPI-Host": "car-specs.p.rapidapi.com",
-      },
-    }
-  );
+  const res = await fetch(`/api/trims/${generationId}`);
 
   if (!res.ok) {
     console.error("❌ Failed to fetch trims:", res.statusText);

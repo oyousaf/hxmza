@@ -26,6 +26,8 @@ export async function mapModelToCar(
     (await fetchCarImage(apiModel.make || "", apiModel.model || "")) ||
     placeholderImage;
 
+  const rating = getRandomInRange(4.0, 5.0, true);
+
   return {
     id,
     modelId,
@@ -38,8 +40,8 @@ export async function mapModelToCar(
     transmission: "—",
     mileage: rawMileage,
     pricePerDay: getRandomInRange(isNewer ? 1000 : 500, isNewer ? 1800 : 800),
-    rating: getRandomInRange(4.0, 5.0, true),
-    featured: false,
+    rating,
+    featured: rating >= 4.7,
     status: "available",
     numberOfSeats: "—",
     trim: "",

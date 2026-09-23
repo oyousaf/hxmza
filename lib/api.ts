@@ -4,14 +4,17 @@ import { Car } from "@/types/car";
 
 /**
  * Fetch models by makeId with pagination and filtering.
+ *
+ * Note: only `featured` is filterable at this level. Fuel/transmission only
+ * exist once a specific trim's spec is fetched (several requests deep in the
+ * generation -> trim -> spec drill-down), so they can't be filtered on in
+ * the list view without an expensive fetch fan-out per model.
  */
 export async function fetchCarsFromAPI(
   makeId: number,
   page: number = 1,
   limit: number = 10,
   filters?: {
-    fuel?: string;
-    transmission?: string;
     featured?: boolean;
   }
 ): Promise<Car[]> {
@@ -28,36 +31,8 @@ export async function fetchCarsFromAPI(
   );
   let cars = await Promise.all(carPromises);
 
-  // Apply filters if provided
-  if (filters) {
-    const { fuel, transmission, featured } = filters;
-
-    if (fuel) {
-      const userFuel = fuel.toLowerCase();
-      const fuelAliases: Record<string, string[]> = {
-        petrol: ["petrol", "gasoline"],
-        diesel: ["diesel"],
-        electric: ["electric", "ev", "electricity", "battery"],
-        hybrid: ["hybrid", "plug-in hybrid", "mild hybrid", "phev"],
-      };
-      const acceptedFuelTerms = fuelAliases[userFuel] ?? [userFuel];
-
-      cars = cars.filter((car) => {
-        const carFuel = car.fuel?.toLowerCase() || "";
-        return acceptedFuelTerms.some((alias) => carFuel.includes(alias));
-      });
-    }
-
-    if (transmission) {
-      const transmissionValue = transmission.toLowerCase();
-      cars = cars.filter((car) =>
-        car.transmission?.toLowerCase().includes(transmissionValue)
-      );
-    }
-
-    if (featured) {
-      cars = cars.filter((car) => car.featured);
-    }
+  if (filters?.featured) {
+    cars = cars.filter((car) => car.featured);
   }
 
   return cars;

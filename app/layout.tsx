@@ -1,15 +1,23 @@
 import "@/styles/globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Manrope } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { MotionConfig } from "motion/react";
 
 const manrope = Manrope({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#d1cbc1" },
+    { media: "(prefers-color-scheme: dark)", color: "#330066" },
+  ],
+};
 
 export const metadata: Metadata = {
   title: "Hxmza's Hub | Car Rentals",
@@ -40,8 +48,14 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
   },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
@@ -101,21 +115,21 @@ export default function RootLayout({
             }),
           }}
         />
-
-        <meta
-          name="keywords"
-          content="Hxmza's Hub, Car rentals UK, Luxury car hire, Electric car rental, Affordable car hire, Supercar rental UK, Rent a car online UK, Vehicle hire service, Car rental app"
-        />
       </head>
       <body
-        className={`${manrope.className} pt-[60px] text-textPrimary bg-brand dark:bg-textPrimary dark:text-brand`}
+        className={`${manrope.className} pt-15 text-textPrimary bg-brand dark:bg-textPrimary dark:text-brand`}
       >
-        <Navbar />
-        <main>
-          {children}
-          <Analytics />
-        </main>
-        <Footer />
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <MotionConfig reducedMotion="user">
+          <Navbar />
+          <main>
+            {children}
+            <Analytics />
+          </main>
+          <Footer />
+        </MotionConfig>
       </body>
     </html>
   );

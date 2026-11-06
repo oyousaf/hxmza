@@ -4,7 +4,7 @@ A stylish, responsive car rental platform built with:
 
 - [Next.js 16](https://nextjs.org) (App Router, Turbopack)
 - [Tailwind CSS 4](https://tailwindcss.com)
-- [Motion](https://motion.dev) (formerly Framer Motion)
+- [Motion](https://motion.dev)
 - [Car Specs API (RapidAPI)](https://rapidapi.com/alekivanovski96-O1vKHrFskQm/api/car-specs) — proxied server-side
 - [Unsplash API](https://unsplash.com/developers) — proxied server-side
 
